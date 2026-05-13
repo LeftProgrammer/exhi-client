@@ -1,0 +1,62 @@
+@use 'tokens' as t;
+@use 'mixins' as m;
+
+html,
+body,
+#app {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: t.$color-bg-primary;
+  color: t.$color-text-primary;
+  overflow: hidden;
+  font-family: t.$font-family-base;
+  @include m.no-interact;
+  cursor: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.adaptive-stage {
+  position: fixed;
+  inset: 0;
+  @include m.flex-center;
+  background: t.$color-bg-primary;
+  overflow: hidden;
+
+  &__inner {
+    position: relative;
+    transform-origin: center center;
+    background: transparent;
+  }
+}
+
+.scene-layer {
+  @include m.fill-parent;
+}
+
+// 场景切换动效
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity t.$duration-base t.$easing-base;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+// 启动错误兜底
+.error-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  color: t.$color-error;
+  @include m.flex-center;
+  font-size: t.$font-size-md;
+  padding: t.$space-lg;
+  text-align: center;
+  z-index: t.$z-diagnostic;
+}
