@@ -1,0 +1,44 @@
+{
+  "name": "exhi-client",
+  "version": "1.0.0",
+  "description": "智慧展厅展示端 Runtime（白马项目首发）",
+  "main": "out/main/index.js",
+  "author": "exhi-team",
+  "license": "UNLICENSED",
+  "private": true,
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "dev": "chcp 65001 >nul && electron-vite dev",
+    "build": "chcp 65001 >nul && electron-vite build",
+    "preview": "electron-vite preview",
+    "pack": "npm run build && electron-builder",
+    "pack:dir": "npm run build && electron-builder --dir",
+    "typecheck:node": "tsc --noEmit -p tsconfig.node.json",
+    "typecheck:web": "vue-tsc --noEmit -p runtime/renderer/tsconfig.json",
+    "typecheck": "npm run typecheck:node && npm run typecheck:web",
+    "format": "prettier --write \"runtime/**/*.{ts,vue,json,css}\""
+  },
+  "dependencies": {
+    "electron-log": "^5.2.0",
+    "electron-updater": "^6.3.9",
+    "fastify": "^5.1.0",
+    "pinia": "^2.3.0",
+    "vue": "^3.5.13",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "@types/ws": "^8.5.13",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "@vue/tsconfig": "^0.7.0",
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8",
+    "electron-vite": "^2.3.0",
+    "prettier": "^3.4.1",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11",
+    "vue-tsc": "^2.1.10"
+  }
+}
