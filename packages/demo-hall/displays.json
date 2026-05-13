@@ -6,6 +6,13 @@
       "designBase": { "width": 1920, "height": 1080 },
       "defaultScene": "welcome",
       "fitPolicy": "scale"
+    },
+    {
+      "id": "side",
+      "match": { "index": 1 },
+      "designBase": { "width": 1920, "height": 1080 },
+      "defaultScene": "image-demo",
+      "fitPolicy": "scale"
     }
   ]
 }

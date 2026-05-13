@@ -15,13 +15,18 @@ function compute() {
   const baseH = device.designBase.height
   const vw = window.innerWidth
   const vh = window.innerHeight
+  let s: number
   if (device.fitPolicy === 'fill') {
-    scale.value = Math.max(vw / baseW, vh / baseH)
+    s = Math.max(vw / baseW, vh / baseH)
   } else if (device.fitPolicy === 'none') {
-    scale.value = 1
+    s = 1
   } else {
-    scale.value = Math.min(vw / baseW, vh / baseH)
+    s = Math.min(vw / baseW, vh / baseH)
   }
+  // 缩放比非常接近 1 时强制 snap 到 1，避免 CSS transform 的亚像素渲染导致整屏发糊。
+  // 典型场景：dev 模式窗口刚好被任务栏挤掉 16px，scale=0.991x。
+  if (Math.abs(s - 1) < 0.03) s = 1
+  scale.value = s
 }
 
 onMounted(() => {
