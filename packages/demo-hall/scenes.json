@@ -1,0 +1,20 @@
+{
+  "scenes": {
+    "welcome": {
+      "type": "web",
+      "src": "contents/welcome/index.html",
+      "allowInteraction": true,
+      "injectBridge": true
+    },
+    "image-demo": {
+      "type": "image",
+      "src": "contents/sample.svg",
+      "fit": "contain"
+    },
+    "blank": {
+      "type": "image",
+      "src": "contents/black.svg",
+      "fit": "cover"
+    }
+  }
+}

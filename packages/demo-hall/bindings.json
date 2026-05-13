@@ -1,0 +1,22 @@
+{
+  "bindings": [
+    {
+      "on": "cmd.gotoScene",
+      "do": "scene.switch",
+      "params": { "sceneId": "$payload.sceneId", "display": "$payload.display" }
+    },
+    { "on": "cmd.play", "do": "renderer.play" },
+    { "on": "cmd.pause", "do": "renderer.pause" },
+    { "on": "cmd.volume", "do": "system.setVolume", "params": { "value": "$payload.value" } }
+  ],
+  "macros": {
+    "scenario.demo": {
+      "description": "演示用宏：切到 image-demo",
+      "steps": [{ "do": "scene.switch", "params": { "sceneId": "image-demo" } }]
+    }
+  },
+  "standalone": {
+    "description": "无中控时仅保持默认场景",
+    "onStartup": []
+  }
+}
