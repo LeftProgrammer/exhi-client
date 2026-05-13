@@ -5,21 +5,58 @@
 
 ---
 
-## 当前阶段：M2 · 通信层 + Standalone
+## 当前阶段：M3 · 内容系统增强
 
-**M1 已完成**：工程骨架、多屏窗口、CSP、IPC、项目包加载、Video/Image/Web 三种 Renderer、AdaptiveStage。
+**M1/M2 已完成**：工程骨架、多屏窗口、CSP、IPC、项目包加载、Video/Image/Web Renderer、AdaptiveStage、WebSocket 客户端、本地 HTTP、Standalone、Mock Hub。
 
-**M2 新增**：
-- ✅ WebSocket 客户端（指数退避、心跳、离线队列、HMAC 签名可关）
-- ✅ 本地 HTTP 服务（127.0.0.1:17600，供本地代理推送 + bridge 兜底）
-- ✅ Standalone 调度（无中控时按 bindings.json `standalone.onStartup` 执行）
-- ✅ 主进程事件总线 `MainBus`，统一调度三个来源的指令
-- ✅ 渲染层 command store + SceneOrchestrator 扩展（处理 gotoScene/reload/volume）
-- ✅ 状态采集与上报（30s 兜底 + 状态变化即时）
-- ✅ Mock Hub 工具（一个 Node 脚本启 WS 服务 + CLI 发指令）
-- ✅ Sass/SCSS 全局样式与设计 token
+**M3 新增**：
+- ✅ exhibitBridge：iframe 内容通过 `window.exhibitBridge` 反向调客户端（dispatch/emit/on/getInfo）
+- ✅ Bridge 脚本通过 `exhi-pkg://pkg/__exhi__/bridge.js` 由 Runtime 内置提供（项目包无需打包）
+- ✅ `CompositeRenderer`：多层场景合成（stack/row/column/grid 四种布局）
+- ✅ `SceneStage` 双缓冲 crossfade：场景切换无黑帧
+- ✅ VideoRenderer 事件采集（progress/ended/error）+ 状态精细上报
+- ✅ Bridge 事件广播（scene:changed / scene:ended → 所有 iframe）
+- ✅ demo-hall 新增 touch-demo 触摸交互页 + composite-demo 合成场景
 
-**尚未做**（后续里程碑）：M3 exhibitBridge + composite + 场景预加载 · M4 CommandDispatcher 完整 bindings.json 引擎 · M5 项目包双槽 · M6 watchdog + Guardian · M7 OTA + 诊断面板
+**尚未做**：M4 CommandDispatcher + bindings 引擎 · M5 双槽 + content-sync · M6 watchdog + Guardian · M7 OTA + 诊断面板
+
+---
+
+## exhibitBridge 在项目包里怎么用
+
+任意一个展项 HTML 加一行 script：
+
+```html
+<script src="exhi-pkg://pkg/__exhi__/bridge.js"></script>
+```
+
+然后就能调：
+
+```js
+await window.exhibitBridge.ready
+
+// 切场景（同屏或跨屏）
+await window.exhibitBridge.dispatch({
+  type: 'cmd.gotoScene',
+  payload: { sceneId: 'next', display: 'wall' }
+})
+
+// 埋点 / 抛事件给中控
+window.exhibitBridge.emit('analytics', { action: 'tap', target: 'btn-1' })
+
+// 订阅客户端事件
+window.exhibitBridge.on('scene:changed', (e) => {
+  console.log('哪块屏切到了:', e.displayId, e.sceneId)
+})
+
+// 拿设备信息
+const info = window.exhibitBridge.getInfo()
+// { deviceId, displayId, runtimeVersion, packageInfo }
+```
+
+**允许调用的指令白名单**（与方案 §13.2 对齐）：
+`cmd.gotoScene / cmd.play / cmd.pause / cmd.seek / cmd.setRate / cmd.volume / cmd.reload / cmd.macro`
+（`cmd.system.*` / `cmd.package.*` / `cmd.runtime.*` / `cmd.diag.*` 只能中控下发，bridge 拒绝）
 
 ---
 
@@ -181,8 +218,9 @@ curl -X POST http://127.0.0.1:17600/cmd ^
 
 ---
 
-## 下一步（M3）
+## 下一步（M4）
 
-- exhibitBridge：iframe 内的 HTML 通过 `window.exhibitBridge` 调客户端能力
-- composite 场景（多层合成）
-- 场景预加载与双缓冲淡入淡出
+- CommandDispatcher 完整接入 `bindings.json`（含 macro、变量替换、嵌套）
+- 系统音量真接入（PowerShell 调系统声卡）
+- `cmd.system.reboot/shutdown/restartApp` 接入
+- 内置 Action 集合稳定化

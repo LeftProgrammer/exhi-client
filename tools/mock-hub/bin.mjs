@@ -144,7 +144,7 @@ function randomId() {
 function shortJson(obj) {
   if (!obj) return ''
   const s = JSON.stringify(obj)
-  return s.length > 120 ? s.slice(0, 117) + '...' : s
+  return s.length > 500 ? s.slice(0, 497) + '...' : s
 }
 
 function printHelp() {

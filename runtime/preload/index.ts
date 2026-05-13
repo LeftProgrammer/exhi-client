@@ -9,11 +9,15 @@ import type { BootInfo, Command, DeviceStatus } from '../shared/types'
 
 export interface ExhibitAPI {
   onCommand(cb: (cmd: Command) => void): () => void
-  reportStatus(status: Partial<DeviceStatus>): void
+  onBridgeEventFromMain(
+    cb: (ev: { name: string; payload?: unknown; targetDisplayId?: string }) => void
+  ): () => void
+  reportStatus(status: Partial<DeviceStatus> & { displayId?: string }): void
   log(level: 'debug' | 'info' | 'warn' | 'error', msg: string, ctx?: unknown): void
   readPackageFile(relPath: string): Promise<Uint8Array>
   getBootInfo(): Promise<BootInfo>
   dispatchBridgeCommand(cmd: Command): void
+  bridgeEmit(name: string, payload?: unknown, fromDisplayId?: string): void
 }
 
 const api: ExhibitAPI = {
@@ -21,6 +25,15 @@ const api: ExhibitAPI = {
     const listener = (_e: Electron.IpcRendererEvent, cmd: Command) => cb(cmd)
     ipcRenderer.on(IPC.COMMAND, listener)
     return () => ipcRenderer.off(IPC.COMMAND, listener)
+  },
+
+  onBridgeEventFromMain(cb) {
+    const listener = (
+      _e: Electron.IpcRendererEvent,
+      ev: { name: string; payload?: unknown; targetDisplayId?: string }
+    ) => cb(ev)
+    ipcRenderer.on(IPC.BRIDGE_EVENT_FROM_MAIN, listener)
+    return () => ipcRenderer.off(IPC.BRIDGE_EVENT_FROM_MAIN, listener)
   },
 
   reportStatus(status) {
@@ -42,6 +55,10 @@ const api: ExhibitAPI = {
 
   dispatchBridgeCommand(cmd) {
     ipcRenderer.send(IPC.DISPATCH_BRIDGE_CMD, cmd)
+  },
+
+  bridgeEmit(name, payload, fromDisplayId) {
+    ipcRenderer.send(IPC.BRIDGE_EMIT, { name, payload, fromDisplayId })
   }
 }
 

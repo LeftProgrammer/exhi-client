@@ -2,6 +2,7 @@ import { net, protocol } from 'electron'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { logger } from './logger'
+import { BRIDGE_SCRIPT } from './bridge-script'
 
 /**
  * 自定义协议：把 exhi-pkg:// 映射到当前激活项目包根目录。
@@ -41,6 +42,12 @@ export function attachProtocolHandler(packageRoot: string) {
     try {
       const url = new URL(request.url)
       const relPath = decodeURIComponent(url.pathname).replace(/^\/+/, '')
+
+      // 拦截 __exhi__/* 路径，返回 Runtime 内置资源（如 bridge.js）
+      if (relPath.startsWith('__exhi__/')) {
+        return serveBuiltin(relPath)
+      }
+
       const full = path.resolve(rootResolved, relPath)
 
       // 防穿越
@@ -57,6 +64,17 @@ export function attachProtocolHandler(packageRoot: string) {
   })
 
   logger.info(`exhi-pkg 协议已挂载，root=${rootResolved}`)
+}
+
+function serveBuiltin(relPath: string): Response {
+  const sub = relPath.slice('__exhi__/'.length)
+  if (sub === 'bridge.js') {
+    return new Response(BRIDGE_SCRIPT, {
+      status: 200,
+      headers: { 'content-type': 'application/javascript; charset=utf-8' }
+    })
+  }
+  return new Response('Not Found', { status: 404 })
 }
 
 /** 给渲染层用的工具：拼出 exhi-pkg URL */

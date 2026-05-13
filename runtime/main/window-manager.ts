@@ -139,7 +139,10 @@ export class WindowManager {
     if (isDev) {
       const devUrl = process.env['ELECTRON_RENDERER_URL']!
       win.loadURL(`${devUrl}?displayId=${cfg.id}`)
-      win.webContents.openDevTools({ mode: 'detach' })
+      // 每个窗口都打开独立 DevTools
+      win.webContents.once('did-finish-load', () => {
+        win.webContents.openDevTools({ mode: 'detach' })
+      })
     } else {
       win.loadFile(path.join(__dirname, '../renderer/index.html'), {
         query: { displayId: cfg.id }

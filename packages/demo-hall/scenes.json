@@ -11,6 +11,28 @@
       "src": "contents/sample.svg",
       "fit": "contain"
     },
+    "touch-demo": {
+      "type": "web",
+      "src": "contents/touch/index.html",
+      "allowInteraction": true,
+      "injectBridge": true
+    },
+    "intro-video": {
+      "type": "video",
+      "src": "contents/整体介绍.mp4",
+      "loop": true,
+      "muted": false,
+      "autoplay": true,
+      "fit": "contain"
+    },
+    "composite-demo": {
+      "type": "composite",
+      "layout": "stack",
+      "children": [
+        { "type": "image", "src": "contents/sample.svg", "fit": "cover" },
+        { "type": "web", "src": "contents/touch/index.html", "transparent": true, "allowInteraction": true }
+      ]
+    },
     "blank": {
       "type": "image",
       "src": "contents/black.svg",
