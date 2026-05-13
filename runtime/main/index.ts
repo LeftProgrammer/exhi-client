@@ -3,17 +3,22 @@ import { initLogger, logger } from './logger'
 import { applySecurity, registerHotkeyBlocking, unregisterAllHotkeys } from './security'
 import { PackageLoader } from './package-loader'
 import { WindowManager } from './window-manager'
-import { ensureDeviceId, IpcBus } from './ipc'
+import { ensureDeviceId, IpcBus, MainBus } from './ipc'
 import { attachProtocolHandler, registerPkgScheme } from './protocol'
+import { loadSettings } from './settings'
+import { WsClient } from './ws-client'
+import { LocalServer } from './local-server'
+import { StandaloneScheduler } from './standalone'
+import { RUNTIME_VERSION } from '@shared/constants'
 
 /**
  * 主进程入口。
- * 流程：单实例锁 → 日志 → 安全策略 → 等 ready → 加载项目包 → 创建多屏窗口 → 注册 IPC。
+ * 启动顺序：日志 → 安全 → 协议注册 → 单实例锁 → ready → 项目包 → WS/Local/IPC → 窗口 → Standalone 启动
  */
 
 initLogger()
 applySecurity()
-registerPkgScheme() // 必须在 app.ready 之前调用
+registerPkgScheme()
 
 const singleInstanceLock = app.requestSingleInstanceLock()
 if (!singleInstanceLock) {
@@ -22,53 +27,96 @@ if (!singleInstanceLock) {
   process.exit(0)
 }
 
-// Electron 启用后台节流会让非聚焦窗口卡顿，展厅多屏全屏场景必须关掉
 app.commandLine.appendSwitch('disable-background-timer-throttling')
 app.commandLine.appendSwitch('disable-renderer-backgrounding')
 app.commandLine.appendSwitch('disable-backgrounding-occluded-windows')
-
-// 展厅大屏强制 1:1 物理像素映射，忽略 Windows 系统 DPI 缩放（125%/150% 等）。
-// 否则非整数 scale 会让 transform 缩放糊掉文字与 iframe。
-// 注意：这个开关必须在 app.ready 之前设置，否则不生效。
 app.commandLine.appendSwitch('force-device-scale-factor', '1')
 app.commandLine.appendSwitch('high-dpi-support', '1')
+
+let wsClient: WsClient | null = null
+let localServer: LocalServer | null = null
 
 app.whenReady().then(async () => {
   try {
     const deviceId = await ensureDeviceId()
     logger.info(`deviceId = ${deviceId}`)
 
+    const settings = loadSettings()
+    logger.info(
+      `Settings: hubUrl=${settings.hubUrl ?? '(disabled)'} enableSign=${settings.enableSign}`
+    )
+
     const loader = new PackageLoader()
     const pkg = loader.load()
     logger.info(`项目包加载成功: ${pkg.manifest.name} (${pkg.manifest.projectId})`)
-
     attachProtocolHandler(pkg.rootPath)
 
+    const mainBus = new MainBus()
     const winManager = new WindowManager(pkg)
-    const ipcBus = new IpcBus(pkg, winManager, deviceId)
+    const ipcBus = new IpcBus(pkg, winManager, deviceId, mainBus, () => wsClient)
     ipcBus.register()
 
+    // WS 客户端
+    if (!settings.hubDisabled) {
+      wsClient = new WsClient(settings, deviceId, pkg.manifest.version)
+      wsClient.on('command', (cmd) => mainBus.emit('command', cmd))
+      wsClient.on('modeChanged', (mode) => logger.info(`WS 模式切换: ${mode}`))
+      wsClient.start()
+    }
+
+    // 本地 HTTP
+    localServer = new LocalServer(mainBus, () => ({
+      ok: true,
+      deviceId,
+      runtime: RUNTIME_VERSION,
+      package: pkg.manifest.projectId,
+      packageVersion: pkg.manifest.version,
+      mode: wsClient?.mode ?? 'standalone',
+      uptime: Math.floor(process.uptime())
+    }))
+    await localServer.start()
+
+    // 创建窗口（注意：必须在 IPC 注册后，避免渲染层先于 IPC 启动）
     winManager.createAll()
     registerHotkeyBlocking()
 
+    // 上线事件
+    wsClient?.publish({
+      id: `boot-${Date.now().toString(36)}`,
+      ts: Date.now(),
+      deviceId,
+      type: 'evt.online',
+      payload: {
+        runtime: RUNTIME_VERSION,
+        package: { id: pkg.manifest.projectId, version: pkg.manifest.version },
+        displays: pkg.displays.displays.map((d) => d.id),
+        mode: wsClient?.mode ?? 'standalone'
+      }
+    })
+
+    // Standalone 启动步骤（等窗口 ready 后再触发，给渲染层时间初始化）
+    setTimeout(() => {
+      const scheduler = new StandaloneScheduler(mainBus, pkg.bindings)
+      scheduler.runOnStartup()
+    }, 1500)
+
     app.on('activate', () => {
-      // macOS 概念，Windows 一般用不上
       if (BrowserWindow.getAllWindows().length === 0) winManager.createAll()
     })
   } catch (e) {
     logger.error('启动失败:', e)
-    // 此处不立即退出，让用户能看到错误页（后续可加错误窗口）
     setTimeout(() => app.quit(), 3000)
   }
 })
 
 app.on('window-all-closed', () => {
-  // 展厅场景下所有窗口关闭等于退出
   app.quit()
 })
 
-app.on('will-quit', () => {
+app.on('will-quit', async () => {
   unregisterAllHotkeys()
+  wsClient?.stop()
+  await localServer?.stop()
   logger.info('应用退出')
 })
 
@@ -76,10 +124,5 @@ app.on('second-instance', () => {
   logger.info('第二实例尝试启动，已被单实例锁阻止')
 })
 
-process.on('uncaughtException', (err) => {
-  logger.error('uncaughtException:', err)
-})
-
-process.on('unhandledRejection', (reason) => {
-  logger.error('unhandledRejection:', reason)
-})
+process.on('uncaughtException', (err) => logger.error('uncaughtException:', err))
+process.on('unhandledRejection', (reason) => logger.error('unhandledRejection:', reason))
