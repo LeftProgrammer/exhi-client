@@ -1,0 +1,45 @@
+// ============================================================
+// 全局设计 Token：颜色、尺寸、字体、动效。
+// 在 .vue 的 <style lang="scss"> 内通过 @use 引入：
+//   @use '@renderer/styles/tokens.scss' as t;
+//   color: t.$color-text-primary;
+// ============================================================
+
+// ---- 颜色 ----
+$color-bg-primary: #000000;
+$color-bg-stage: #0a1530;
+$color-text-primary: #ffffff;
+$color-text-secondary: rgba(255, 255, 255, 0.75);
+$color-text-muted: rgba(255, 255, 255, 0.5);
+$color-accent: #4ade80;
+$color-error: #ff6b6b;
+$color-warn: #fbbf24;
+
+// ---- 字号 ----
+$font-size-xs: 14px;
+$font-size-sm: 18px;
+$font-size-md: 24px;
+$font-size-lg: 36px;
+$font-size-xl: 48px;
+$font-size-display: 96px;
+
+// ---- 间距 ----
+$space-xs: 8px;
+$space-sm: 16px;
+$space-md: 24px;
+$space-lg: 40px;
+$space-xl: 80px;
+
+// ---- 字体 ----
+$font-family-base: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+
+// ---- 动效 ----
+$duration-fast: 0.2s;
+$duration-base: 0.4s;
+$duration-slow: 0.8s;
+$easing-base: cubic-bezier(0.4, 0, 0.2, 1);
+
+// ---- 层级 ----
+$z-stage: 1;
+$z-overlay: 100;
+$z-diagnostic: 9999;

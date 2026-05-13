@@ -1,0 +1,52 @@
+// ============================================================
+// 通用 Mixin
+// 用法：
+//   @use '@renderer/styles/mixins.scss' as m;
+//   @include m.fill-parent;
+// ============================================================
+
+@use 'tokens' as t;
+
+/// 铺满父容器
+@mixin fill-parent {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/// flex 居中
+@mixin flex-center($direction: row) {
+  display: flex;
+  flex-direction: $direction;
+  align-items: center;
+  justify-content: center;
+}
+
+/// 文字单行省略
+@mixin ellipsis {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/// 文字多行省略
+@mixin ellipsis-multi($lines: 2) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/// 不可选中、不可拖拽（展厅大屏标配）
+@mixin no-interact {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+}
+
+/// GPU 加速层（缓解某些情况的渲染抖动）
+@mixin gpu-layer {
+  transform: translateZ(0);
+  will-change: transform;
+}
