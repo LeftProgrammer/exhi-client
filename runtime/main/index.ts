@@ -27,6 +27,12 @@ app.commandLine.appendSwitch('disable-background-timer-throttling')
 app.commandLine.appendSwitch('disable-renderer-backgrounding')
 app.commandLine.appendSwitch('disable-backgrounding-occluded-windows')
 
+// 展厅大屏强制 1:1 物理像素映射，忽略 Windows 系统 DPI 缩放（125%/150% 等）。
+// 否则非整数 scale 会让 transform 缩放糊掉文字与 iframe。
+// 注意：这个开关必须在 app.ready 之前设置，否则不生效。
+app.commandLine.appendSwitch('force-device-scale-factor', '1')
+app.commandLine.appendSwitch('high-dpi-support', '1')
+
 app.whenReady().then(async () => {
   try {
     const deviceId = await ensureDeviceId()
