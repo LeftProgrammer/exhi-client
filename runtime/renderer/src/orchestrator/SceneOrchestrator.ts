@@ -60,6 +60,7 @@ export class SceneOrchestrator {
     const scene = useSceneStore()
     if (!device.boot) return
     window.exhibit.reportStatus({
+      displayId: device.boot.displayId, // 顶层 displayId 让主进程能正确归类，否则 evt.status 里 displays 永远为空
       deviceId: device.boot.deviceId,
       displays: [
         {

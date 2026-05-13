@@ -19,12 +19,14 @@ export const IPC = {
   COMMAND: 'exhi:command',
   STATE_PUSH: 'exhi:state-push',
   BOOT_INFO: 'exhi:boot-info',
+  BRIDGE_EVENT_FROM_MAIN: 'exhi:bridge-event-from-main',
   // 渲染 → 主
   REPORT_STATUS: 'exhi:report-status',
   LOG: 'exhi:log',
   READ_PACKAGE_FILE: 'exhi:read-package-file',
   GET_BOOT_INFO: 'exhi:get-boot-info',
-  DISPATCH_BRIDGE_CMD: 'exhi:dispatch-bridge-cmd'
+  DISPATCH_BRIDGE_CMD: 'exhi:dispatch-bridge-cmd',
+  BRIDGE_EMIT: 'exhi:bridge-emit'
 } as const
 
 /** 项目包相关路径（相对 userData / ProgramData） */

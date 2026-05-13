@@ -59,8 +59,45 @@ export class IpcBus {
       this.mainBus.emit('command', cmd)
     })
 
+    ipcMain.on(
+      IPC.BRIDGE_EMIT,
+      (_e, ev: { name: string; payload?: unknown; fromDisplayId?: string }) => {
+        // 来自 web 内容的 emit 事件，记录日志 + 上报中控 evt.bridge
+        logger.debug(`[bridge] ${ev.fromDisplayId ?? '?'} emit: ${ev.name}`, ev.payload ?? '')
+        const ws = this.getWsClient()
+        if (ws) {
+          ws.publish({
+            id: randomId(),
+            ts: Date.now(),
+            deviceId: this.deviceId,
+            type: 'evt.bridge',
+            payload: {
+              source: ev.fromDisplayId,
+              name: ev.name,
+              payload: ev.payload
+            } as unknown as Record<string, unknown>
+          })
+        }
+      }
+    )
+
     // 监听总线指令 → 分发到对应窗口
     this.mainBus.on('command', (cmd: Command) => this.dispatchCommand(cmd))
+
+    // 监听 bridge 事件总线（来自渲染层/主进程，需要推给 iframe 的事件）
+    this.mainBus.on(
+      'bridge-event',
+      (ev: { name: string; payload?: unknown; targetDisplayId?: string }) => {
+        const targets = ev.targetDisplayId
+          ? [this.winManager.get(ev.targetDisplayId)]
+          : this.winManager.all()
+        for (const win of targets) {
+          if (win && !win.isDestroyed()) {
+            win.webContents.send(IPC.BRIDGE_EVENT_FROM_MAIN, ev)
+          }
+        }
+      }
+    )
   }
 
   /** 把 cmd 转发给指定 display 的窗口；payload.display 为空则广播给所有 */
@@ -90,7 +127,24 @@ export class IpcBus {
 
   private handleStatusReport(s: Partial<DeviceStatus> & { displayId?: string }) {
     if (s.displayId && s.displays?.[0]) {
-      this.statusByDisplay.set(s.displayId, s.displays[0])
+      const incoming = s.displays[0]
+      const previous = this.statusByDisplay.get(s.displayId)
+      this.statusByDisplay.set(s.displayId, incoming)
+
+      // 场景变更 → 广播 scene:changed bridge 事件给所有 iframe
+      if (previous?.sceneId !== incoming.sceneId) {
+        this.mainBus.emit('bridge-event', {
+          name: 'scene:changed',
+          payload: { displayId: s.displayId, sceneId: incoming.sceneId }
+        })
+      }
+      // 视频播放结束 → 广播 scene:ended
+      if (previous?.playState !== 'stopped' && incoming.playState === 'stopped') {
+        this.mainBus.emit('bridge-event', {
+          name: 'scene:ended',
+          payload: { displayId: s.displayId, sceneId: incoming.sceneId }
+        })
+      }
     }
     if (typeof s.volume === 'number') this.deviceVolume = s.volume
 
