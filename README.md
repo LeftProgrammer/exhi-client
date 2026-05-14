@@ -17,6 +17,7 @@
 - ✅ `tools/release-cli`：把 electron-builder 产物组织成 OTA 频道目录
 - ✅ `electron-builder.yml` 配置 generic publish（生成 latest.yml）
 - ✅ [DEPLOY.md](./DEPLOY.md)：完整部署文档（Windows 准备、Kiosk、Guardian、OTA、验收清单）
+- ✅ [docs/CONTENT-GUIDE.md](./docs/CONTENT-GUIDE.md)：项目包内容制作规范（视频编码、HTML 响应式、字体内嵌）
 
 🎉 **客户端 Runtime 核心功能完整，可投入生产部署**
 
