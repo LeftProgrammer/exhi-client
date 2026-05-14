@@ -3,6 +3,49 @@
   "name": "演示展厅（开发占位）",
   "version": "0.1.0",
   "runtimeRange": ">=1.0.0 <2.0.0",
-  "createdAt": "2026-05-13T00:00:00Z",
-  "author": "exhi-team"
+  "createdAt": "2026-05-14T02:50:08.238Z",
+  "author": "exhi-team",
+  "files": [
+    {
+      "path": "bindings.json",
+      "size": 2244,
+      "sha256": "5bdc1fd376c8834dd0a06a1667d92eff036ebb628738a5a67064fe46dbd617e6"
+    },
+    {
+      "path": "contents/整体介绍.mp4",
+      "size": 26383148,
+      "sha256": "151ce7d7d08b33b2ec5eb5370592d77d1a11ce1a8e37f7c6ae45e436b2919a6a"
+    },
+    {
+      "path": "contents/black.svg",
+      "size": 122,
+      "sha256": "9bff2ed04f29974e3f16df0c5aa5345afb1437125c916e7d33ad253d7b04f735"
+    },
+    {
+      "path": "contents/sample.svg",
+      "size": 693,
+      "sha256": "a49df8163aa033e28b4eec7de38de6904fab0edff87c12dd6594880f9ffcc549"
+    },
+    {
+      "path": "contents/touch/index.html",
+      "size": 3833,
+      "sha256": "d5f36b9a9da8dd31485a353902282f6f094152662f094e162f51252d5df6acd1"
+    },
+    {
+      "path": "contents/welcome/index.html",
+      "size": 2061,
+      "sha256": "dfdc5b54bc7c05ed6434c115ec015b2c06a21e4e068c95b0ff279f3fa4a999cd"
+    },
+    {
+      "path": "displays.json",
+      "size": 389,
+      "sha256": "1789fb2626e4a715201215248720f4b84b675ce2e1b22133601db511f4f5e244"
+    },
+    {
+      "path": "scenes.json",
+      "size": 1005,
+      "sha256": "fcaa89ef4e92f949accf8581620a9991497c55308ca7831d901de68c4a183c16"
+    }
+  ],
+  "checksum": "44496ded1c295de68ed49e1ebe28e6471aa89e85ee7ca952b38dab223571b3c6"
 }

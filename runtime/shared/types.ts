@@ -5,13 +5,23 @@
 
 // ============ 项目包配置类型 ============
 
+/** 项目包内单个文件的清单条目（用于增量同步与完整性校验） */
+export interface ManifestFile {
+  path: string // 相对项目包根的 POSIX 路径，e.g. "contents/intro.mp4"
+  size: number // 字节数
+  sha256: string // 小写 hex
+}
+
 export interface Manifest {
   $schema?: string
   projectId: string
   name: string
   version: string
   runtimeRange: string
+  /** 整包校验和（可选；pack-cli 会生成 = 全部文件 sha256 拼接后再 sha256） */
   checksum?: string
+  /** 每文件清单。pack-cli 生成；未生成时跳过文件级校验 */
+  files?: ManifestFile[]
   createdAt?: string
   author?: string
 }
