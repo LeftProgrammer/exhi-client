@@ -1,12 +1,12 @@
 import { createHmac } from 'node:crypto'
 import { EventEmitter } from 'node:events'
+import { app } from 'electron'
 import WebSocket, { type RawData } from 'ws'
 import {
   WS_HEARTBEAT_INTERVAL_MS,
   WS_HEARTBEAT_TIMEOUT_MS,
   WS_RECONNECT_BASE_MS,
   WS_RECONNECT_MAX_MS,
-  RUNTIME_VERSION,
   ErrorCode
 } from '@shared/constants'
 import type { Command, Event as DomainEvent } from '@shared/types'
@@ -141,7 +141,7 @@ export class WsClient extends EventEmitter {
     const sep = base.includes('?') ? '&' : '?'
     const params = new URLSearchParams({
       deviceId: this.deviceId,
-      v: RUNTIME_VERSION,
+      v: app.getVersion(),
       pkgV: this.projectVersion
     })
     if (this.settings.hubToken) params.set('token', this.settings.hubToken)

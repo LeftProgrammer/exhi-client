@@ -33,4 +33,10 @@ nsis:
   createDesktopShortcut: true
   createStartMenuShortcut: true
   shortcutName: 智慧展厅客户端
-publish: null
+# 配置 generic provider 让 electron-builder 生成 latest.yml（OTA 必需）
+# 实际部署的 URL 由 settings.json 的 updateFeedUrl 决定，这里只是占位
+publish:
+  - provider: generic
+    url: https://example.com/exhi-client/${channel}
+    channel: stable
+    updaterCacheDirName: exhi-client-updater

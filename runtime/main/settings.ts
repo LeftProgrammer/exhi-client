@@ -21,6 +21,12 @@ export interface Settings {
   enableSign: boolean
   /** 是否禁用整个 WS 通道（纯 Standalone） */
   hubDisabled: boolean
+  /** OTA 升级源（electron-updater feed URL）；为空则禁用 OTA */
+  updateFeedUrl: string | null
+  /** OTA 通道：stable / beta（也支持任意自定义字符串） */
+  updateChannel: string
+  /** 启动时自动检查 OTA 一次 */
+  autoCheckUpdate: boolean
 }
 
 const DEFAULTS: Settings = {
@@ -28,7 +34,10 @@ const DEFAULTS: Settings = {
   hubToken: null,
   hubSecret: null,
   enableSign: false,
-  hubDisabled: false
+  hubDisabled: false,
+  updateFeedUrl: null,
+  updateChannel: 'stable',
+  autoCheckUpdate: false
 }
 
 export function loadSettings(): Settings {
@@ -51,6 +60,10 @@ export function loadSettings(): Settings {
   if (process.env['EXHI_HUB_TOKEN']) fromEnv.hubToken = process.env['EXHI_HUB_TOKEN']
   if (process.env['EXHI_HUB_SECRET']) fromEnv.hubSecret = process.env['EXHI_HUB_SECRET']
   if (process.env['EXHI_HUB_SIGN']) fromEnv.enableSign = process.env['EXHI_HUB_SIGN'] === 'true'
+  if (process.env['EXHI_UPDATE_FEED']) fromEnv.updateFeedUrl = process.env['EXHI_UPDATE_FEED']
+  if (process.env['EXHI_UPDATE_CHANNEL']) fromEnv.updateChannel = process.env['EXHI_UPDATE_CHANNEL']
+  if (process.env['EXHI_AUTO_CHECK_UPDATE'])
+    fromEnv.autoCheckUpdate = process.env['EXHI_AUTO_CHECK_UPDATE'] === 'true'
 
   const merged: Settings = { ...DEFAULTS, ...fromFile, ...fromEnv }
   if (!merged.hubUrl) merged.hubDisabled = true

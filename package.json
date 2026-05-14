@@ -24,6 +24,7 @@
     "pkg:build": "node tools/pack-cli/bin.mjs build",
     "pkg:verify": "node tools/pack-cli/bin.mjs verify",
     "content-server": "node tools/content-server/bin.mjs",
+    "release": "node tools/release-cli/bin.mjs publish",
     "guardian": "node guardian/guardian.mjs",
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json",
     "typecheck:web": "vue-tsc --noEmit -p runtime/renderer/tsconfig.json",

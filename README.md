@@ -5,22 +5,20 @@
 
 ---
 
-## 当前阶段：M6 · 稳定性兜底
+## 当前阶段：M7 · OTA + 部署收尾（**全部里程碑完成**）
 
-**M1-M5 已完成**：工程骨架、多屏、IPC、四种 Renderer、AdaptiveStage、双缓冲 SceneStage、WebSocket、本地 HTTP、Standalone、Mock Hub、exhibitBridge、CommandDispatcher、系统 Action、项目包双槽与远程更新。
+**M1-M6 已完成**：工程骨架、多屏、IPC、四种 Renderer、双缓冲 SceneStage、WebSocket、本地 HTTP、Standalone、Mock Hub、exhibitBridge、CommandDispatcher、系统 Action、项目包双槽与远程更新、Watchdog 三级守护、熔断安全模式、心跳、Guardian、远程日志、健康指标、诊断指令、诊断面板。
 
-**M6 新增**：
-- ✅ 完整 Watchdog：渲染崩溃/卡死/连续失败 → reload → 重建窗口 三级守护
-- ✅ 崩溃熔断 + 安全模式：5 分钟窗口内崩超 3 次 → 自动进入安全模式（窗口加载 about:blank 阻止崩溃链）；空闲后自动解除
-- ✅ ScheduledRestart：每日 04:00 自动 reload 全部窗口（缓解长期内存累积）
-- ✅ Heartbeat：主进程每 5 秒写心跳文件，供 Guardian 监测
-- ✅ Guardian：独立守护进程（`guardian/guardian.mjs`）+ Windows 任务计划安装脚本（`install-task.ps1`）
-- ✅ RemoteLogReporter：warn+ 即时上报、info 批量上报（5 秒/50 条）`evt.log`
-- ✅ MetricsReporter：每 10 秒采集 CPU/内存/磁盘/进程数 → `evt.metrics`
-- ✅ 诊断指令：`cmd.diag.echo` / `cmd.diag.logs` / `cmd.diag.screenshot`
-- ✅ 渲染层隐藏诊断面板（Ctrl+Shift+Alt+E 连按 3 次）：设备信息、当前场景、最近指令
+**M7 新增**：
+- ✅ Runtime OTA（基于 electron-updater）：generic provider，支持 stable/beta 灰度通道
+- ✅ `cmd.runtime.update` 指令：检查 → 后台下载 → 按 `applyAt` 调度安装（now/idle/ISO 时间）
+- ✅ `cmd.runtime.cancel` 取消挂起的安装
+- ✅ 上行事件 `evt.runtimeUpdate`（checking/available/downloading/downloaded/scheduled/error）
+- ✅ `tools/release-cli`：把 electron-builder 产物组织成 OTA 频道目录
+- ✅ `electron-builder.yml` 配置 generic publish（生成 latest.yml）
+- ✅ [DEPLOY.md](./DEPLOY.md)：完整部署文档（Windows 准备、Kiosk、Guardian、OTA、验收清单）
 
-**尚未做**：M7 Runtime OTA
+🎉 **客户端 Runtime 核心功能完整，可投入生产部署**
 
 ---
 
@@ -416,8 +414,75 @@ npm run guardian
 
 ---
 
-## 下一步（M7）
+## OTA 验证（M7）
 
-- Runtime OTA（electron-updater 私服）
-- 灰度通道（stable / beta）
-- 部署脚本与 Kiosk 模式打磨
+> 完整端到端发布演练。前提：客户端已被 `npm run dist` 打包到 `build/`。
+
+### 1. 准备发布频道目录
+
+```bash
+# 把 build/ 里的 latest.yml + setup.exe + blockmap 复制到 build/ota/stable/
+npm run release -- --channel=stable --out=build/ota
+```
+
+### 2. 启动 OTA 服务器
+
+```bash
+npm run content-server -- --root=build/ota --port=18090
+```
+
+### 3. 配置客户端
+
+`%APPDATA%/exhi-client/settings.json`：
+```json
+{
+  "updateFeedUrl": "http://127.0.0.1:18090",
+  "updateChannel": "stable"
+}
+```
+
+或者用环境变量启动：
+```bash
+$env:EXHI_UPDATE_FEED="http://127.0.0.1:18090"
+$env:EXHI_UPDATE_CHANNEL="stable"
+npm run dev:online   # 开发期；正式部署直接跑 EXE
+```
+
+### 4. 触发更新
+
+```bash
+# 立即下载安装（客户端会重启）
+npm run hub:send -- cmd.runtime.update --applyAt=now
+
+# 后台下载，凌晨 4 点装
+npm run hub:send -- cmd.runtime.update --applyAt=idle
+
+# 切到 beta 通道
+npm run hub:send -- cmd.runtime.update --channel=beta --applyAt=now
+
+# 取消挂起安装
+npm run hub:send -- cmd.runtime.cancel
+```
+
+观察 Hub 终端：
+```
+[evt] evt.runtimeUpdate {"phase":"checking"}
+[evt] evt.runtimeUpdate {"phase":"available","version":"1.0.1"}
+[evt] evt.runtimeUpdate {"phase":"downloading","percent":42.3,...}
+[evt] evt.runtimeUpdate {"phase":"downloaded","version":"1.0.1"}
+[evt] evt.runtimeUpdate {"phase":"scheduled","at":"2026-05-15T04:00:00.000Z"}
+```
+
+---
+
+## 生产部署
+
+详见 [DEPLOY.md](./DEPLOY.md)：
+
+- Windows 系统准备（电源/网络/任务栏/通知）
+- Kiosk 模式（Assigned Access / Shell Launcher）
+- Guardian 服务安装
+- 项目包预置与远程推送
+- OTA 服务器搭建（nginx）
+- 灰度发布流程
+- 验收清单 / 故障排查
