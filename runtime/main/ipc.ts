@@ -8,6 +8,7 @@ import { logger } from './logger'
 import type { LoadedPackage } from './package-loader'
 import type { WindowManager } from './window-manager'
 import type { WsClient } from './ws-client'
+import { runSystemAction } from './system-actions'
 
 /**
  * 主进程的"事件总线"：把 ws / local-server / standalone 产出的指令，
@@ -42,6 +43,17 @@ export class IpcBus {
       if (!safe) throw new Error('非法路径: ' + relPath)
       return fs.readFile(safe)
     })
+
+    ipcMain.handle(
+      IPC.RUN_SYSTEM_ACTION,
+      async (_e, invoke: { action: string; params: Record<string, unknown> }) => {
+        const result = await runSystemAction(invoke)
+        logger.info(
+          `system action: ${invoke.action} → ${result.ok ? 'ok' : 'fail: ' + result.error}`
+        )
+        return result
+      }
+    )
 
     ipcMain.on(IPC.LOG, (_e, level: string, msg: string, ctx?: unknown) => {
       const fn = (logger as unknown as Record<string, (...a: unknown[]) => void>)[level]

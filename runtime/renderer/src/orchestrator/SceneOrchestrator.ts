@@ -1,57 +1,43 @@
-import type { Command } from '@shared/types'
+import type { BindingsConfig, Command } from '@shared/types'
 import { useCommandStore } from '../stores/command'
 import { useSceneStore } from '../stores/scene'
 import { useDeviceStore } from '../stores/device'
+import { CommandDispatcher } from './CommandDispatcher'
 
 /**
- * SceneOrchestrator：渲染层指令调度。
+ * SceneOrchestrator：渲染层的指令入口。
  *
- * M2 阶段支持：cmd.gotoScene / cmd.reload / cmd.volume
- * M4 接入 bindings.json 真正的 CommandDispatcher，本类会被替代或瘦身。
+ * - 启动时切到默认场景
+ * - 监听主进程下发的指令，交给 CommandDispatcher
+ * - 监听 scene store 变化触发状态上报
  */
 export class SceneOrchestrator {
-  init(initialSceneId: string) {
+  private dispatcher!: CommandDispatcher
+
+  async init(initialSceneId: string) {
     const sceneStore = useSceneStore()
+
+    // 加载 bindings.json 给 dispatcher
+    const buf = await window.exhibit.readPackageFile('bindings.json')
+    const bindings = JSON.parse(new TextDecoder().decode(buf)) as BindingsConfig
+    this.dispatcher = new CommandDispatcher(bindings)
+
     if (initialSceneId) sceneStore.switchTo(initialSceneId)
 
     window.exhibit.onCommand((cmd) => this.handle(cmd))
 
-    // 周期性上报状态（30s 兜底，状态变化时另有触发）
     this.reportStatus()
     setInterval(() => this.reportStatus(), 30_000)
-
-    // 切场景时立即上报
     sceneStore.$subscribe(() => this.reportStatus())
   }
 
-  handle(cmd: Command) {
+  async handle(cmd: Command) {
     useCommandStore().push(cmd)
-    window.exhibit.log('debug', `收到指令: ${cmd.type}`, cmd.payload)
+    window.exhibit.log('debug', `dispatcher 收到: ${cmd.type}`, cmd.payload)
 
-    switch (cmd.type) {
-      case 'cmd.gotoScene': {
-        const sceneId = (cmd.payload as { sceneId?: string } | undefined)?.sceneId
-        if (sceneId) useSceneStore().switchTo(sceneId)
-        break
-      }
-      case 'cmd.reload': {
-        // 简单实现：重新载入当前场景
-        const cur = useSceneStore().currentSceneId
-        if (cur) {
-          useSceneStore().switchTo(cur)
-        }
-        break
-      }
-      case 'cmd.volume': {
-        // 系统音量需要主进程通过 PowerShell/nircmd 调节，M2 这里仅记录与上报
-        const value = (cmd.payload as { value?: number } | undefined)?.value
-        if (typeof value === 'number') {
-          window.exhibit.log('info', `M2 暂不真改系统音量，仅记录 value=${value}`)
-        }
-        break
-      }
-      default:
-        window.exhibit.log('warn', `M2 暂未处理的指令: ${cmd.type}`)
+    const result = await this.dispatcher.handle(cmd)
+    if (!result.ok) {
+      window.exhibit.log('warn', `指令处理失败: ${cmd.type} → ${result.error}`)
     }
   }
 
@@ -60,7 +46,7 @@ export class SceneOrchestrator {
     const scene = useSceneStore()
     if (!device.boot) return
     window.exhibit.reportStatus({
-      displayId: device.boot.displayId, // 顶层 displayId 让主进程能正确归类，否则 evt.status 里 displays 永远为空
+      displayId: device.boot.displayId,
       deviceId: device.boot.deviceId,
       displays: [
         {
