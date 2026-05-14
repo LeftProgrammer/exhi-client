@@ -1,11 +1,16 @@
 import { app, BrowserWindow } from 'electron'
 import { initLogger, logger } from './logger'
-import { applySecurity, registerHotkeyBlocking, unregisterAllHotkeys } from './security'
+import {
+  applySecurity,
+  registerDiagHotkey,
+  registerHotkeyBlocking,
+  unregisterAllHotkeys
+} from './security'
 import { PackageLoader } from './package-loader'
 import { WindowManager } from './window-manager'
 import { ensureDeviceId, IpcBus, MainBus } from './ipc'
 import { attachProtocolHandler, registerPkgScheme } from './protocol'
-import { loadSettings } from './settings'
+import { loadSettings, loadSettingsEarly } from './settings'
 import { WsClient } from './ws-client'
 import { LocalServer } from './local-server'
 import { StandaloneScheduler } from './standalone'
@@ -39,8 +44,16 @@ if (!singleInstanceLock) {
 app.commandLine.appendSwitch('disable-background-timer-throttling')
 app.commandLine.appendSwitch('disable-renderer-backgrounding')
 app.commandLine.appendSwitch('disable-backgrounding-occluded-windows')
-app.commandLine.appendSwitch('force-device-scale-factor', '1')
-app.commandLine.appendSwitch('high-dpi-support', '1')
+
+// 早期读取 settings 里几个必须在 ready 之前应用的字段
+const earlySettings = loadSettingsEarly()
+if (earlySettings.deviceScaleFactor !== 'auto') {
+  app.commandLine.appendSwitch('force-device-scale-factor', String(earlySettings.deviceScaleFactor))
+  app.commandLine.appendSwitch('high-dpi-support', '1')
+}
+if (earlySettings.disableHardwareAcceleration) {
+  app.disableHardwareAcceleration()
+}
 
 let wsClient: WsClient | null = null
 let localServer: LocalServer | null = null
@@ -116,20 +129,25 @@ app.whenReady().then(async () => {
     })
 
     // 本地 HTTP
-    localServer = new LocalServer(mainBus, () => ({
-      ok: true,
-      deviceId,
-      runtime: APP_VERSION,
-      package: pkg.manifest.projectId,
-      packageVersion: pkg.manifest.version,
-      mode: wsClient?.mode ?? 'standalone',
-      uptime: Math.floor(process.uptime())
-    }))
+    localServer = new LocalServer(
+      mainBus,
+      () => ({
+        ok: true,
+        deviceId,
+        runtime: APP_VERSION,
+        package: pkg.manifest.projectId,
+        packageVersion: pkg.manifest.version,
+        mode: wsClient?.mode ?? 'standalone',
+        uptime: Math.floor(process.uptime())
+      }),
+      settings
+    )
     await localServer.start()
 
     // 创建窗口
     winManager.createAll()
     registerHotkeyBlocking()
+    registerDiagHotkey()
 
     // 定时刷新（每天 04:00）
     scheduledRestart = new ScheduledRestart(winManager, 4, 0)

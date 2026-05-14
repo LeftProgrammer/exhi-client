@@ -15,6 +15,7 @@ export interface ExhibitAPI {
     action: string,
     params: Record<string, unknown>
   ): Promise<{ ok: boolean; error?: string; data?: Record<string, unknown> }>
+  onDiagHotkey(cb: () => void): () => void
 }
 
 declare global {

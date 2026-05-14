@@ -27,6 +27,17 @@ export interface Settings {
   updateChannel: string
   /** 启动时自动检查 OTA 一次 */
   autoCheckUpdate: boolean
+  /** 本地 HTTP /cmd 鉴权 token，留空则不鉴权（仅 127.0.0.1 可达） */
+  localToken: string | null
+  /** 本地 HTTP /cmd 每个 cmd.type 的最大频率 (Hz)；默认 30 */
+  localCmdMaxHz: number
+  /**
+   * Chromium device scale factor。默认 1（强制忽略 Windows DPI 缩放）。
+   * 笔记本/特殊面板需要按物理像素时设 'auto' 让系统决定；或设具体数字（如 1.5）。
+   */
+  deviceScaleFactor: number | 'auto'
+  /** 关掉硬件加速。低配工控 GPU 驱动有问题时设 true */
+  disableHardwareAcceleration: boolean
 }
 
 const DEFAULTS: Settings = {
@@ -37,7 +48,42 @@ const DEFAULTS: Settings = {
   hubDisabled: false,
   updateFeedUrl: null,
   updateChannel: 'stable',
-  autoCheckUpdate: false
+  autoCheckUpdate: false,
+  localToken: null,
+  localCmdMaxHz: 30,
+  deviceScaleFactor: 1,
+  disableHardwareAcceleration: false
+}
+
+/**
+ * 早期读取：只取必须在 app.ready 之前用的几个字段。
+ * 没用 electron.app.getPath（那个要 ready），直接拼标准 %APPDATA% 路径。
+ */
+export function loadSettingsEarly(): Pick<
+  Settings,
+  'deviceScaleFactor' | 'disableHardwareAcceleration'
+> {
+  const appdata = process.env['APPDATA'] || ''
+  const file = path.join(appdata, 'exhi-client', 'settings.json')
+  if (!appdata || !fs.existsSync(file)) {
+    return {
+      deviceScaleFactor: DEFAULTS.deviceScaleFactor,
+      disableHardwareAcceleration: DEFAULTS.disableHardwareAcceleration
+    }
+  }
+  try {
+    const j = JSON.parse(fs.readFileSync(file, 'utf-8')) as Partial<Settings>
+    return {
+      deviceScaleFactor: j.deviceScaleFactor ?? DEFAULTS.deviceScaleFactor,
+      disableHardwareAcceleration:
+        j.disableHardwareAcceleration ?? DEFAULTS.disableHardwareAcceleration
+    }
+  } catch {
+    return {
+      deviceScaleFactor: DEFAULTS.deviceScaleFactor,
+      disableHardwareAcceleration: DEFAULTS.disableHardwareAcceleration
+    }
+  }
 }
 
 export function loadSettings(): Settings {

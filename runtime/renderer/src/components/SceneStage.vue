@@ -1,23 +1,26 @@
 <script setup lang="ts">
-import { computed, watch, ref } from 'vue'
+import { computed, watch, ref, nextTick } from 'vue'
 import type { Scene } from '@shared/types'
 import { useSceneStore } from '../stores/scene'
 import { resolveRenderer } from '../renderers/registry'
 
 /**
- * SceneStage：双缓冲场景容器。
+ * SceneStage：双缓冲场景容器（M8 升级版）。
  *
- * 实现思路：维护"当前层"和"上一层"两个槽位。
- * 切场景时，把新场景挂到"当前层"，旧场景留在"上一层"，两层透明度做 crossfade。
- * 切换完成后销毁"上一层"。
+ * 实现思路：
+ * - 维护"当前层" + "上一层"两个槽位
+ * - 切场景时，新场景挂到"当前层"，旧场景留在"上一层"
+ * - 等新场景的 video / image 实际 ready 再淡入（避免上层已淡出但新内容黑帧）
+ * - 普通 web/composite 场景则等一帧即可
  *
- * 这样可以避免传统 mode:out-in 的"先黑屏再淡入"问题。
+ * 通过 `data-ready` 属性 + opacity 控制：新层默认不可见，<ready> 事件后才淡入。
  */
 
 interface Layer {
   key: number
   scene: Scene
   sceneId: string
+  ready: boolean
 }
 
 const sceneStore = useSceneStore()
@@ -25,6 +28,8 @@ const current = ref<Layer | null>(null)
 const previous = ref<Layer | null>(null)
 
 const CROSSFADE_MS = 400
+/** 等 ready 的最长时间，超过就强制淡入（哪怕没解码完）。避免坏视频卡死整套切换 */
+const READY_TIMEOUT_MS = 3_000
 
 watch(
   () => [sceneStore.switchSeq, sceneStore.currentSceneId] as const,
@@ -33,23 +38,41 @@ watch(
     const scene = sceneStore.scenes[sceneId]
     if (!scene) return
 
-    const newLayer: Layer = { key: seq, scene, sceneId }
+    const newLayer: Layer = { key: seq, scene, sceneId, ready: false }
 
-    if (current.value) {
-      // 把当前层降为 previous，新层挂到 current
-      previous.value = current.value
-    }
+    if (current.value) previous.value = current.value
     current.value = newLayer
 
-    // crossfade 完成后清理 previous
-    window.setTimeout(() => {
-      // 仅当 previous 仍是这次切换前的层时才清理
-      if (previous.value && previous.value !== current.value) {
-        previous.value = null
+    // 给新层一个 ready 兜底：3 秒后强制 ready（防止坏视频卡死）
+    const myKey = seq
+    setTimeout(() => {
+      if (current.value && current.value.key === myKey && !current.value.ready) {
+        current.value.ready = true
       }
-    }, CROSSFADE_MS + 50)
+    }, READY_TIMEOUT_MS)
+
+    // 非 video/image 场景：等一帧就 ready（web/composite 自己内部异步）
+    if (scene.type !== 'video' && scene.type !== 'image') {
+      nextTick(() => {
+        if (current.value && current.value.key === myKey) current.value.ready = true
+      })
+    }
+
+    // crossfade 完成后清理 previous（从 ready 算起，不是从切换瞬间）
   },
   { immediate: true }
+)
+
+// previous 清理：监听 current.ready 变 true 后等 crossfade 时长再清
+watch(
+  () => current.value?.ready,
+  (ready) => {
+    if (!ready) return
+    const oldPrev = previous.value
+    setTimeout(() => {
+      if (previous.value === oldPrev) previous.value = null
+    }, CROSSFADE_MS + 50)
+  }
 )
 
 const previousRenderer = computed(() =>
@@ -58,17 +81,36 @@ const previousRenderer = computed(() =>
 const currentRenderer = computed(() =>
   current.value ? resolveRenderer(current.value.scene.type) : null
 )
+
+/** 当 video/image renderer 通知 ready，标记当前层可淡入 */
+function onLayerReady(key: number) {
+  if (current.value && current.value.key === key) {
+    current.value.ready = true
+  }
+}
 </script>
 
 <template>
   <div class="scene-stage">
-    <!-- 旧层：固定渲染但淡出 -->
-    <div v-if="previous && previousRenderer" class="scene-stage__layer scene-stage__layer--leaving">
+    <!-- 旧层：保持显示，靠 z-index 在下方；通过 entering 动画的 opacity 反向"淡出"旧 -->
+    <div
+      v-if="previous && previousRenderer"
+      class="scene-stage__layer scene-stage__layer--previous"
+    >
       <component :is="previousRenderer" :key="previous.key" :scene="previous.scene" />
     </div>
-    <!-- 新层：淡入 -->
-    <div v-if="current && currentRenderer" class="scene-stage__layer scene-stage__layer--entering">
-      <component :is="currentRenderer" :key="current.key" :scene="current.scene" />
+    <!-- 新层：ready 才显示，避免黑帧 -->
+    <div
+      v-if="current && currentRenderer"
+      class="scene-stage__layer scene-stage__layer--current"
+      :data-ready="current.ready ? 'true' : 'false'"
+    >
+      <component
+        :is="currentRenderer"
+        :key="current.key"
+        :scene="current.scene"
+        @ready="onLayerReady(current.key)"
+      />
     </div>
   </div>
 </template>
@@ -89,30 +131,19 @@ const currentRenderer = computed(() =>
     width: 100%;
     height: 100%;
 
-    &--entering {
-      animation: layer-in 0.4s t.$easing-base both;
+    &--previous {
+      // 旧层始终可见但被新层 ready 后覆盖；自身做一次淡出
+      opacity: 1;
+      transition: opacity 0.4s t.$easing-base;
     }
 
-    &--leaving {
-      animation: layer-out 0.4s t.$easing-base both;
+    &--current {
+      opacity: 0;
+      transition: opacity 0.4s t.$easing-base;
+      &[data-ready='true'] {
+        opacity: 1;
+      }
     }
-  }
-}
-
-@keyframes layer-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-@keyframes layer-out {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
   }
 }
 </style>

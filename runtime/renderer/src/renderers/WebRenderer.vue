@@ -5,6 +5,7 @@ import { resolvePkgUrl } from '../utils/url'
 import { useDeviceStore } from '../stores/device'
 
 const props = defineProps<{ scene: WebScene }>()
+const emit = defineEmits<{ (e: 'ready'): void }>()
 const device = useDeviceStore()
 
 const src = computed(() => resolvePkgUrl(props.scene.src))
@@ -114,6 +115,7 @@ onBeforeUnmount(() => {
     }"
     frameborder="0"
     allow="autoplay; fullscreen"
+    @load="emit('ready')"
   />
 </template>
 

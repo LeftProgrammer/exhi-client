@@ -173,8 +173,9 @@ export class RuntimeUpdater {
     if (applyAt === 'now') {
       at = new Date()
     } else if (applyAt === 'idle') {
+      // 错峰：04:30，与 scheduled-restart(03:30) 和 package.update(04:00) 错开
       const t = new Date()
-      t.setHours(4, 0, 0, 0)
+      t.setHours(4, 30, 0, 0)
       if (t.getTime() <= Date.now()) t.setDate(t.getDate() + 1)
       at = t
     } else {

@@ -22,6 +22,8 @@ export type ActionResult =
 export type ActionHandler = (ctx: ActionContext) => Promise<ActionResult> | ActionResult
 
 const registry: Record<string, ActionHandler> = {}
+/** 受保护的内置 action 前缀，禁止项目包覆盖 */
+const PROTECTED_PREFIXES = ['scene.', 'renderer.', 'system.', 'macro']
 
 export function registerAction(name: string, handler: ActionHandler) {
   registry[name] = handler
@@ -33,6 +35,42 @@ export function getAction(name: string): ActionHandler | undefined {
 
 export function listActions(): string[] {
   return Object.keys(registry)
+}
+
+/**
+ * 项目包扩展 API。项目包根目录可放 actions.js：
+ *   // actions.js
+ *   export default function register(exhi) {
+ *     exhi.registerAction('mypkg.fancy', async ({ params }) => { ... })
+ *   }
+ *
+ * Runtime 启动时通过 SceneOrchestrator 加载 + 调用 register(exhi)。
+ * 项目包 action 必须有命名空间（含 '.'），禁止覆盖内置前缀。
+ */
+export interface ProjectActionHost {
+  registerAction(name: string, handler: ActionHandler): void
+  /** 主动 emit 一个事件到主进程（保留扩展点，目前 no-op） */
+  log(msg: string): void
+}
+
+export function makeProjectHost(): ProjectActionHost {
+  return {
+    registerAction(name, handler) {
+      if (!name.includes('.')) {
+        console.warn(`[actions] 项目包 action 必须有命名空间: ${name}`)
+        return
+      }
+      if (PROTECTED_PREFIXES.some((p) => name === p || name.startsWith(p))) {
+        console.warn(`[actions] 禁止覆盖内置 action: ${name}`)
+        return
+      }
+      registerAction(name, handler)
+      console.info(`[actions] 项目包 action 已注册: ${name}`)
+    },
+    log(msg) {
+      console.info('[project-actions]', msg)
+    }
+  }
 }
 
 // ============ 内置 Actions（渲染层） ============

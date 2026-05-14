@@ -22,6 +22,7 @@ export interface ExhibitAPI {
     action: string,
     params: Record<string, unknown>
   ): Promise<{ ok: boolean; error?: string; data?: Record<string, unknown> }>
+  onDiagHotkey(cb: () => void): () => void
 }
 
 const api: ExhibitAPI = {
@@ -67,6 +68,12 @@ const api: ExhibitAPI = {
 
   runSystemAction(action, params) {
     return ipcRenderer.invoke(IPC.RUN_SYSTEM_ACTION, { action, params })
+  },
+
+  onDiagHotkey(cb) {
+    const listener = () => cb()
+    ipcRenderer.on(IPC.DIAG_HOTKEY, listener)
+    return () => ipcRenderer.off(IPC.DIAG_HOTKEY, listener)
   }
 }
 

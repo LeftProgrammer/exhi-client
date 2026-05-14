@@ -25,6 +25,7 @@ export const IPC = {
   STATE_PUSH: 'exhi:state-push',
   BOOT_INFO: 'exhi:boot-info',
   BRIDGE_EVENT_FROM_MAIN: 'exhi:bridge-event-from-main',
+  DIAG_HOTKEY: 'exhi:diag-hotkey',
   // 渲染 → 主
   REPORT_STATUS: 'exhi:report-status',
   LOG: 'exhi:log',

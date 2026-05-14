@@ -6,6 +6,7 @@ import { useDeviceStore } from '../stores/device'
 import { useSceneStore } from '../stores/scene'
 
 const props = defineProps<{ scene: VideoScene }>()
+const emit = defineEmits<{ (e: 'ready'): void }>()
 const device = useDeviceStore()
 const sceneStore = useSceneStore()
 
@@ -51,12 +52,20 @@ function onError() {
   })
 }
 
+function onLoadedData() {
+  // 首帧已解码，可以告诉 SceneStage 淡入了
+  emit('ready')
+}
+
 onMounted(() => {
   const v = videoRef.value
   if (!v) return
   v.addEventListener('timeupdate', onTimeUpdate)
   v.addEventListener('ended', onEnded)
   v.addEventListener('error', onError)
+  v.addEventListener('loadeddata', onLoadedData, { once: true })
+  // 极少数情况：缓存命中，loadeddata 可能已触发，兜底检查
+  if (v.readyState >= 2) emit('ready')
   if (typeof props.scene.startAt === 'number') v.currentTime = props.scene.startAt
   if (typeof props.scene.playbackRate === 'number') v.playbackRate = props.scene.playbackRate
 })
