@@ -486,3 +486,85 @@ npm run hub:send -- cmd.runtime.cancel
 - OTA 服务器搭建（nginx）
 - 灰度发布流程
 - 验收清单 / 故障排查
+
+---
+
+## M8 上线兜底（针对评审反馈）
+
+| # | 改进 | 文件 |
+|---|---|---|
+| 1 | watchdog 熔断改加载内置 fallback data URL，不再 about:blank 白屏 | `safe-mode-page.ts`、`window-manager.ts` |
+| 2 | 项目包根目录可放 `actions.js` 扩展自定义 Action（无需改 Runtime） | `actions.ts`、`SceneOrchestrator.ts` |
+| 3 | 本地 HTTP `/cmd` 加 Bearer 鉴权 + 按 cmd.type 限频（默认 30Hz） | `local-server.ts`、`settings.ts` |
+| 4 | 诊断热键改主进程 `globalShortcut` 注册，iframe 焦点也能收到 | `security.ts`、`DiagPanel.vue` |
+| 5 | 截图 PNG → JPG（默认 q60，10MB→400KB）+ 5 秒最小间隔 | `diag.ts` |
+| 6 | 离线事件持久化到 `userData/offline-queue.ndjson`（10MB 滚动） | `ws-client.ts` |
+| 7 | scheduled-restart 03:30 / package.update 04:00 / runtime.update 04:30 错峰 | `scheduled-restart.ts`、`runtime-updater.ts` |
+| 8 | HMAC 签名校验改 stable stringify（字段顺序无关） | `stable-json.ts`、`ws-client.ts` |
+| 9 | SceneStage 等新场景 ready 再淡入，杜绝"先黑帧再淡入"（3s 超时兜底） | `SceneStage.vue` + 各 Renderer |
+| 10 | `deviceScaleFactor` / `disableHardwareAcceleration` 可配（早期读取） | `settings.ts` 的 `loadSettingsEarly` |
+| - | 代码签名采购与配置流程 | `build-resources/SIGNING.md` |
+
+### 配置示例（settings.json 新增字段）
+
+```json
+{
+  "localToken": "device-local-secret",
+  "localCmdMaxHz": 30,
+  "deviceScaleFactor": 1,
+  "disableHardwareAcceleration": false
+}
+```
+
+### 项目包扩展 Action 示例
+
+`packages/<your-project>/actions.js`：
+
+```js
+export default function register(exhi) {
+  exhi.registerAction('baima.fancy-transition', async ({ params }) => {
+    console.log('自定义动作', params)
+    return { ok: true }
+  })
+}
+```
+
+`bindings.json` 里直接用：
+
+```json
+{ "on": "cmd.scenario.special", "do": "baima.fancy-transition", "params": { "duration": 2000 } }
+```
+
+约束：项目包 action 必须含 `.` 命名空间，且不能覆盖 `scene.* / renderer.* / system.* / macro` 前缀。
+
+### 验证步骤
+
+```bash
+# 1. 安全模式 fallback
+#    Console 跑 location.href = 'chrome://crash' 三次触发熔断
+#    现在看到的是暗色呼吸点而不是白屏
+
+# 2. Action 扩展
+#    在 packages/demo-hall/ 加 actions.js → 重启 dev → 看主进程日志：
+#    [actions] 项目包 action 已注册: xxx.yyy
+
+# 3. 本地 HTTP 节流
+curl -X POST http://127.0.0.1:17600/cmd -H "content-type: application/json" \
+  -d '{"type":"cmd.gotoScene","payload":{"sceneId":"image-demo"}}'
+#    高频重复发会被 429 拒绝
+
+# 4. 诊断热键
+#    在任意窗口（包括 touch-demo 内的 iframe）按 Ctrl+Shift+Alt+E 三次 → 面板弹出
+
+# 5. 截图
+npm run hub:send -- cmd.diag.screenshot --display=main
+#    返回 evt.diagScreenshot 含 jpgBase64（不再是 pngBase64）
+#    立刻再发一次 → evt.cmdResult.error: "rate-limited, retry in ..."
+
+# 6. 离线队列
+#    停掉 hub → 一段时间后查看 userData/offline-queue.ndjson
+#    重启 dev → 日志：WS: 从磁盘恢复 N 条离线事件
+
+# 9. 场景预加载
+#    切换视频场景 → 不再先黑屏再淡入
+```

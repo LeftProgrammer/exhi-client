@@ -1,11 +1,19 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import type { CompositeScene } from '@shared/types'
 import { resolveRenderer } from './registry'
 
 const props = defineProps<{ scene: CompositeScene }>()
+const emit = defineEmits<{ (e: 'ready'): void }>()
 
 const layout = computed(() => props.scene.layout ?? 'stack')
+
+// 所有子层 ready 后才把整个 composite 视为 ready
+const readyCount = ref(0)
+function onChildReady() {
+  readyCount.value++
+  if (readyCount.value >= props.scene.children.length) emit('ready')
+}
 
 interface Child {
   comp: ReturnType<typeof resolveRenderer>
@@ -30,7 +38,12 @@ const children = computed<Child[]>(() =>
       class="composite__child"
       :class="`composite__child--${layout}`"
     >
-      <component v-if="child.comp" :is="child.comp" :scene="child.scene" />
+      <component
+        v-if="child.comp"
+        :is="child.comp"
+        :scene="child.scene"
+        @ready="onChildReady"
+      />
     </div>
   </div>
 </template>

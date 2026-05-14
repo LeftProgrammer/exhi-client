@@ -1,5 +1,7 @@
 import { createHmac } from 'node:crypto'
 import { EventEmitter } from 'node:events'
+import fs from 'node:fs'
+import path from 'node:path'
 import { app } from 'electron'
 import WebSocket, { type RawData } from 'ws'
 import {
@@ -11,6 +13,7 @@ import {
 } from '@shared/constants'
 import type { Command, Event as DomainEvent } from '@shared/types'
 import { logger } from './logger'
+import { stableStringify } from './stable-json'
 import type { Settings } from './settings'
 
 export type WsMode = 'online' | 'standalone'
@@ -43,7 +46,14 @@ export class WsClient extends EventEmitter {
   private heartbeatTimer: NodeJS.Timeout | null = null
   private pongTimer: NodeJS.Timeout | null = null
   private offlineQueue: DomainEvent[] = []
-  private readonly maxQueue = 500
+  /** 内存上限：到顶就开始淘汰最旧的 */
+  private readonly maxQueue = 2000
+  /** 文件上限：超过就截断旧部分 */
+  private readonly maxFileBytes = 10 * 1024 * 1024 // 10MB
+  /** 持久化文件路径，由 init 设置 */
+  private queueFile: string
+  /** flush 节流定时器 */
+  private flushTimer: NodeJS.Timeout | null = null
   private _mode: WsMode = 'standalone'
   private stopped = false
 
@@ -53,6 +63,8 @@ export class WsClient extends EventEmitter {
     private projectVersion: string
   ) {
     super()
+    this.queueFile = path.join(app.getPath('userData'), 'offline-queue.ndjson')
+    this.loadQueueFromDisk()
   }
 
   get mode(): WsMode {
@@ -70,6 +82,12 @@ export class WsClient extends EventEmitter {
   stop() {
     this.stopped = true
     this.clearTimers()
+    if (this.flushTimer) {
+      clearTimeout(this.flushTimer)
+      this.flushTimer = null
+    }
+    // 退出前最后一次刷盘，确保未送出的事件不丢
+    if (this.offlineQueue.length > 0) this.persistQueue()
     if (this.ws) {
       try {
         this.ws.close()
@@ -80,13 +98,14 @@ export class WsClient extends EventEmitter {
     }
   }
 
-  /** 上报事件，离线入队 */
+  /** 上报事件，离线入队（带文件持久化） */
   publish(ev: DomainEvent) {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.send(ev)
     } else {
       if (this.offlineQueue.length >= this.maxQueue) this.offlineQueue.shift()
       this.offlineQueue.push(ev)
+      this.scheduleFlush()
     }
   }
 
@@ -182,8 +201,9 @@ export class WsClient extends EventEmitter {
   private verifySig(cmd: Command): boolean {
     if (!this.settings.hubSecret || !cmd.sig) return false
     const { sig, ...rest } = cmd
+    // 用 stable stringify：两端字段顺序无关，杜绝顺序差异导致签名 100% 不过
     const expected = createHmac('sha256', this.settings.hubSecret)
-      .update(JSON.stringify(rest))
+      .update(stableStringify(rest))
       .digest('base64')
     return expected === sig
   }
@@ -268,6 +288,65 @@ export class WsClient extends EventEmitter {
     logger.info(`WS: 补报离线事件 ${this.offlineQueue.length} 条`)
     for (const ev of this.offlineQueue) this.send(ev)
     this.offlineQueue = []
+    // 全部补完，清空磁盘文件
+    try {
+      if (fs.existsSync(this.queueFile)) fs.unlinkSync(this.queueFile)
+    } catch (e) {
+      logger.warn('WS: 清理离线队列文件失败', e)
+    }
+  }
+
+  // ---- 持久化 ----
+
+  /** 启动时把磁盘上的队列读回来（断电/重启后不丢日志） */
+  private loadQueueFromDisk() {
+    try {
+      if (!fs.existsSync(this.queueFile)) return
+      const raw = fs.readFileSync(this.queueFile, 'utf-8')
+      const lines = raw.split('\n').filter((l) => l.trim())
+      let loaded = 0
+      for (const line of lines) {
+        try {
+          const ev = JSON.parse(line) as DomainEvent
+          this.offlineQueue.push(ev)
+          loaded++
+          if (this.offlineQueue.length >= this.maxQueue) {
+            this.offlineQueue.shift()
+          }
+        } catch {
+          /* 单行解析失败跳过 */
+        }
+      }
+      if (loaded > 0) logger.info(`WS: 从磁盘恢复 ${loaded} 条离线事件`)
+    } catch (e) {
+      logger.warn('WS: 读取离线队列文件失败', e)
+    }
+  }
+
+  /** 节流刷盘：500ms 内的多次 publish 合并成一次 IO */
+  private scheduleFlush() {
+    if (this.flushTimer) return
+    this.flushTimer = setTimeout(() => {
+      this.flushTimer = null
+      this.persistQueue()
+    }, 500)
+  }
+
+  /** 把当前 offlineQueue 全量写入文件（NDJSON 格式，每行一条） */
+  private persistQueue() {
+    try {
+      // 简单策略：超过 maxFileBytes 直接丢前一半
+      let lines = this.offlineQueue.map((e) => JSON.stringify(e))
+      let content = lines.join('\n') + '\n'
+      if (content.length > this.maxFileBytes) {
+        const half = Math.floor(lines.length / 2)
+        lines = lines.slice(half)
+        content = lines.join('\n') + '\n'
+      }
+      fs.writeFileSync(this.queueFile, content, 'utf-8')
+    } catch (e) {
+      logger.warn('WS: 持久化离线队列失败', e)
+    }
   }
 }
 

@@ -4,6 +4,7 @@ import { logger } from './logger'
 import type { DisplayConfig } from '@shared/types'
 import type { LoadedPackage } from './package-loader'
 import { Watchdog } from './watchdog'
+import { getSafeModeDataUrl } from './safe-mode-page'
 import type { WsClient } from './ws-client'
 
 /**
@@ -152,12 +153,12 @@ export class WindowManager {
       this.rebuildWindow(displayId)
     })
     wd.on('safe-mode', () => {
-      // 安全模式：把窗口加载到一个最小占位页（直接 about:blank）
-      // 防止反复崩溃链中拉起的渲染层又触发同样的崩溃
+      // 安全模式：加载内置兜底页（data URL，零依赖），不再用 about:blank 白屏
+      // 设计原则：不解码视频/复杂 CSS，避免再次诱发渲染崩溃
       try {
-        win.loadURL('about:blank')
+        win.loadURL(getSafeModeDataUrl())
       } catch (e) {
-        logger.warn('safe-mode loadURL about:blank 失败', e)
+        logger.warn('safe-mode loadURL 失败', e)
       }
     })
     wd.on('safe-mode-cleared', () => {

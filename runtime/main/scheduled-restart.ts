@@ -12,8 +12,9 @@ export class ScheduledRestart {
 
   constructor(
     private winManager: WindowManager,
-    private hour = 4,
-    private minute = 0
+    // 默认错峰：03:30，与 OTA(04:00)、package.update(idle=04:00) 拉开 30 分钟
+    private hour = 3,
+    private minute = 30
   ) {}
 
   start() {

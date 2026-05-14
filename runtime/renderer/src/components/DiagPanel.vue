@@ -18,36 +18,35 @@ const cmd = useCommandStore()
 const lastTimes: number[] = []
 const HOTKEY_WINDOW_MS = 5_000
 
-function isHotkey(e: KeyboardEvent) {
-  return e.ctrlKey && e.shiftKey && e.altKey && e.key.toLowerCase() === 'e'
+/**
+ * 唤起策略：连续 3 次（5 秒内）触发主进程热键 → 打开面板。
+ * 主进程热键用 globalShortcut，焦点在 iframe 也能收到，解决了之前的盲区。
+ */
+function onHotkeyFromMain() {
+  const now = Date.now()
+  lastTimes.push(now)
+  while (lastTimes.length && now - lastTimes[0] > HOTKEY_WINDOW_MS) lastTimes.shift()
+  if (lastTimes.length >= 3) {
+    visible.value = true
+    lastTimes.length = 0
+  }
 }
 
-function onKey(e: KeyboardEvent) {
-  if (isHotkey(e)) {
-    const now = Date.now()
-    lastTimes.push(now)
-    while (lastTimes.length && now - lastTimes[0] > HOTKEY_WINDOW_MS) lastTimes.shift()
-    window.exhibit?.log?.(
-      'debug',
-      `DiagPanel hotkey: count=${lastTimes.length}`
-    )
-    if (lastTimes.length >= 3) {
-      visible.value = true
-      lastTimes.length = 0
-    }
-  }
-  if (e.key === 'Escape' && visible.value) {
-    visible.value = false
-  }
+function onEsc(e: KeyboardEvent) {
+  if (e.key === 'Escape' && visible.value) visible.value = false
 }
+
+let unsubHotkey: (() => void) | null = null
 
 onMounted(() => {
-  // capture 阶段：避免被业务内容的 stopPropagation 拦住
-  window.addEventListener('keydown', onKey, true)
+  unsubHotkey = window.exhibit?.onDiagHotkey?.(onHotkeyFromMain) ?? null
+  window.addEventListener('keydown', onEsc, true)
 })
 
 onBeforeUnmount(() => {
-  window.removeEventListener('keydown', onKey, true)
+  unsubHotkey?.()
+  unsubHotkey = null
+  window.removeEventListener('keydown', onEsc, true)
 })
 
 const recentCmds = computed(() => cmd.recent.slice(0, 12))

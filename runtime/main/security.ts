@@ -1,5 +1,6 @@
-import { app, globalShortcut, session } from 'electron'
+import { app, BrowserWindow, globalShortcut, session } from 'electron'
 import { logger } from './logger'
+import { IPC } from '@shared/constants'
 
 /**
  * 应用层安全策略。
@@ -64,4 +65,28 @@ export function registerHotkeyBlocking() {
 
 export function unregisterAllHotkeys() {
   globalShortcut.unregisterAll()
+}
+
+/**
+ * 注册诊断面板唤起热键（Ctrl+Shift+Alt+E）。
+ *
+ * 用 globalShortcut 而非渲染层 keydown 监听，避免 iframe 抢焦点导致按键收不到——
+ * 这是触摸一体机最常见的现场救火盲区。
+ *
+ * 收到热键后，向所有窗口推 IPC，渲染层 DiagPanel 自己决定显示策略（如连按 3 次）。
+ */
+export function registerDiagHotkey() {
+  const key = 'CommandOrControl+Shift+Alt+E'
+  try {
+    const ok = globalShortcut.register(key, () => {
+      logger.info('诊断热键触发')
+      for (const win of BrowserWindow.getAllWindows()) {
+        if (!win.isDestroyed()) win.webContents.send(IPC.DIAG_HOTKEY)
+      }
+    })
+    if (!ok) logger.warn(`诊断热键注册失败（可能被系统占用）: ${key}`)
+    else logger.info(`诊断热键已注册: ${key}`)
+  } catch (e) {
+    logger.warn('诊断热键注册异常:', e)
+  }
 }
