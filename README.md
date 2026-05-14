@@ -5,19 +5,24 @@
 
 ---
 
-## 当前阶段：M4 · 指令分发引擎 + 系统 Action
+## 当前阶段：M5 · 项目包双槽与远程更新
 
-**M1/M2/M3 已完成**：工程骨架、多屏窗口、IPC、项目包加载、四种 Renderer、AdaptiveStage、双缓冲 SceneStage、WebSocket 客户端、本地 HTTP、Standalone、Mock Hub、exhibitBridge、Composite 场景。
+**M1-M4 已完成**：工程骨架、多屏窗口、IPC、项目包加载、四种 Renderer、AdaptiveStage、双缓冲 SceneStage、WebSocket、本地 HTTP、Standalone、Mock Hub、exhibitBridge、CommandDispatcher、bindings 引擎、系统 Action。
 
-**M4 新增**：
-- ✅ `CommandDispatcher`：完整解析 bindings.json，含变量替换（`$payload.x`、`$args.x`、`$device.x`）
-- ✅ Macro：命名步骤序列、嵌套（`do: "macro"`）、带参（`$args.x`）、限深防循环
-- ✅ 内置 Action 注册表：`scene.switch / scene.switchAll / scene.reload / renderer.play / pause / seek / setRate`
-- ✅ 系统 Action（主进程实现）：`system.setVolume / system.reboot / system.shutdown / system.abortShutdown / system.restartApp`
-- ✅ 显式 `cmd.macro` 与隐式 `cmd.scenario.<name>`（语法糖，自动找 `scenario.<name>` macro）
-- ✅ demo-hall bindings 完整示例（4 个 scenario macro，含嵌套与带参）
+**M5 新增**：
+- ✅ 项目包双槽 + 原子指针切换 + 启动失败自动回滚
+- ✅ Manifest `files[]` + 整包 `checksum`：每文件 size + sha256，支持完整性校验
+- ✅ `ContentSync`：HTTP 拉取远端 manifest → 比对本地 → 增量下载缺失/不一致文件 → 删除孤儿 → 校验
+- ✅ `cmd.package.update {url, version?, applyAt}` 指令：后台同步 + 按 applyAt 调度切换
+  - `applyAt: "now"` 立即重启切换
+  - `applyAt: "idle"` 凌晨 4 点切换（默认）
+  - `applyAt: "2026-05-15T03:00:00Z"` 指定时间
+- ✅ `cmd.package.cancel` 取消挂起的切换计划
+- ✅ 上行事件：`evt.packageProgress` / `evt.packageReady` / `evt.packageChanged`
+- ✅ `tools/pack-cli`：项目包构建与校验 CLI（生成 files + checksum 写回 manifest）
+- ✅ `tools/content-server`：开发期静态内容服务器（生产用 nginx 代替）
 
-**尚未做**：M5 双槽 + content-sync · M6 watchdog + Guardian · M7 OTA + 诊断面板
+**尚未做**：M6 watchdog + Guardian Service · M7 Runtime OTA + 诊断面板
 
 ---
 
@@ -283,8 +288,84 @@ npm run hub:send -- cmd.macro --name=scenario.go-with-args --sceneId=image-demo
 
 ---
 
-## 下一步（M5）
+## 项目包远程更新（M5）
 
-- 项目包双槽 + 原子切换 + 自动回滚
-- `cmd.package.update`：HTTPS Range 增量下载 + SHA256 校验
-- 项目包构建 CLI（`tools/pack-cli`）
+完整流程示例——演示把 `demo-hall` 项目包"远程"推到运行中的客户端：
+
+### 1. 构建项目包（生成 manifest.files + checksum + 输出到 dist 目录）
+
+```bash
+npm run pkg:build packages/demo-hall -- --out=build/packages
+```
+
+输出：
+```
+build/packages/demo-hall-0.1.0/
+  ├─ manifest.json   ← files[] + checksum 已自动写入
+  ├─ scenes.json
+  ├─ contents/...
+  └─ ...
+```
+
+### 2. 启动开发期内容服务器
+
+```bash
+npm run content-server
+# [content] 监听 http://127.0.0.1:18090/
+# [content] 可用包：
+#   - http://127.0.0.1:18090/demo-hall-0.1.0/
+```
+
+### 3. 让客户端拉这个包
+
+终端 1: hub  · 终端 2: dev:online · 终端 3 发指令：
+
+```bash
+# 立即同步并切换（会重启客户端）
+npm run hub:send -- cmd.package.update --url=http://127.0.0.1:18090/demo-hall-0.1.0/ --applyAt=now
+
+# 或后台同步、凌晨 4 点切（默认 idle）
+npm run hub:send -- cmd.package.update --url=http://127.0.0.1:18090/demo-hall-0.1.0/
+
+# 取消挂起的切换
+npm run hub:send -- cmd.package.cancel
+```
+
+观察 hub 终端可看到：
+```
+[evt] evt.packageProgress {phase:"fetch-manifest"}
+[evt] evt.packageProgress {phase:"download", current:1, total:5, file:"contents/..."}
+...
+[evt] evt.packageProgress {phase:"verify-final"}
+[evt] evt.packageReady {slot:"slot-b", version:"0.1.0", ...}
+[evt] evt.packageChanged {slot:"slot-b", version:"0.1.0"}    ← 切换后
+```
+
+### 4. 校验本地包完整性
+
+```bash
+npm run pkg:verify build/packages/demo-hall-0.1.0
+# [pack-cli] verify OK (5 files)
+```
+
+### 双槽与回滚说明
+
+```
+%APPDATA%/exhi-client/packages/
+  ├─ slot-a/   ← 当前激活
+  ├─ slot-b/   ← content-sync 写入到这里
+  └─ current.txt   "slot-a"
+```
+
+- 切槽流程：下载到 slot-b → 校验 → 写 current.txt 指向 slot-b → 重启
+- 启动若发现激活槽校验失败，自动回滚到另一槽并写指针
+- 双槽都失败 → dev 用工程内 fallback / prod 用种子包
+
+---
+
+## 下一步（M6）
+
+- 渲染进程崩溃看门狗 + 重建窗口
+- Windows Service Guardian（独立进程守护客户端进程）
+- 反复崩溃熔断 → 安全模式
+- 远程日志上报 + CPU/内存/GPU 指标采集

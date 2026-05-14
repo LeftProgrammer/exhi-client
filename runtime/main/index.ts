@@ -9,7 +9,9 @@ import { loadSettings } from './settings'
 import { WsClient } from './ws-client'
 import { LocalServer } from './local-server'
 import { StandaloneScheduler } from './standalone'
+import { PackageUpdater } from './package-updater'
 import { RUNTIME_VERSION } from '@shared/constants'
+import type { Command } from '@shared/types'
 
 /**
  * 主进程入口。
@@ -51,6 +53,8 @@ app.whenReady().then(async () => {
     logger.info(`项目包加载成功: ${pkg.manifest.name} (${pkg.manifest.projectId})`)
     attachProtocolHandler(pkg.rootPath)
 
+    const updater = new PackageUpdater(loader, deviceId, () => wsClient)
+
     const mainBus = new MainBus()
     const winManager = new WindowManager(pkg)
     const ipcBus = new IpcBus(pkg, winManager, deviceId, mainBus, () => wsClient)
@@ -63,6 +67,16 @@ app.whenReady().then(async () => {
       wsClient.on('modeChanged', (mode) => logger.info(`WS 模式切换: ${mode}`))
       wsClient.start()
     }
+
+    // 项目包更新指令：截胡 cmd.package.update / cmd.package.cancel，不下到渲染层
+    mainBus.on('command', async (cmd: Command) => {
+      if (cmd.type === 'cmd.package.update') {
+        await updater.handle(cmd)
+      } else if (cmd.type === 'cmd.package.cancel') {
+        const cancelled = updater.cancelPending()
+        logger.info(`package.cancel: ${cancelled ? 'ok' : 'no-pending'}`)
+      }
+    })
 
     // 本地 HTTP
     localServer = new LocalServer(mainBus, () => ({
