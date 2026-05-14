@@ -18,6 +18,10 @@ export interface ExhibitAPI {
   getBootInfo(): Promise<BootInfo>
   dispatchBridgeCommand(cmd: Command): void
   bridgeEmit(name: string, payload?: unknown, fromDisplayId?: string): void
+  runSystemAction(
+    action: string,
+    params: Record<string, unknown>
+  ): Promise<{ ok: boolean; error?: string; data?: Record<string, unknown> }>
 }
 
 const api: ExhibitAPI = {
@@ -59,6 +63,10 @@ const api: ExhibitAPI = {
 
   bridgeEmit(name, payload, fromDisplayId) {
     ipcRenderer.send(IPC.BRIDGE_EMIT, { name, payload, fromDisplayId })
+  },
+
+  runSystemAction(action, params) {
+    return ipcRenderer.invoke(IPC.RUN_SYSTEM_ACTION, { action, params })
   }
 }
 

@@ -11,6 +11,10 @@ export interface ExhibitAPI {
   getBootInfo(): Promise<BootInfo>
   dispatchBridgeCommand(cmd: Command): void
   bridgeEmit(name: string, payload?: unknown, fromDisplayId?: string): void
+  runSystemAction(
+    action: string,
+    params: Record<string, unknown>
+  ): Promise<{ ok: boolean; error?: string; data?: Record<string, unknown> }>
 }
 
 declare global {

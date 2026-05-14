@@ -5,20 +5,19 @@
 
 ---
 
-## 当前阶段：M3 · 内容系统增强
+## 当前阶段：M4 · 指令分发引擎 + 系统 Action
 
-**M1/M2 已完成**：工程骨架、多屏窗口、CSP、IPC、项目包加载、Video/Image/Web Renderer、AdaptiveStage、WebSocket 客户端、本地 HTTP、Standalone、Mock Hub。
+**M1/M2/M3 已完成**：工程骨架、多屏窗口、IPC、项目包加载、四种 Renderer、AdaptiveStage、双缓冲 SceneStage、WebSocket 客户端、本地 HTTP、Standalone、Mock Hub、exhibitBridge、Composite 场景。
 
-**M3 新增**：
-- ✅ exhibitBridge：iframe 内容通过 `window.exhibitBridge` 反向调客户端（dispatch/emit/on/getInfo）
-- ✅ Bridge 脚本通过 `exhi-pkg://pkg/__exhi__/bridge.js` 由 Runtime 内置提供（项目包无需打包）
-- ✅ `CompositeRenderer`：多层场景合成（stack/row/column/grid 四种布局）
-- ✅ `SceneStage` 双缓冲 crossfade：场景切换无黑帧
-- ✅ VideoRenderer 事件采集（progress/ended/error）+ 状态精细上报
-- ✅ Bridge 事件广播（scene:changed / scene:ended → 所有 iframe）
-- ✅ demo-hall 新增 touch-demo 触摸交互页 + composite-demo 合成场景
+**M4 新增**：
+- ✅ `CommandDispatcher`：完整解析 bindings.json，含变量替换（`$payload.x`、`$args.x`、`$device.x`）
+- ✅ Macro：命名步骤序列、嵌套（`do: "macro"`）、带参（`$args.x`）、限深防循环
+- ✅ 内置 Action 注册表：`scene.switch / scene.switchAll / scene.reload / renderer.play / pause / seek / setRate`
+- ✅ 系统 Action（主进程实现）：`system.setVolume / system.reboot / system.shutdown / system.abortShutdown / system.restartApp`
+- ✅ 显式 `cmd.macro` 与隐式 `cmd.scenario.<name>`（语法糖，自动找 `scenario.<name>` macro）
+- ✅ demo-hall bindings 完整示例（4 个 scenario macro，含嵌套与带参）
 
-**尚未做**：M4 CommandDispatcher + bindings 引擎 · M5 双槽 + content-sync · M6 watchdog + Guardian · M7 OTA + 诊断面板
+**尚未做**：M5 双槽 + content-sync · M6 watchdog + Guardian · M7 OTA + 诊断面板
 
 ---
 
@@ -218,9 +217,74 @@ curl -X POST http://127.0.0.1:17600/cmd ^
 
 ---
 
-## 下一步（M4）
+## bindings.json 用法
 
-- CommandDispatcher 完整接入 `bindings.json`（含 macro、变量替换、嵌套）
-- 系统音量真接入（PowerShell 调系统声卡）
-- `cmd.system.reboot/shutdown/restartApp` 接入
-- 内置 Action 集合稳定化
+```json
+{
+  "bindings": [
+    { "on": "cmd.gotoScene", "do": "scene.switch",
+      "params": { "sceneId": "$payload.sceneId", "display": "$payload.display" } }
+  ],
+  "macros": {
+    "scenario.opening": {
+      "steps": [
+        { "do": "system.setVolume", "params": { "value": 0.8 } },
+        { "do": "scene.switchAll", "params": { "sceneId": "intro-video" } }
+      ]
+    },
+    "scenario.demo-nested": {
+      "steps": [
+        { "do": "macro", "params": { "name": "scenario.touch-mode" } },
+        { "do": "scene.switchAll", "params": { "sceneId": "welcome" } }
+      ]
+    }
+  }
+}
+```
+
+**触发方式**
+
+```bash
+# 直接 binding（demo bindings 的 cmd.gotoScene → scene.switch）
+npm run hub:goto -- --sceneId=touch-demo
+
+# 显式 macro
+npm run hub:send -- cmd.macro --name=scenario.opening
+
+# 隐式 scenario（语法糖：cmd.scenario.opening 自动找 scenario.opening 宏）
+npm run hub:send -- cmd.scenario.opening
+npm run hub:send -- cmd.scenario.demo-nested
+
+# 带参 macro
+npm run hub:send -- cmd.macro --name=scenario.go-with-args --sceneId=image-demo
+```
+
+**变量占位符**
+
+| 占位 | 来源 |
+|---|---|
+| `$payload.x` | 触发指令的 payload（例如 `--sceneId=xxx` 后变成 `payload.sceneId`） |
+| `$args.x` | macro 调用时的 args 字段 |
+| `$device.x` | 当前 display 信息（deviceId / displayId / runtimeVersion） |
+
+**内置 Action 一览**
+
+| Action | 实现层 | 说明 |
+|---|---|---|
+| `scene.switch` | 渲染层 | 切单屏（带 display 检查） |
+| `scene.switchAll` | 渲染层 | 切所有屏 |
+| `scene.reload` | 渲染层 | 重载当前场景 |
+| `renderer.play / pause / seek / setRate` | 渲染层 | 播放控制 |
+| `system.setVolume` | 主进程 | PowerShell 调系统音量 |
+| `system.reboot / shutdown` | 主进程 | Windows shutdown 命令（默认 10s 倒计时） |
+| `system.abortShutdown` | 主进程 | 取消倒计时 |
+| `system.restartApp` | 主进程 | 重启 Electron 自身 |
+| `macro` | 渲染层 | 调用另一个 macro（支持参数透传） |
+
+---
+
+## 下一步（M5）
+
+- 项目包双槽 + 原子切换 + 自动回滚
+- `cmd.package.update`：HTTPS Range 增量下载 + SHA256 校验
+- 项目包构建 CLI（`tools/pack-cli`）

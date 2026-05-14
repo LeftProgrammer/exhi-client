@@ -26,7 +26,8 @@ export const IPC = {
   READ_PACKAGE_FILE: 'exhi:read-package-file',
   GET_BOOT_INFO: 'exhi:get-boot-info',
   DISPATCH_BRIDGE_CMD: 'exhi:dispatch-bridge-cmd',
-  BRIDGE_EMIT: 'exhi:bridge-emit'
+  BRIDGE_EMIT: 'exhi:bridge-emit',
+  RUN_SYSTEM_ACTION: 'exhi:run-system-action'
 } as const
 
 /** 项目包相关路径（相对 userData / ProgramData） */

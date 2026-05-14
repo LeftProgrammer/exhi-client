@@ -7,14 +7,49 @@
     },
     { "on": "cmd.play", "do": "renderer.play" },
     { "on": "cmd.pause", "do": "renderer.pause" },
-    { "on": "cmd.volume", "do": "system.setVolume", "params": { "value": "$payload.value" } }
+    { "on": "cmd.seek", "do": "renderer.seek", "params": { "time": "$payload.time" } },
+    { "on": "cmd.setRate", "do": "renderer.setRate", "params": { "rate": "$payload.rate" } },
+    { "on": "cmd.reload", "do": "scene.reload" },
+    { "on": "cmd.volume", "do": "system.setVolume", "params": { "value": "$payload.value" } },
+    { "on": "cmd.system.reboot", "do": "system.reboot", "params": { "delaySec": "$payload.delaySec" } },
+    { "on": "cmd.system.shutdown", "do": "system.shutdown", "params": { "delaySec": "$payload.delaySec" } },
+    { "on": "cmd.system.restartApp", "do": "system.restartApp" }
   ],
+
   "macros": {
-    "scenario.demo": {
-      "description": "演示用宏：切到 image-demo",
-      "steps": [{ "do": "scene.switch", "params": { "sceneId": "image-demo" } }]
+    "scenario.opening": {
+      "description": "开场仪式：音量调到 80% + 切到 intro-video",
+      "steps": [
+        { "do": "system.setVolume", "params": { "value": 0.8 } },
+        { "do": "scene.switchAll", "params": { "sceneId": "intro-video" } }
+      ]
+    },
+    "scenario.touch-mode": {
+      "description": "互动模式：所有屏切到触摸演示页",
+      "steps": [{ "do": "scene.switchAll", "params": { "sceneId": "touch-demo" } }]
+    },
+    "scenario.closing": {
+      "description": "闭馆：所有屏黑屏 + 静音",
+      "steps": [
+        { "do": "system.setVolume", "params": { "value": 0 } },
+        { "do": "scene.switchAll", "params": { "sceneId": "blank" } }
+      ]
+    },
+    "scenario.demo-nested": {
+      "description": "嵌套 macro 示例：先触摸模式，再切回 welcome",
+      "steps": [
+        { "do": "macro", "params": { "name": "scenario.touch-mode" } },
+        { "do": "scene.switchAll", "params": { "sceneId": "welcome" } }
+      ]
+    },
+    "scenario.go-with-args": {
+      "description": "带参 macro：用 $args.sceneId 决定切到哪",
+      "steps": [
+        { "do": "scene.switch", "params": { "sceneId": "$args.sceneId", "display": "$args.display" } }
+      ]
     }
   },
+
   "standalone": {
     "description": "无中控时仅保持默认场景",
     "onStartup": []
