@@ -5,24 +5,22 @@
 
 ---
 
-## 当前阶段：M5 · 项目包双槽与远程更新
+## 当前阶段：M6 · 稳定性兜底
 
-**M1-M4 已完成**：工程骨架、多屏窗口、IPC、项目包加载、四种 Renderer、AdaptiveStage、双缓冲 SceneStage、WebSocket、本地 HTTP、Standalone、Mock Hub、exhibitBridge、CommandDispatcher、bindings 引擎、系统 Action。
+**M1-M5 已完成**：工程骨架、多屏、IPC、四种 Renderer、AdaptiveStage、双缓冲 SceneStage、WebSocket、本地 HTTP、Standalone、Mock Hub、exhibitBridge、CommandDispatcher、系统 Action、项目包双槽与远程更新。
 
-**M5 新增**：
-- ✅ 项目包双槽 + 原子指针切换 + 启动失败自动回滚
-- ✅ Manifest `files[]` + 整包 `checksum`：每文件 size + sha256，支持完整性校验
-- ✅ `ContentSync`：HTTP 拉取远端 manifest → 比对本地 → 增量下载缺失/不一致文件 → 删除孤儿 → 校验
-- ✅ `cmd.package.update {url, version?, applyAt}` 指令：后台同步 + 按 applyAt 调度切换
-  - `applyAt: "now"` 立即重启切换
-  - `applyAt: "idle"` 凌晨 4 点切换（默认）
-  - `applyAt: "2026-05-15T03:00:00Z"` 指定时间
-- ✅ `cmd.package.cancel` 取消挂起的切换计划
-- ✅ 上行事件：`evt.packageProgress` / `evt.packageReady` / `evt.packageChanged`
-- ✅ `tools/pack-cli`：项目包构建与校验 CLI（生成 files + checksum 写回 manifest）
-- ✅ `tools/content-server`：开发期静态内容服务器（生产用 nginx 代替）
+**M6 新增**：
+- ✅ 完整 Watchdog：渲染崩溃/卡死/连续失败 → reload → 重建窗口 三级守护
+- ✅ 崩溃熔断 + 安全模式：5 分钟窗口内崩超 3 次 → 自动进入安全模式（窗口加载 about:blank 阻止崩溃链）；空闲后自动解除
+- ✅ ScheduledRestart：每日 04:00 自动 reload 全部窗口（缓解长期内存累积）
+- ✅ Heartbeat：主进程每 5 秒写心跳文件，供 Guardian 监测
+- ✅ Guardian：独立守护进程（`guardian/guardian.mjs`）+ Windows 任务计划安装脚本（`install-task.ps1`）
+- ✅ RemoteLogReporter：warn+ 即时上报、info 批量上报（5 秒/50 条）`evt.log`
+- ✅ MetricsReporter：每 10 秒采集 CPU/内存/磁盘/进程数 → `evt.metrics`
+- ✅ 诊断指令：`cmd.diag.echo` / `cmd.diag.logs` / `cmd.diag.screenshot`
+- ✅ 渲染层隐藏诊断面板（Ctrl+Shift+Alt+E 连按 3 次）：设备信息、当前场景、最近指令
 
-**尚未做**：M6 watchdog + Guardian Service · M7 Runtime OTA + 诊断面板
+**尚未做**：M7 Runtime OTA
 
 ---
 
@@ -363,9 +361,63 @@ npm run pkg:verify build/packages/demo-hall-0.1.0
 
 ---
 
-## 下一步（M6）
+## 稳定性验证（M6）
 
-- 渲染进程崩溃看门狗 + 重建窗口
-- Windows Service Guardian（独立进程守护客户端进程）
-- 反复崩溃熔断 → 安全模式
-- 远程日志上报 + CPU/内存/GPU 指标采集
+### Watchdog & 熔断
+
+模拟渲染崩溃：在主屏 DevTools Console 跑：
+```js
+process.crash()
+```
+预期主进程日志：
+```
+[watchdog main] 崩溃 #1/3 ...
+[watchdog main] 已触发 reload
+```
+再连续 crash 三次，进入安全模式 → 窗口变白，5 分钟后自动解除。
+
+### 远程诊断
+
+```bash
+# 回声测试
+npm run hub:send -- cmd.diag.echo --text=hello
+
+# 拉日志（默认 200 行）
+npm run hub:send -- cmd.diag.logs --lines=50
+
+# 远程截图（带 PNG base64 回来）
+npm run hub:send -- cmd.diag.screenshot --display=main
+```
+
+Mock Hub 终端会看到 `[evt] evt.diagLogs / evt.diagScreenshot ...`。
+
+### 健康指标
+
+启动客户端后等几秒，Hub 终端会持续看到：
+```
+[evt] evt.metrics {"cpu":0.05,"memMB":312,"sysMem":0.61,"freeMB":6234,"uptime":42,...}
+```
+
+### Guardian 测试
+
+打包后（`npm run dist:dir`）：
+```powershell
+$env:EXHI_CLIENT_EXE = "build\win-unpacked\智慧展厅客户端.exe"
+npm run guardian
+```
+
+用任务管理器强杀客户端进程，30 秒内 Guardian 会拉起。
+
+正式部署用 `guardian/install-task.ps1`（管理员 PowerShell）。
+
+### 隐藏诊断面板
+
+任意窗口聚焦 → 5 秒内连按 3 次 **Ctrl+Shift+Alt+E** → 弹出诊断面板。ESC 关闭。
+
+---
+
+## 下一步（M7）
+
+- Runtime OTA（electron-updater 私服）
+- 灰度通道（stable / beta）
+- 部署脚本与 Kiosk 模式打磨
