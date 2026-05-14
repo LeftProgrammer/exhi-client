@@ -2,7 +2,7 @@ import { app, ipcMain, screen } from 'electron'
 import { EventEmitter } from 'node:events'
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { IPC, RUNTIME_VERSION } from '@shared/constants'
+import { IPC } from '@shared/constants'
 import type { BootInfo, Command, DeviceStatus, DisplayStatus, Event as DomainEvent } from '@shared/types'
 import { logger } from './logger'
 import type { LoadedPackage } from './package-loader'
@@ -207,7 +207,7 @@ export class IpcBus {
 
     return {
       deviceId: this.deviceId,
-      runtimeVersion: RUNTIME_VERSION,
+      runtimeVersion: app.getVersion(),
       packageInfo: {
         projectId: this.pkg.manifest.projectId,
         version: this.pkg.manifest.version,

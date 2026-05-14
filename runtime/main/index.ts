@@ -10,13 +10,16 @@ import { WsClient } from './ws-client'
 import { LocalServer } from './local-server'
 import { StandaloneScheduler } from './standalone'
 import { PackageUpdater } from './package-updater'
+import { RuntimeUpdater } from './runtime-updater'
 import { ScheduledRestart } from './scheduled-restart'
 import { Heartbeat } from './heartbeat'
 import { RemoteLogReporter } from './remote-log'
 import { MetricsReporter } from './metrics'
 import { DiagHandler } from './diag'
-import { RUNTIME_VERSION } from '@shared/constants'
 import type { Command } from '@shared/types'
+
+// app.getVersion() 读 package.json 实际版本，OTA 升级后能反映新版本号
+const APP_VERSION = app.getVersion()
 
 /**
  * 主进程入口。
@@ -63,6 +66,23 @@ app.whenReady().then(async () => {
 
     const updater = new PackageUpdater(loader, deviceId, () => wsClient)
 
+    // Runtime OTA
+    let runtimeUpdater: RuntimeUpdater | null = null
+    if (settings.updateFeedUrl) {
+      runtimeUpdater = new RuntimeUpdater(
+        settings.updateFeedUrl,
+        settings.updateChannel,
+        deviceId,
+        () => wsClient
+      )
+      runtimeUpdater.init()
+      logger.info(
+        `Runtime OTA 启用: feed=${settings.updateFeedUrl} channel=${settings.updateChannel}`
+      )
+    } else {
+      logger.info('Runtime OTA 未配置（updateFeedUrl 为空）')
+    }
+
     const mainBus = new MainBus()
     const winManager = new WindowManager(pkg, deviceId, () => wsClient)
     const ipcBus = new IpcBus(pkg, winManager, deviceId, mainBus, () => wsClient)
@@ -87,6 +107,11 @@ app.whenReady().then(async () => {
         logger.info(`package.cancel: ${cancelled ? 'ok' : 'no-pending'}`)
       } else if (cmd.type.startsWith('cmd.diag.')) {
         await diag.handle(cmd)
+      } else if (cmd.type === 'cmd.runtime.update') {
+        if (runtimeUpdater) await runtimeUpdater.handle(cmd)
+        else logger.warn('cmd.runtime.update 被忽略：未配置 updateFeedUrl')
+      } else if (cmd.type === 'cmd.runtime.cancel') {
+        if (runtimeUpdater) runtimeUpdater.cancelPending()
       }
     })
 
@@ -94,7 +119,7 @@ app.whenReady().then(async () => {
     localServer = new LocalServer(mainBus, () => ({
       ok: true,
       deviceId,
-      runtime: RUNTIME_VERSION,
+      runtime: APP_VERSION,
       package: pkg.manifest.projectId,
       packageVersion: pkg.manifest.version,
       mode: wsClient?.mode ?? 'standalone',
@@ -112,7 +137,7 @@ app.whenReady().then(async () => {
 
     // 心跳文件（供 Guardian 监测）
     heartbeat = new Heartbeat(5_000, () => ({
-      runtime: RUNTIME_VERSION,
+      runtime: APP_VERSION,
       package: pkg.manifest.projectId,
       version: pkg.manifest.version
     }))
@@ -133,7 +158,7 @@ app.whenReady().then(async () => {
       deviceId,
       type: 'evt.online',
       payload: {
-        runtime: RUNTIME_VERSION,
+        runtime: APP_VERSION,
         package: { id: pkg.manifest.projectId, version: pkg.manifest.version },
         displays: pkg.displays.displays.map((d) => d.id),
         mode: wsClient?.mode ?? 'standalone'

@@ -2,7 +2,12 @@
  * 客户端运行常量。
  */
 
-export const RUNTIME_VERSION = '1.0.0'
+/**
+ * 兜底版本号。
+ * 主进程实际应使用 app.getVersion()，仅在该 API 不可用时回退到此常量。
+ * 渲染层 / preload 通过 BootInfo.runtimeVersion 间接拿到主进程注入的真实值。
+ */
+export const RUNTIME_VERSION = '0.0.0-fallback'
 
 /** 本地 HTTP 服务端口（exhibitBridge 兜底通道 + 本地代理入口） */
 export const LOCAL_SERVER_PORT = 17600

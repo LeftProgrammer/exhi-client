@@ -6,8 +6,7 @@ import {
   PACKAGE_DIR,
   PACKAGE_POINTER_FILE,
   PACKAGE_SLOT_A,
-  PACKAGE_SLOT_B,
-  RUNTIME_VERSION
+  PACKAGE_SLOT_B
 } from '@shared/constants'
 import type {
   BindingsConfig,
@@ -243,7 +242,7 @@ export class PackageLoader {
 
   private checkRuntimeCompatibility(manifest: Manifest) {
     logger.info(
-      `项目包: ${manifest.projectId} v${manifest.version}, 要求 Runtime ${manifest.runtimeRange}, 当前 ${RUNTIME_VERSION}`
+      `项目包: ${manifest.projectId} v${manifest.version}, 要求 Runtime ${manifest.runtimeRange}, 当前 ${app.getVersion()}`
     )
   }
 
