@@ -10,12 +10,16 @@ import { WsClient } from './ws-client'
 import { LocalServer } from './local-server'
 import { StandaloneScheduler } from './standalone'
 import { PackageUpdater } from './package-updater'
+import { ScheduledRestart } from './scheduled-restart'
+import { Heartbeat } from './heartbeat'
+import { RemoteLogReporter } from './remote-log'
+import { MetricsReporter } from './metrics'
+import { DiagHandler } from './diag'
 import { RUNTIME_VERSION } from '@shared/constants'
 import type { Command } from '@shared/types'
 
 /**
  * 主进程入口。
- * 启动顺序：日志 → 安全 → 协议注册 → 单实例锁 → ready → 项目包 → WS/Local/IPC → 窗口 → Standalone 启动
  */
 
 initLogger()
@@ -37,6 +41,10 @@ app.commandLine.appendSwitch('high-dpi-support', '1')
 
 let wsClient: WsClient | null = null
 let localServer: LocalServer | null = null
+let scheduledRestart: ScheduledRestart | null = null
+let heartbeat: Heartbeat | null = null
+let remoteLog: RemoteLogReporter | null = null
+let metrics: MetricsReporter | null = null
 
 app.whenReady().then(async () => {
   try {
@@ -56,9 +64,11 @@ app.whenReady().then(async () => {
     const updater = new PackageUpdater(loader, deviceId, () => wsClient)
 
     const mainBus = new MainBus()
-    const winManager = new WindowManager(pkg)
+    const winManager = new WindowManager(pkg, deviceId, () => wsClient)
     const ipcBus = new IpcBus(pkg, winManager, deviceId, mainBus, () => wsClient)
     ipcBus.register()
+
+    const diag = new DiagHandler(deviceId, winManager, () => wsClient)
 
     // WS 客户端
     if (!settings.hubDisabled) {
@@ -68,13 +78,15 @@ app.whenReady().then(async () => {
       wsClient.start()
     }
 
-    // 项目包更新指令：截胡 cmd.package.update / cmd.package.cancel，不下到渲染层
+    // 主进程级指令拦截：包更新 + 诊断指令
     mainBus.on('command', async (cmd: Command) => {
       if (cmd.type === 'cmd.package.update') {
         await updater.handle(cmd)
       } else if (cmd.type === 'cmd.package.cancel') {
         const cancelled = updater.cancelPending()
         logger.info(`package.cancel: ${cancelled ? 'ok' : 'no-pending'}`)
+      } else if (cmd.type.startsWith('cmd.diag.')) {
+        await diag.handle(cmd)
       }
     })
 
@@ -90,9 +102,29 @@ app.whenReady().then(async () => {
     }))
     await localServer.start()
 
-    // 创建窗口（注意：必须在 IPC 注册后，避免渲染层先于 IPC 启动）
+    // 创建窗口
     winManager.createAll()
     registerHotkeyBlocking()
+
+    // 定时刷新（每天 04:00）
+    scheduledRestart = new ScheduledRestart(winManager, 4, 0)
+    scheduledRestart.start()
+
+    // 心跳文件（供 Guardian 监测）
+    heartbeat = new Heartbeat(5_000, () => ({
+      runtime: RUNTIME_VERSION,
+      package: pkg.manifest.projectId,
+      version: pkg.manifest.version
+    }))
+    await heartbeat.start()
+
+    // 远程日志上报
+    remoteLog = new RemoteLogReporter(deviceId, () => wsClient)
+    remoteLog.start()
+
+    // 健康指标
+    metrics = new MetricsReporter(deviceId, () => wsClient, 10_000)
+    metrics.start()
 
     // 上线事件
     wsClient?.publish({
@@ -108,7 +140,7 @@ app.whenReady().then(async () => {
       }
     })
 
-    // Standalone 启动步骤（等窗口 ready 后再触发，给渲染层时间初始化）
+    // Standalone 启动步骤
     setTimeout(() => {
       const scheduler = new StandaloneScheduler(mainBus, pkg.bindings)
       scheduler.runOnStartup()
@@ -129,6 +161,10 @@ app.on('window-all-closed', () => {
 
 app.on('will-quit', async () => {
   unregisterAllHotkeys()
+  scheduledRestart?.stop()
+  metrics?.stop()
+  remoteLog?.stop()
+  heartbeat?.stop()
   wsClient?.stop()
   await localServer?.stop()
   logger.info('应用退出')

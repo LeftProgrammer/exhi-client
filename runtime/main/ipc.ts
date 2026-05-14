@@ -115,6 +115,12 @@ export class IpcBus {
   /** 把 cmd 转发给指定 display 的窗口；payload.display 为空则广播给所有 */
   private dispatchCommand(cmd: Command) {
     logger.info(`总线指令: ${cmd.type} from=${cmd.source ?? 'unknown'}`)
+
+    // 主进程级指令（package/diag）已由 index.ts 监听处理，不再下发到渲染层
+    if (cmd.type.startsWith('cmd.package.') || cmd.type.startsWith('cmd.diag.')) {
+      return
+    }
+
     const targetDisplay = (cmd.payload as { display?: string } | undefined)?.display
     const targets = targetDisplay ? [this.winManager.get(targetDisplay)] : this.winManager.all()
     let delivered = 0

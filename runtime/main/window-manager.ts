@@ -1,11 +1,13 @@
 import { BrowserWindow, screen, type Display } from 'electron'
 import path from 'node:path'
 import { logger } from './logger'
-import type { DisplayConfig, DisplaysConfig } from '@shared/types'
+import type { DisplayConfig } from '@shared/types'
 import type { LoadedPackage } from './package-loader'
+import { Watchdog } from './watchdog'
+import type { WsClient } from './ws-client'
 
 /**
- * 多屏窗口管理：把 displays.json 中的逻辑 display 映射到物理屏，并为每块物理屏创建窗口。
+ * 多屏窗口管理 + 每窗口看门狗。
  *
  * 匹配规则优先级：label > primary > bounds > size > index。
  * 未匹配的物理屏不创建窗口；未匹配的逻辑 display 会记录警告。
@@ -14,8 +16,15 @@ import type { LoadedPackage } from './package-loader'
  */
 export class WindowManager {
   private windows = new Map<string, BrowserWindow>()
+  private watchdogs = new Map<string, Watchdog>()
+  private displayCfgMap = new Map<string, DisplayConfig>()
+  private physicalDisplayMap = new Map<string, Display>()
 
-  constructor(private pkg: LoadedPackage) {}
+  constructor(
+    private pkg: LoadedPackage,
+    private deviceId: string,
+    private getWs: () => WsClient | null
+  ) {}
 
   /**
    * 启动时按 displays.json 创建所有窗口。
@@ -24,7 +33,7 @@ export class WindowManager {
     const physicalDisplays = screen.getAllDisplays()
     logger.info(`检测到 ${physicalDisplays.length} 块物理屏`)
 
-    const used = new Set<number>() // 已被占用的物理屏 id
+    const used = new Set<number>()
     const created: BrowserWindow[] = []
 
     for (const cfg of this.pkg.displays.displays) {
@@ -34,18 +43,23 @@ export class WindowManager {
         continue
       }
       used.add(matched.id)
+      this.displayCfgMap.set(cfg.id, cfg)
+      this.physicalDisplayMap.set(cfg.id, matched)
       const win = this.createWindow(cfg, matched)
       this.windows.set(cfg.id, win)
+      this.attachWatchdog(cfg.id, win)
       created.push(win)
     }
 
     if (created.length === 0) {
-      // 兜底：如果一个都没匹配上（开发环境常见），用第一个 display 配置 + 主屏强制创建一个
       logger.warn('没有任何窗口被创建，回退到主屏强制创建第一个 display 配置')
       const fallback = this.pkg.displays.displays[0]
       const primary = screen.getPrimaryDisplay()
+      this.displayCfgMap.set(fallback.id, fallback)
+      this.physicalDisplayMap.set(fallback.id, primary)
       const win = this.createWindow(fallback, primary)
       this.windows.set(fallback.id, win)
+      this.attachWatchdog(fallback.id, win)
       created.push(win)
     }
 
@@ -61,18 +75,13 @@ export class WindowManager {
     const available = displays.filter((d) => !used.has(d.id))
     const { match } = cfg
 
-    if (match.label) {
-      // Electron 暂无公开的 label 字段，留作扩展点（部署时可用 deviceId 匹配）
-    }
     if (match.primary) {
       const primary = screen.getPrimaryDisplay()
       if (available.find((d) => d.id === primary.id)) return primary
     }
     if (match.size) {
       const [w, h] = match.size.split('x').map(Number)
-      const hit = available.find(
-        (d) => d.bounds.width === w && d.bounds.height === h
-      )
+      const hit = available.find((d) => d.bounds.width === w && d.bounds.height === h)
       if (hit) return hit
     }
     if (match.bounds) {
@@ -86,7 +95,6 @@ export class WindowManager {
         return displays[match.index]
       }
     }
-    // 兜底：取第一个可用屏
     return available[0] ?? null
   }
 
@@ -99,7 +107,7 @@ export class WindowManager {
       y: display.bounds.y,
       width: display.bounds.width,
       height: display.bounds.height,
-      fullscreen: !isDev, // 开发模式不全屏，方便调试
+      fullscreen: !isDev,
       frame: isDev,
       kiosk: !isDev,
       alwaysOnTop: !isDev,
@@ -113,7 +121,6 @@ export class WindowManager {
         sandbox: true,
         nodeIntegration: false,
         webSecurity: true,
-        // 把当前 displayId 通过 query 传给渲染层，渲染层启动时就知道自己是哪块屏
         additionalArguments: [`--exhi-display-id=${cfg.id}`]
       }
     })
@@ -123,23 +130,9 @@ export class WindowManager {
       logger.info(`窗口已显示: display=${cfg.id}, 物理屏 id=${display.id}`)
     })
 
-    win.webContents.on('render-process-gone', (_e, details) => {
-      logger.error(`渲染进程异常: display=${cfg.id}, reason=${details.reason}`)
-      // M6 中会接入 watchdog，自动 reload
-      if (!win.isDestroyed()) {
-        setTimeout(() => win.reload(), 3000)
-      }
-    })
-
-    win.webContents.on('unresponsive', () => {
-      logger.warn(`渲染进程无响应: display=${cfg.id}`)
-    })
-
-    // 加载渲染层
     if (isDev) {
       const devUrl = process.env['ELECTRON_RENDERER_URL']!
       win.loadURL(`${devUrl}?displayId=${cfg.id}`)
-      // 每个窗口都打开独立 DevTools
       win.webContents.once('did-finish-load', () => {
         win.webContents.openDevTools({ mode: 'detach' })
       })
@@ -150,6 +143,66 @@ export class WindowManager {
     }
 
     return win
+  }
+
+  private attachWatchdog(displayId: string, win: BrowserWindow) {
+    const wd = new Watchdog(win, { displayId }, this.deviceId, this.getWs)
+    wd.on('rebuild-required', () => {
+      logger.warn(`重建窗口: display=${displayId}`)
+      this.rebuildWindow(displayId)
+    })
+    wd.on('safe-mode', () => {
+      // 安全模式：把窗口加载到一个最小占位页（直接 about:blank）
+      // 防止反复崩溃链中拉起的渲染层又触发同样的崩溃
+      try {
+        win.loadURL('about:blank')
+      } catch (e) {
+        logger.warn('safe-mode loadURL about:blank 失败', e)
+      }
+    })
+    wd.on('safe-mode-cleared', () => {
+      logger.info(`safe-mode 解除，重新加载 display=${displayId}`)
+      this.reloadDisplayContent(displayId)
+    })
+    this.watchdogs.set(displayId, wd)
+  }
+
+  /** 重建窗口（销毁旧的，新建一个） */
+  private rebuildWindow(displayId: string) {
+    const old = this.windows.get(displayId)
+    const cfg = this.displayCfgMap.get(displayId)
+    const display = this.physicalDisplayMap.get(displayId)
+    const wd = this.watchdogs.get(displayId)
+    if (!cfg || !display) {
+      logger.error(`重建失败：缺少 ${displayId} 的配置`)
+      return
+    }
+    try {
+      wd?.destroy()
+      this.watchdogs.delete(displayId)
+      if (old && !old.isDestroyed()) old.destroy()
+    } catch (e) {
+      logger.warn('重建：销毁旧窗口报错', e)
+    }
+    const win = this.createWindow(cfg, display)
+    this.windows.set(displayId, win)
+    this.attachWatchdog(displayId, win)
+    logger.info(`窗口已重建: display=${displayId}`)
+  }
+
+  /** 重新加载某屏的内容（safe-mode 恢复用） */
+  private reloadDisplayContent(displayId: string) {
+    const win = this.windows.get(displayId)
+    const cfg = this.displayCfgMap.get(displayId)
+    if (!win || win.isDestroyed() || !cfg) return
+    const isDev = !!process.env['ELECTRON_RENDERER_URL']
+    if (isDev) {
+      win.loadURL(`${process.env['ELECTRON_RENDERER_URL']!}?displayId=${cfg.id}`)
+    } else {
+      win.loadFile(path.join(__dirname, '../renderer/index.html'), {
+        query: { displayId: cfg.id }
+      })
+    }
   }
 
   get(displayId: string): BrowserWindow | undefined {
@@ -164,6 +217,8 @@ export class WindowManager {
     for (const w of this.windows.values()) {
       if (!w.isDestroyed()) w.close()
     }
+    for (const wd of this.watchdogs.values()) wd.destroy()
     this.windows.clear()
+    this.watchdogs.clear()
   }
 }

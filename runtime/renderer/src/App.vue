@@ -4,6 +4,7 @@ import { useDeviceStore } from './stores/device'
 import { useSceneStore } from './stores/scene'
 import AdaptiveStage from './layout/AdaptiveStage.vue'
 import SceneStage from './components/SceneStage.vue'
+import DiagPanel from './components/DiagPanel.vue'
 import { SceneOrchestrator } from './orchestrator/SceneOrchestrator'
 
 const device = useDeviceStore()
@@ -31,4 +32,5 @@ onMounted(async () => {
   <AdaptiveStage v-else-if="device.ready">
     <SceneStage />
   </AdaptiveStage>
+  <DiagPanel />
 </template>

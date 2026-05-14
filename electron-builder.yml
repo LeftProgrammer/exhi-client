@@ -22,7 +22,9 @@ win:
       arch:
         - x64
   artifactName: ${productName}-${version}-${arch}.${ext}
-  requestedExecutionLevel: requireAdministrator
+  # 运行时不需要管理员：音量/shutdown 这些 Windows 普通用户即可执行
+  # 安装时若要写 Program Files，由 NSIS perMachine + allowElevation 处理
+  requestedExecutionLevel: asInvoker
 nsis:
   oneClick: false
   perMachine: true
