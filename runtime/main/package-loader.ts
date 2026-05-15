@@ -55,10 +55,13 @@ export interface LoadedPackage {
  */
 export class PackageLoader {
   private packageRoot: string
-  private defaultProject = 'demo-hall'
+  private defaultProject: string
 
   constructor() {
     this.packageRoot = path.join(app.getPath('userData'), PACKAGE_DIR)
+    // 默认项目包：dev fallback / 生产种子用
+    // 环境变量 EXHI_DEV_PACKAGE 可在 dev 切换（如 "baima-exhibition"）
+    this.defaultProject = process.env['EXHI_DEV_PACKAGE'] || 'demo-hall'
   }
 
   /** 启动期加载当前激活包 */
