@@ -87,8 +87,6 @@ export class MetricsReporter {
     let diskFree: number | null = null
     try {
       const userData = app.getPath('userData')
-      // statfs 在 Node 20 有
-      // @ts-expect-error - statfsSync 在某些 @types/node 还未声明
       const st = fs.statfsSync ? fs.statfsSync(userData) : null
       if (st) diskFree = Number(st.bavail) * Number(st.bsize)
     } catch {

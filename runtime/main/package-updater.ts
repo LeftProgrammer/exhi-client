@@ -68,7 +68,7 @@ export class PackageUpdater {
   }
 
   /** 安排切换时机 */
-  private schedule(slot: string, version: string, applyAt: string) {
+  private schedule(slot: string, version: string, applyAt: string): void {
     if (this.applyTimer) {
       clearTimeout(this.applyTimer)
       this.applyTimer = null

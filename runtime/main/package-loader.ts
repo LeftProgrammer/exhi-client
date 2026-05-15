@@ -75,9 +75,7 @@ export class PackageLoader {
   }
 
   /** 读取并解析一个项目包目录（不切换、不写 pointer） */
-  readPackage(
-    rootPath: string
-  ): {
+  readPackage(rootPath: string): {
     manifest: Manifest
     displays: DisplaysConfig
     scenes: ScenesConfig
@@ -186,9 +184,7 @@ export class PackageLoader {
   private resolveActivePackagePath(): { rootPath: string; slot: string | null } {
     // 1. 双槽 + 指针，失败自动回滚到另一个槽
     const current = this.currentSlot()
-    const slots = current
-      ? [current, this.otherSlot(current)]
-      : [PACKAGE_SLOT_A, PACKAGE_SLOT_B]
+    const slots = current ? [current, this.otherSlot(current)] : [PACKAGE_SLOT_A, PACKAGE_SLOT_B]
     for (const slot of slots) {
       const p = this.slotPath(slot)
       if (this.isValidPackage(p)) {
@@ -222,9 +218,7 @@ export class PackageLoader {
       }
     }
 
-    throw new Error(
-      `找不到可用的项目包。已查找：${this.packageRoot}, 以及种子包目录。请检查部署。`
-    )
+    throw new Error(`找不到可用的项目包。已查找：${this.packageRoot}, 以及种子包目录。请检查部署。`)
   }
 
   private isValidPackage(p: string): boolean {

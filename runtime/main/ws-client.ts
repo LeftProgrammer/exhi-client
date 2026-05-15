@@ -23,6 +23,8 @@ export interface WsClientEvents {
   modeChanged: (mode: WsMode) => void
 }
 
+// EventEmitter 子类的标准类型扩展模式：interface + class 同名合并。
+// 社区惯例（io、ws、mqtt 等都这样写）。
 export declare interface WsClient {
   on<E extends keyof WsClientEvents>(ev: E, cb: WsClientEvents[E]): this
   off<E extends keyof WsClientEvents>(ev: E, cb: WsClientEvents[E]): this

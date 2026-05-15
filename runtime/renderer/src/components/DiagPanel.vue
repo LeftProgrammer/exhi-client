@@ -66,12 +66,18 @@ function reloadSelf() {
 
       <section>
         <h4>设备</h4>
-        <pre>{{ JSON.stringify({
-          deviceId: device.boot?.deviceId,
-          displayId: device.boot?.displayId,
-          runtime: device.boot?.runtimeVersion,
-          package: device.boot?.packageInfo
-        }, null, 2) }}</pre>
+        <pre>{{
+          JSON.stringify(
+            {
+              deviceId: device.boot?.deviceId,
+              displayId: device.boot?.displayId,
+              runtime: device.boot?.runtimeVersion,
+              package: device.boot?.packageInfo
+            },
+            null,
+            2
+          )
+        }}</pre>
       </section>
 
       <section>

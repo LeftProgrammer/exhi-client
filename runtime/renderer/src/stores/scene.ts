@@ -43,7 +43,7 @@ export const useSceneStore = defineStore('scene', {
   },
   getters: {
     current(state): Scene | null {
-      return state.currentSceneId ? state.scenes[state.currentSceneId] ?? null : null
+      return state.currentSceneId ? (state.scenes[state.currentSceneId] ?? null) : null
     }
   }
 })

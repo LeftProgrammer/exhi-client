@@ -19,9 +19,7 @@ export class ScheduledRestart {
 
   start() {
     this.scheduleNext()
-    logger.info(
-      `已开启定时窗口刷新：每日 ${pad(this.hour)}:${pad(this.minute)}`
-    )
+    logger.info(`已开启定时窗口刷新：每日 ${pad(this.hour)}:${pad(this.minute)}`)
   }
 
   stop() {

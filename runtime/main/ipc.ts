@@ -3,7 +3,13 @@ import { EventEmitter } from 'node:events'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { IPC } from '@shared/constants'
-import type { BootInfo, Command, DeviceStatus, DisplayStatus, Event as DomainEvent } from '@shared/types'
+import type {
+  BootInfo,
+  Command,
+  DeviceStatus,
+  DisplayStatus,
+  Event as DomainEvent
+} from '@shared/types'
 import { logger } from './logger'
 import type { LoadedPackage } from './package-loader'
 import type { WindowManager } from './window-manager'

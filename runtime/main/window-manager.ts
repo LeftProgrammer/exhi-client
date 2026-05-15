@@ -68,11 +68,7 @@ export class WindowManager {
   }
 
   /** 物理屏匹配 */
-  private matchDisplay(
-    cfg: DisplayConfig,
-    displays: Display[],
-    used: Set<number>
-  ): Display | null {
+  private matchDisplay(cfg: DisplayConfig, displays: Display[], used: Set<number>): Display | null {
     const available = displays.filter((d) => !used.has(d.id))
     const { match } = cfg
 

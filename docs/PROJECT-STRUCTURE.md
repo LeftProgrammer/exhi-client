@@ -254,6 +254,111 @@ exhi-client/
 
 ---
 
+## 项目内 shared 目录约定
+
+每个项目包的 `src/shared/` 是**项目内多屏共享**的代码集合，方便后期复盘抽公共库。
+
+```
+src/shared/
+├── styles/
+│   ├── tokens.scss        # 项目设计 token（颜色/字号/间距/动效曲线）
+│   ├── mixins.scss        # SCSS mixin（fill / center / touch-safe / glass 等）
+│   └── reset.scss         # 触摸屏全局重置（user-select: none / 滚动条隐藏）
+├── composables/
+│   └── useBridge.ts       # exhibitBridge Vue 高层封装（goto/emit/on）
+├── components/            # 项目内跨屏共享业务组件（按需建）
+├── utils/                 # 工具函数（按需建）
+└── types/                 # 类型定义（按需建）
+```
+
+### 路径别名
+
+`tsconfig.json` + `vite.config.ts` 已配好：
+
+```ts
+import { useBridge } from '@shared/composables/useBridge'
+import { useFoo } from '@/touch-yushui/utils' // 同屏内
+```
+
+| 别名        | 指向           |
+| ----------- | -------------- |
+| `@/*`       | `src/*`        |
+| `@shared/*` | `src/shared/*` |
+| `@assets/*` | `contents/*`   |
+
+### useBridge 用法
+
+每个屏的组件里：
+
+```vue
+<script setup lang="ts">
+import { useBridge } from '@shared/composables/useBridge'
+
+const { info, goto, gotoAll, emit, on, ready } = useBridge()
+
+// 切其他屏的场景
+goto('wall', 'video-01')
+
+// 抛事件
+emit('analytics', { action: 'open-album' })
+
+// 订阅事件（组件卸载自动解绑）
+on('scene:changed', (payload) => console.log(payload))
+</script>
+```
+
+---
+
+## 第三方库
+
+根目录已收齐展厅项目常用依赖：
+
+- **GSAP** —— 动画引擎（比 CSS 动画灵活，时间轴/缓动/序列）
+- **@vueuse/core** —— Vue 工具集合（useDebounce / useIntervalFn / useDraggable...）
+
+子包通过 npm workspaces 自动共享，直接 `import` 即可。
+
+---
+
+## 工程化保障
+
+| 工具            | 作用                                                                  |
+| --------------- | --------------------------------------------------------------------- |
+| **ESLint**      | 静态检查；`.eslintrc.cjs` 配置；`npm run lint` / `lint:fix`           |
+| **Prettier**    | 格式化；`.prettierrc` 配置；ESLint 通过 `eslint-plugin-prettier` 接管 |
+| **Husky**       | git hook；pre-commit + commit-msg                                     |
+| **lint-staged** | 仅检查暂存区文件；改完文件提交时自动跑 lint+prettier                  |
+| **commitlint**  | 强制约定式 commit message                                             |
+| **vue-tsc**     | 跨工作空间类型检查；`npm run typecheck`                               |
+
+### commit message 约定
+
+```
+feat: 加新功能
+fix: 修 bug
+docs: 文档
+style: 格式
+refactor: 重构
+perf: 性能
+test: 测试
+chore: 杂项
+
+# 带模块：
+feat(baima): 加领导关怀照片墙
+fix(runtime): 修复 dev proxy EINVAL
+```
+
+### dev-helper
+
+调试用：
+
+```bash
+npm run dev:status     # 看当前 device-id / 项目包槽 / 心跳 / 队列状态
+npm run dev:reset      # 清掉所有运行时残留（双槽/指针/心跳/队列/settings）
+```
+
+---
+
 ## 沉淀路径（M11+）
 
 第 1 个项目（白马）跑稳后，会复盘并沉淀：

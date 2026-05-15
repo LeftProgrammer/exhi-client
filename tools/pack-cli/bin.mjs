@@ -50,15 +50,7 @@ if (sub === 'build') {
 // ============ build ============
 
 /** walk 时跳过的目录（项目工程文件，不进项目包） */
-const EXCLUDE_DIRS = new Set([
-  'src',
-  'dist',
-  'node_modules',
-  '.git',
-  '.vscode',
-  '.idea',
-  'public'
-])
+const EXCLUDE_DIRS = new Set(['src', 'dist', 'node_modules', '.git', '.vscode', '.idea', 'public'])
 /** walk 时跳过的根级文件（vite/ts/npm 工程文件） */
 const EXCLUDE_FILES = new Set([
   'package.json',
@@ -117,7 +109,9 @@ async function build(srcDir, outBase) {
 
   // 写回 manifest（原地）
   await fs.writeFile(manifestPath, JSON.stringify(manifest, null, 2), 'utf-8')
-  console.log(`[pack-cli] 已写入 manifest.json: files=${fileEntries.length} checksum=${checksum.slice(0, 12)}...`)
+  console.log(
+    `[pack-cli] 已写入 manifest.json: files=${fileEntries.length} checksum=${checksum.slice(0, 12)}...`
+  )
 
   // 复制到 --out
   if (outBase) {
@@ -212,7 +206,9 @@ async function runViteBuild(pkgDir) {
       stdio: 'inherit',
       shell: isWindows
     })
-    proc.on('exit', (code) => (code === 0 ? resolve() : reject(new Error(`vite build exit ${code}`))))
+    proc.on('exit', (code) =>
+      code === 0 ? resolve() : reject(new Error(`vite build exit ${code}`))
+    )
     proc.on('error', reject)
   })
 }

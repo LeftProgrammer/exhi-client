@@ -1,0 +1,9 @@
+node_modules
+out
+build
+dist
+*.d.ts
+runtime/renderer/src/types/bridge.d.ts
+packages/*/contents/**
+packages/demo-hall/**
+guardian/guardian.mjs
