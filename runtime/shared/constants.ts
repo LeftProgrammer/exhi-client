@@ -30,6 +30,7 @@ export const IPC = {
   REPORT_STATUS: 'exhi:report-status',
   LOG: 'exhi:log',
   READ_PACKAGE_FILE: 'exhi:read-package-file',
+  EXISTS_PACKAGE_FILE: 'exhi:exists-package-file',
   GET_BOOT_INFO: 'exhi:get-boot-info',
   DISPATCH_BRIDGE_CMD: 'exhi:dispatch-bridge-cmd',
   BRIDGE_EMIT: 'exhi:bridge-emit',

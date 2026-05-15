@@ -58,10 +58,11 @@ console.log('[content-dev] 在另一个终端运行 npm run dev:online 让 Elect
 console.log('')
 
 const isWindows = process.platform === 'win32'
+// Windows 上 spawn .cmd 必须 shell:true（Node 20.12+ 安全策略）
 const proc = spawn(isWindows ? 'npm.cmd' : 'npm', ['run', 'dev'], {
   cwd: pkgDir,
   stdio: 'inherit',
-  shell: false
+  shell: isWindows
 })
 
 proc.on('exit', (code) => process.exit(code ?? 0))

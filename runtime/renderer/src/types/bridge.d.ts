@@ -8,6 +8,7 @@ export interface ExhibitAPI {
   reportStatus(status: Partial<DeviceStatus> & { displayId?: string }): void
   log(level: 'debug' | 'info' | 'warn' | 'error', msg: string, ctx?: unknown): void
   readPackageFile(relPath: string): Promise<Uint8Array>
+  existsPackageFile(relPath: string): Promise<boolean>
   getBootInfo(): Promise<BootInfo>
   dispatchBridgeCommand(cmd: Command): void
   bridgeEmit(name: string, payload?: unknown, fromDisplayId?: string): void

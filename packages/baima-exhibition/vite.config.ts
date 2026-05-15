@@ -23,7 +23,15 @@ export default defineConfig({
   server: {
     port: 5174,
     strictPort: true,
-    host: '127.0.0.1'
+    host: '127.0.0.1',
+    // HMR 客户端注入到页面时，告诉它直连 vite dev server 拿热更新
+    // 否则它会从 location.host (exhi-pkg://pkg) 推断 → ws://pkg/ 连不上
+    hmr: {
+      protocol: 'ws',
+      host: '127.0.0.1',
+      port: 5174,
+      clientPort: 5174
+    }
   },
   build: {
     outDir: resolve(__dirname, 'dist'),
