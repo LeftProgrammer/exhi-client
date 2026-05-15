@@ -1,0 +1,14 @@
+{
+  "bindings": [
+    {
+      "on": "cmd.gotoScene",
+      "do": "scene.switch",
+      "params": { "sceneId": "$payload.sceneId", "display": "$payload.display" }
+    },
+    { "on": "cmd.reload", "do": "scene.reload" }
+  ],
+  "macros": {},
+  "standalone": {
+    "onStartup": []
+  }
+}

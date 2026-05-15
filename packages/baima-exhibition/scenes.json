@@ -1,0 +1,10 @@
+{
+  "scenes": {
+    "hello": {
+      "type": "web",
+      "src": "contents/hello/index.html",
+      "allowInteraction": true,
+      "injectBridge": true
+    }
+  }
+}
