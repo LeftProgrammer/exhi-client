@@ -1,0 +1,94 @@
+// ===== 白马项目设计 token =====
+// 视觉风格参考：航电科技蓝绿调，深色背景 + 青色辉光强调
+// 所有屏共享。改色调/字号/动效只改这里。
+
+// ===== 颜色 =====
+// 背景
+$color-bg-primary: #050b1a; // 主体深色背景
+$color-bg-secondary: #0a1a2e; // 次级背景（卡片底）
+$color-bg-elevated: rgba(15, 35, 60, 0.7); // 抬升层（卡片/浮层）
+$color-bg-overlay: rgba(5, 11, 26, 0.92); // 遮罩
+
+// 强调（青色辉光）
+$color-accent: #00e5d4; // 主强调（按钮/边框/标题点缀）
+$color-accent-soft: rgba(0, 229, 212, 0.18);
+$color-accent-glow: rgba(0, 229, 212, 0.5);
+$color-accent-dim: rgba(0, 229, 212, 0.35);
+
+// 文字
+$color-text-primary: #e8f5ff;
+$color-text-secondary: #a8c5d8;
+$color-text-muted: #6b8da3;
+$color-text-disabled: rgba(180, 200, 230, 0.4);
+
+// 状态
+$color-success: #4ade80;
+$color-warning: #fbbf24;
+$color-danger: #ef4444;
+
+// 边框
+$color-border-soft: rgba(0, 229, 212, 0.15);
+$color-border-strong: rgba(0, 229, 212, 0.5);
+$color-border-glow: rgba(0, 229, 212, 0.8);
+
+// ===== 字号（vh 基准，跨屏一致） =====
+$fs-display: 5vh; // 顶部主标题
+$fs-hero: 4.5vh; // 大卡片标题
+$fs-h1: 3.5vh;
+$fs-h2: 2.8vh;
+$fs-h3: 2.2vh;
+$fs-body: 1.8vh;
+$fs-small: 1.5vh;
+$fs-mini: 1.2vh;
+
+// ===== 字重 =====
+$fw-regular: 400;
+$fw-medium: 500;
+$fw-bold: 700;
+
+// ===== 间距 =====
+$space-xxs: 0.4vh;
+$space-xs: 0.8vh;
+$space-sm: 1.6vh;
+$space-md: 2.4vh;
+$space-lg: 4vh;
+$space-xl: 7vh;
+
+// ===== 圆角 =====
+$radius-sm: 0.4vh;
+$radius-md: 1vh;
+$radius-lg: 2vh;
+$radius-full: 999px;
+
+// ===== 动效曲线 =====
+$ease-base: cubic-bezier(0.4, 0, 0.2, 1);
+$ease-in: cubic-bezier(0.4, 0, 1, 1);
+$ease-out: cubic-bezier(0, 0, 0.2, 1);
+$ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+// ===== 动效时长 =====
+$dur-fast: 180ms;
+$dur-base: 360ms;
+$dur-slow: 600ms;
+$dur-page: 800ms; // 一二级页面切换
+
+// ===== 字体 =====
+$font-family-base:
+  'BaimaFont',
+  'Microsoft YaHei',
+  -apple-system,
+  BlinkMacSystemFont,
+  'Segoe UI',
+  sans-serif;
+
+// ===== 阴影 / 辉光 =====
+$shadow-card: 0 4px 24px rgba(0, 0, 0, 0.6);
+$glow-accent: 0 0 12px $color-accent-glow;
+$glow-accent-strong:
+  0 0 24px $color-accent-glow,
+  0 0 4px $color-accent;
+
+// ===== z-index =====
+$z-content: 1;
+$z-overlay: 100;
+$z-modal: 1000;

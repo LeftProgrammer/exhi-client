@@ -1,5 +1,5 @@
 {
-  "name": "@exhi-pkg/baima-exhibition",
+  "name": "@exhi-pkg/baima-yushui-leaders",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -7,5 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "typecheck": "vue-tsc --noEmit"
+  },
+  "dependencies": {
+    "vue-router": "^4.5.0"
   }
 }

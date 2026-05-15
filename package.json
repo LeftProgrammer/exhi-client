@@ -15,7 +15,7 @@
   "scripts": {
     "dev": "chcp 65001 >nul && electron-vite dev",
     "dev:online": "chcp 65001 >nul && set EXHI_HUB_URL=ws://localhost:18080&& electron-vite dev",
-    "dev:baima": "chcp 65001 >nul && set EXHI_HUB_URL=ws://localhost:18080&& set EXHI_DEV_PACKAGE=baima-exhibition&& electron-vite dev",
+    "dev:baima": "chcp 65001 >nul && set EXHI_HUB_URL=ws://localhost:18080&& set EXHI_DEV_PACKAGE=baima-yushui-leaders&& electron-vite dev",
     "dev:content": "node tools/content-dev/bin.mjs",
     "dev:status": "node tools/dev-helper/bin.mjs status",
     "dev:reset": "node tools/dev-helper/bin.mjs reset",
