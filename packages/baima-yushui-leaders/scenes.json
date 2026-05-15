@@ -1,8 +1,8 @@
 {
   "scenes": {
-    "hello": {
+    "app": {
       "type": "web",
-      "src": "contents/hello/index.html",
+      "src": "contents/app/index.html",
       "allowInteraction": true,
       "injectBridge": true
     }

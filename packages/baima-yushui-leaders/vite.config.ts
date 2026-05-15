@@ -39,8 +39,8 @@ export default defineConfig({
     assetsDir: 'assets',
     rollupOptions: {
       input: {
-        // 每加一块屏，复制一行
-        hello: resolve(__dirname, 'src/hello/index.html')
+        // 渝水 + 领导 是同一台触摸屏的两个一级入口，共用一个 SPA 工程
+        app: resolve(__dirname, 'src/app/index.html')
       }
     }
   },

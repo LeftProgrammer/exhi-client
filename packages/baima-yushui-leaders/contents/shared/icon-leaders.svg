@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- 中间人 -->
+  <circle cx="100" cy="78" r="20" stroke="#00e5d4" stroke-width="3" fill="rgba(0,229,212,0.12)"/>
+  <path d="M70 160 Q70 115 100 115 Q130 115 130 160" stroke="#00e5d4" stroke-width="3" fill="rgba(0,229,212,0.08)"/>
+  <!-- 左 -->
+  <circle cx="55" cy="92" r="15" stroke="rgba(0,229,212,0.7)" stroke-width="2.5" fill="rgba(0,229,212,0.06)"/>
+  <path d="M30 160 Q30 125 55 125 Q70 125 75 135" stroke="rgba(0,229,212,0.7)" stroke-width="2.5" fill="rgba(0,229,212,0.04)"/>
+  <!-- 右 -->
+  <circle cx="145" cy="92" r="15" stroke="rgba(0,229,212,0.7)" stroke-width="2.5" fill="rgba(0,229,212,0.06)"/>
+  <path d="M125 135 Q130 125 145 125 Q170 125 170 160" stroke="rgba(0,229,212,0.7)" stroke-width="2.5" fill="rgba(0,229,212,0.04)"/>
+</svg>
