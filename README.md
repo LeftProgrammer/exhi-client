@@ -16,8 +16,9 @@
 - ✅ 上行事件 `evt.runtimeUpdate`（checking/available/downloading/downloaded/scheduled/error）
 - ✅ `tools/release-cli`：把 electron-builder 产物组织成 OTA 频道目录
 - ✅ `electron-builder.yml` 配置 generic publish（生成 latest.yml）
-- ✅ [DEPLOY.md](./DEPLOY.md)：完整部署文档（Windows 准备、Kiosk、Guardian、OTA、验收清单）
+- ✅ [DEPLOY.md](./docs/DEPLOY.md)：完整部署文档（Windows 准备、Kiosk、Guardian、OTA、验收清单）
 - ✅ [docs/CONTENT-GUIDE.md](./docs/CONTENT-GUIDE.md)：项目包内容制作规范（视频编码、HTML 响应式、字体内嵌）
+- ✅ [docs/PROJECT-STRUCTURE.md](./docs/PROJECT-STRUCTURE.md)：项目包结构约定（Vite 工程化、目录、加屏步骤）
 
 🎉 **客户端 Runtime 核心功能完整，可投入生产部署**
 
@@ -478,7 +479,7 @@ npm run hub:send -- cmd.runtime.cancel
 
 ## 生产部署
 
-详见 [DEPLOY.md](./DEPLOY.md)：
+详见 [DEPLOY.md](./docs/DEPLOY.md)：
 
 - Windows 系统准备（电源/网络/任务栏/通知）
 - Kiosk 模式（Assigned Access / Shell Launcher）

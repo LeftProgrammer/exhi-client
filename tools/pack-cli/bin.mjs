@@ -49,6 +49,27 @@ if (sub === 'build') {
 
 // ============ build ============
 
+/** walk 时跳过的目录（项目工程文件，不进项目包） */
+const EXCLUDE_DIRS = new Set([
+  'src',
+  'dist',
+  'node_modules',
+  '.git',
+  '.vscode',
+  '.idea',
+  'public'
+])
+/** walk 时跳过的根级文件（vite/ts/npm 工程文件） */
+const EXCLUDE_FILES = new Set([
+  'package.json',
+  'package-lock.json',
+  'pnpm-lock.yaml',
+  'tsconfig.json',
+  'vite.config.ts',
+  'vite.config.js',
+  '.gitignore'
+])
+
 async function build(srcDir, outBase) {
   console.log(`[pack-cli] 构建 ${srcDir}`)
   const manifestPath = path.join(srcDir, 'manifest.json')
@@ -60,7 +81,16 @@ async function build(srcDir, outBase) {
     process.exit(2)
   }
 
-  // 扫描文件
+  // M10：如果项目包是 Vite 工程（有 src/ + vite.config.ts），先跑 vite build 再扫描
+  const hasViteProject =
+    (await fileExists(path.join(srcDir, 'vite.config.ts'))) ||
+    (await fileExists(path.join(srcDir, 'vite.config.js')))
+  if (hasViteProject) {
+    await runViteBuild(srcDir)
+    await mergeViteDistIntoContents(srcDir)
+  }
+
+  // 扫描文件（排除工程目录）
   const files = []
   await walk(srcDir, srcDir, files)
   console.log(`[pack-cli] 扫描到 ${files.length} 个文件，计算 sha256...`)
@@ -144,6 +174,11 @@ async function verify(dir) {
 
 async function walk(rootDir, dir, out) {
   for (const entry of await fs.readdir(dir, { withFileTypes: true })) {
+    if (dir === rootDir) {
+      // 根级：排除工程目录与工程文件
+      if (entry.isDirectory() && EXCLUDE_DIRS.has(entry.name)) continue
+      if (!entry.isDirectory() && EXCLUDE_FILES.has(entry.name)) continue
+    }
     const full = path.join(dir, entry.name)
     if (entry.isDirectory()) {
       await walk(rootDir, full, out)
@@ -154,6 +189,78 @@ async function walk(rootDir, dir, out) {
       out.push({ absolute: full, relative: rel, size: stat.size })
     }
   }
+}
+
+async function fileExists(p) {
+  try {
+    await fs.access(p)
+    return true
+  } catch {
+    return false
+  }
+}
+
+/** 用项目包自身的 npm 脚本跑 vite build */
+async function runViteBuild(pkgDir) {
+  const { spawn } = await import('node:child_process')
+  console.log(`[pack-cli] 运行 vite build ...`)
+  const isWindows = process.platform === 'win32'
+  await new Promise((resolve, reject) => {
+    const proc = spawn(isWindows ? 'npm.cmd' : 'npm', ['run', 'build'], {
+      cwd: pkgDir,
+      stdio: 'inherit',
+      shell: false
+    })
+    proc.on('exit', (code) => (code === 0 ? resolve() : reject(new Error(`vite build exit ${code}`))))
+    proc.on('error', reject)
+  })
+}
+
+/**
+ * 把 dist/ 内容合并到 contents/ 下。
+ *
+ * Vite multi-page 输出结构（rollup input 是 src/<screen>/index.html）：
+ *   dist/
+ *     src/<screen>/index.html
+ *     assets/<screen>-*.js
+ *     assets/<screen>-*.css
+ *
+ * 我们的目标：scenes.json 引用 contents/<screen>/index.html
+ * 所以要把 dist/src/<screen>/ 重写到 contents/<screen>/，
+ * 同时 HTML 里的 ../assets/... 路径相对仍然可用（assets 共享）。
+ *
+ * 为简化第 1 版：把 dist/src/* 移到 contents/，dist/assets/ 也搬到 contents/assets/。
+ * Vite 用 base: './' 后，HTML 引用的是相对路径 ../assets/xxx.js —— 我们保留
+ * dist→contents 时的层级关系即可。
+ */
+async function mergeViteDistIntoContents(pkgDir) {
+  const distDir = path.join(pkgDir, 'dist')
+  if (!(await fileExists(distDir))) {
+    console.warn('[pack-cli] dist/ 不存在，跳过合并')
+    return
+  }
+  const contentsDir = path.join(pkgDir, 'contents')
+  await fs.mkdir(contentsDir, { recursive: true })
+
+  // 1) dist/src/<screen>/* → contents/<screen>/*
+  const distSrc = path.join(distDir, 'src')
+  if (await fileExists(distSrc)) {
+    for (const screen of await fs.readdir(distSrc, { withFileTypes: true })) {
+      if (!screen.isDirectory()) continue
+      const from = path.join(distSrc, screen.name)
+      const to = path.join(contentsDir, screen.name)
+      await fs.rm(to, { recursive: true, force: true })
+      await copyDir(from, to)
+    }
+  }
+  // 2) dist/assets/* → contents/assets/*（共享资源）
+  const distAssets = path.join(distDir, 'assets')
+  if (await fileExists(distAssets)) {
+    const toAssets = path.join(contentsDir, 'assets')
+    await fs.rm(toAssets, { recursive: true, force: true })
+    await copyDir(distAssets, toAssets)
+  }
+  console.log('[pack-cli] vite dist → contents 合并完成')
 }
 
 function sha256File(filePath) {

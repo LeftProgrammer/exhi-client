@@ -9,9 +9,13 @@
   "engines": {
     "node": ">=20.0.0"
   },
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "dev": "chcp 65001 >nul && electron-vite dev",
     "dev:online": "chcp 65001 >nul && set EXHI_HUB_URL=ws://localhost:18080&& electron-vite dev",
+    "dev:content": "node tools/content-dev/bin.mjs",
     "build": "chcp 65001 >nul && electron-vite build",
     "preview": "electron-vite preview",
     "dist": "npm run build && electron-builder",
