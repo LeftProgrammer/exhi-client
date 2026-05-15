@@ -1,0 +1,61 @@
+@use 'tokens' as t;
+
+// 铺满父容器
+@mixin fill {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+// flex 居中
+@mixin center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// flex 列居中
+@mixin center-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+// 单行省略
+@mixin ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// 多行省略
+@mixin ellipsis-multi($lines: 2) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// 触摸屏元素：禁选中、禁拖拽、光标隐藏
+@mixin touch-safe {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+// GPU 加速层（缓解某些抖动）
+@mixin gpu-layer {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+// 玻璃质感卡片
+@mixin glass($alpha: 0.05) {
+  background: rgba(255, 255, 255, $alpha);
+  border: 1px solid t.$color-border-soft;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}

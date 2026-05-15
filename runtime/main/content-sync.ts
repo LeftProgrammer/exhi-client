@@ -70,8 +70,7 @@ export class ContentSync {
 
     // 2. 选目标槽（默认非激活槽）
     const current = this.loader.currentSlot()
-    const target =
-      options.targetSlot ?? (current ? this.loader.otherSlot(current) : 'slot-b')
+    const target = options.targetSlot ?? (current ? this.loader.otherSlot(current) : 'slot-b')
     const targetDir = this.loader.ensureSlotDir(target)
     logger.info(`content-sync 目标槽: ${target} (${targetDir})`)
 
@@ -146,10 +145,7 @@ export class ContentSync {
           return
         }
         try {
-          await pipeline(
-            resp as unknown as NodeJS.ReadableStream,
-            fs.createWriteStream(tmp)
-          )
+          await pipeline(resp as unknown as NodeJS.ReadableStream, fs.createWriteStream(tmp))
           resolve()
         } catch (e) {
           reject(e)

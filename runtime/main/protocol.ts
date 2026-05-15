@@ -83,8 +83,7 @@ export function attachProtocolHandler(packageRoot: string) {
   })
 
   logger.info(
-    `exhi-pkg 协议已挂载，root=${rootResolved}` +
-      (isDev ? ` (dev 代理: ${DEV_CONTENT_URL})` : '')
+    `exhi-pkg 协议已挂载，root=${rootResolved}` + (isDev ? ` (dev 代理: ${DEV_CONTENT_URL})` : '')
   )
 }
 
@@ -145,9 +144,7 @@ function shouldDevProxy(relPath: string): boolean {
 async function tryDevProxy(relPath: string, search = ''): Promise<Response | null> {
   // contents/<screen>/... → /<screen>/...（vite root 是 src/，每屏一个子目录）
   // 其他路径（@vite/client、node_modules/...）原样代理
-  const subPath = relPath.startsWith('contents/')
-    ? relPath.slice('contents/'.length)
-    : relPath
+  const subPath = relPath.startsWith('contents/') ? relPath.slice('contents/'.length) : relPath
   // search 必须保留：vite 用 ?vue&type=script&...&lang.ts 这种 query 区分 SFC 块
   const proxyUrl = `${DEV_CONTENT_URL}/${subPath}${search}`
   try {
@@ -158,7 +155,10 @@ async function tryDevProxy(relPath: string, search = ''): Promise<Response | nul
     const headers = new Headers()
     if (contentType) headers.set('content-type', contentType)
     headers.set('cache-control', 'no-cache')
-    return new Response(body, { status, headers })
+    // Buffer 在 @types/node 22 + lib.dom 的 BodyInit 类型签名冲突
+    // 拷到独立 ArrayBuffer 给 Response（BodyInit 接受 ArrayBuffer）
+    const ab = body.buffer.slice(body.byteOffset, body.byteOffset + body.byteLength) as ArrayBuffer
+    return new Response(ab, { status, headers })
   } catch (e) {
     // dev server 没启动是常见情况（用户没跑 dev:content），不打 warn
     logger.debug(`[dev-proxy] miss ${proxyUrl}: ${(e as Error).message}`)

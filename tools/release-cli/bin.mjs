@@ -46,8 +46,7 @@ async function publish() {
   }
 
   // electron-updater 通用 provider 期望的文件
-  const latestYml =
-    channel === 'stable' ? 'latest.yml' : `latest-${channel}.yml`
+  const latestYml = channel === 'stable' ? 'latest.yml' : `latest-${channel}.yml`
   const candidates = await fsp.readdir(src)
   const yml = candidates.find(
     (n) => n === latestYml || n === 'latest.yml' || n === 'beta.yml' || n === `${channel}.yml`

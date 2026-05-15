@@ -1,0 +1,62 @@
+// ===== 触摸屏/展厅展示通用 reset =====
+// 所有屏的入口 main.ts 第一行 import 这个文件
+
+@use 'tokens' as t;
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  font-family: t.$font-family-base;
+  font-size: t.$fs-body;
+  color: t.$color-text-primary;
+  background: t.$color-bg-primary;
+  // 触摸屏防误触
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  // 隐藏滚动条但保留滚动能力
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+#app {
+  width: 100vw;
+  height: 100vh;
+}
+
+img {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+// 展厅环境光标策略：默认隐藏（触摸场景）
+// 鼠标调试时如需显示，临时改 body { cursor: default }
+body.show-cursor {
+  cursor: default;
+}
+body:not(.show-cursor) {
+  cursor: none;
+}

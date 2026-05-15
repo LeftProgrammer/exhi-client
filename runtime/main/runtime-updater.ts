@@ -101,9 +101,8 @@ export class RuntimeUpdater {
 
   /** 处理 cmd.runtime.update */
   async handle(cmd: Command): Promise<void> {
-    const payload = (cmd.payload as
-      | { channel?: string; applyAt?: 'now' | 'idle' | string }
-      | undefined) ?? {}
+    const payload =
+      (cmd.payload as { channel?: string; applyAt?: 'now' | 'idle' | string } | undefined) ?? {}
     if (payload.channel && payload.channel !== this.channel) {
       this.channel = payload.channel
       autoUpdater.channel = payload.channel
@@ -160,7 +159,7 @@ export class RuntimeUpdater {
     return `${root}/${channel}`
   }
 
-  private scheduleApply(applyAt: string) {
+  private scheduleApply(applyAt: string): void {
     if (!this.downloaded) {
       logger.warn('[updater] 尚未下载完成，无法安排安装')
       return

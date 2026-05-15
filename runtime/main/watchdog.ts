@@ -116,7 +116,9 @@ export class Watchdog {
     })
 
     wc.on('unresponsive', () => {
-      logger.warn(`[watchdog ${this.opts.displayId}] 渲染卡死，${this.unresponsiveTimeoutMs}ms 后强制 reload`)
+      logger.warn(
+        `[watchdog ${this.opts.displayId}] 渲染卡死，${this.unresponsiveTimeoutMs}ms 后强制 reload`
+      )
       if (this.unresponsiveTimer) clearTimeout(this.unresponsiveTimer)
       this.unresponsiveTimer = setTimeout(() => {
         if (!this.win.isDestroyed()) {
@@ -152,7 +154,10 @@ export class Watchdog {
       `[watchdog ${this.opts.displayId}] 崩溃 #${this.crashTimestamps.length}/${this.maxCrashes} 窗口内 (${reason})`
     )
 
-    this.publishError(ErrorCode.RENDERER_CRASH, `${reason} (crashes=${this.crashTimestamps.length})`)
+    this.publishError(
+      ErrorCode.RENDERER_CRASH,
+      `${reason} (crashes=${this.crashTimestamps.length})`
+    )
 
     // 熔断
     if (this.crashTimestamps.length >= this.maxCrashes) {

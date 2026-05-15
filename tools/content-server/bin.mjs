@@ -25,7 +25,9 @@ const port = Number(parseOption('--port') ?? '18090')
 
 if (!fs.existsSync(root)) {
   console.error(`root 不存在: ${root}`)
-  console.error('提示：先用 npm run pkg:build packages/demo-hall -- --out=build/packages 构建项目包')
+  console.error(
+    '提示：先用 npm run pkg:build packages/demo-hall -- --out=build/packages 构建项目包'
+  )
   process.exit(1)
 }
 

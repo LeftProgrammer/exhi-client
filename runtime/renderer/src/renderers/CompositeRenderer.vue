@@ -38,12 +38,7 @@ const children = computed<Child[]>(() =>
       class="composite__child"
       :class="`composite__child--${layout}`"
     >
-      <component
-        v-if="child.comp"
-        :is="child.comp"
-        :scene="child.scene"
-        @ready="onChildReady"
-      />
+      <component :is="child.comp" v-if="child.comp" :scene="child.scene" @ready="onChildReady" />
     </div>
   </div>
 </template>

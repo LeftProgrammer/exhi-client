@@ -1,43 +1,17 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
+import { useBridge } from '@shared/composables/useBridge'
 
-interface BridgeInfo {
-  deviceId: string
-  displayId: string
-  runtimeVersion: string
-  packageInfo?: { projectId: string; version: string }
-}
-
-declare global {
-  interface Window {
-    exhibitBridge?: {
-      getInfo(): Promise<BridgeInfo>
-      dispatch(cmd: { type: string; payload?: unknown }): Promise<unknown>
-      emit(name: string, payload?: unknown): void
-      on(name: string, cb: (payload: unknown) => void): () => void
-    }
-  }
-}
-
-const info = ref<BridgeInfo | null>(null)
+const { info, ready, emit, on, reload } = useBridge()
 const counter = ref(0)
 const lastEvent = ref<string>('')
 
-onMounted(async () => {
-  if (window.exhibitBridge) {
-    info.value = await window.exhibitBridge.getInfo()
-    window.exhibitBridge.on('scene:changed', (payload) => {
-      lastEvent.value = `scene:changed → ${JSON.stringify(payload)}`
-    })
-  }
+on('scene:changed', (payload) => {
+  lastEvent.value = `scene:changed → ${JSON.stringify(payload)}`
 })
 
-function reload() {
-  window.exhibitBridge?.dispatch({ type: 'cmd.reload' })
-}
-
 function ping() {
-  window.exhibitBridge?.emit('hello.ping', { counter: counter.value, ts: Date.now() })
+  emit('hello.ping', { counter: counter.value, ts: Date.now() })
   counter.value++
 }
 </script>
@@ -45,17 +19,18 @@ function ping() {
 <template>
   <div class="hello">
     <h1>白马筑基 · 时代赞歌</h1>
-    <p class="subtitle">M10 Mini Vite 工程化骨架</p>
+    <p class="subtitle">M10 Mini · Vite 工程化骨架123</p>
 
-    <div class="info" v-if="info">
-      <div><span>device:</span> {{ info.deviceId }}</div>
-      <div><span>display:</span> {{ info.displayId }}</div>
-      <div><span>runtime:</span> {{ info.runtimeVersion }}</div>
+    <div v-if="info" class="info" :class="{ ready }">
+      <div><span class="label">device:</span> {{ info.deviceId }}</div>
+      <div><span class="label">display:</span> {{ info.displayId }}</div>
+      <div><span class="label">runtime:</span> {{ info.runtimeVersion }}</div>
       <div v-if="info.packageInfo">
-        <span>package:</span> {{ info.packageInfo.projectId }} v{{ info.packageInfo.version }}
+        <span class="label">package:</span>
+        {{ info.packageInfo.projectId }} v{{ info.packageInfo.version }}
       </div>
     </div>
-    <div v-else class="info muted">exhibitBridge 未就绪（直接刷新一次）</div>
+    <div v-else class="info muted">exhibitBridge 未就绪…</div>
 
     <div class="actions">
       <button @click="ping">📡 emit hello.ping (#{{ counter }})</button>
@@ -66,51 +41,47 @@ function ping() {
 
     <p class="hint">
       改 src/hello/App.vue 保存 → HMR 即时生效。<br />
-      改素材：放 contents/* 后改 scenes.json。
+      路径别名 @shared/composables/useBridge 已通。
     </p>
   </div>
 </template>
 
 <style scoped lang="scss">
+@use '@shared/styles/tokens' as t;
+@use '@shared/styles/mixins' as m;
+
 .hello {
-  width: 100vw;
-  height: 100vh;
-  background: linear-gradient(135deg, #0a1428 0%, #163056 100%);
-  color: #e8eef9;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  user-select: none;
-  -webkit-user-select: none;
-  cursor: default;
+  @include m.fill;
+  @include m.center-col;
+  background: linear-gradient(135deg, t.$color-bg-primary 0%, t.$color-bg-secondary 100%);
+  color: t.$color-text-primary;
+  @include m.touch-safe;
 }
 
 h1 {
-  font-size: 6vh;
+  font-size: t.$fs-hero;
   letter-spacing: 0.2em;
-  margin: 0 0 1vh 0;
-  font-weight: 600;
+  margin: 0 0 t.$space-xs;
+  font-weight: t.$fw-bold;
 }
 
 .subtitle {
-  color: #6b8bb8;
-  font-size: 2vh;
+  color: t.$color-text-muted;
+  font-size: t.$fs-h3;
   letter-spacing: 0.3em;
-  margin: 0 0 6vh 0;
+  margin: 0 0 t.$space-xl;
 }
 
 .info {
-  font-size: 2vh;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 2vh 4vw;
-  border-radius: 1vh;
-  margin-bottom: 4vh;
+  @include m.glass;
+  font-size: t.$fs-body;
+  padding: t.$space-sm t.$space-lg;
+  border-radius: t.$radius-md;
+  margin-bottom: t.$space-lg;
   line-height: 1.8;
 
-  span {
-    color: #6b8bb8;
+  .label {
+    color: t.$color-text-muted;
     margin-right: 1vw;
     display: inline-block;
     width: 6em;
@@ -125,18 +96,18 @@ h1 {
 .actions {
   display: flex;
   gap: 2vw;
-  margin-bottom: 4vh;
+  margin-bottom: t.$space-lg;
 }
 
 button {
-  font-size: 2.4vh;
-  padding: 1.6vh 3vw;
-  border: 1px solid rgba(180, 200, 230, 0.3);
+  font-size: t.$fs-h3;
+  padding: t.$space-sm 3vw;
+  border: 1px solid t.$color-border-strong;
   background: rgba(255, 255, 255, 0.05);
-  color: #e8eef9;
-  border-radius: 1vh;
+  color: t.$color-text-primary;
+  border-radius: t.$radius-md;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all t.$dur-fast t.$ease-base;
 
   &:active {
     background: rgba(255, 255, 255, 0.15);
@@ -145,16 +116,16 @@ button {
 }
 
 .event {
-  font-size: 1.6vh;
-  color: #6b8bb8;
+  font-size: t.$fs-small;
+  color: t.$color-text-muted;
   font-family: monospace;
-  margin-bottom: 6vh;
-  min-height: 1.6vh;
+  margin-bottom: t.$space-xl;
+  min-height: t.$fs-small;
 }
 
 .hint {
-  font-size: 1.6vh;
-  color: rgba(180, 200, 230, 0.4);
+  font-size: t.$fs-small;
+  color: t.$color-text-disabled;
   text-align: center;
   line-height: 1.8;
 }
