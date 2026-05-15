@@ -15,6 +15,7 @@ export interface ExhibitAPI {
   reportStatus(status: Partial<DeviceStatus> & { displayId?: string }): void
   log(level: 'debug' | 'info' | 'warn' | 'error', msg: string, ctx?: unknown): void
   readPackageFile(relPath: string): Promise<Uint8Array>
+  existsPackageFile(relPath: string): Promise<boolean>
   getBootInfo(): Promise<BootInfo>
   dispatchBridgeCommand(cmd: Command): void
   bridgeEmit(name: string, payload?: unknown, fromDisplayId?: string): void
@@ -52,6 +53,10 @@ const api: ExhibitAPI = {
   async readPackageFile(relPath) {
     const buf = await ipcRenderer.invoke(IPC.READ_PACKAGE_FILE, relPath)
     return new Uint8Array(buf)
+  },
+
+  existsPackageFile(relPath) {
+    return ipcRenderer.invoke(IPC.EXISTS_PACKAGE_FILE, relPath)
   },
 
   getBootInfo() {

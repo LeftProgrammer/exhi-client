@@ -44,6 +44,17 @@ export class IpcBus {
       return fs.readFile(safe)
     })
 
+    ipcMain.handle(IPC.EXISTS_PACKAGE_FILE, async (_e, relPath: string) => {
+      const safe = this.safeJoin(this.pkg.rootPath, relPath)
+      if (!safe) return false
+      try {
+        await fs.access(safe)
+        return true
+      } catch {
+        return false
+      }
+    })
+
     ipcMain.handle(
       IPC.RUN_SYSTEM_ACTION,
       async (_e, invoke: { action: string; params: Record<string, unknown> }) => {

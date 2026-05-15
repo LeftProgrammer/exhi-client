@@ -206,10 +206,11 @@ async function runViteBuild(pkgDir) {
   console.log(`[pack-cli] 运行 vite build ...`)
   const isWindows = process.platform === 'win32'
   await new Promise((resolve, reject) => {
+    // Windows 上 spawn .cmd 必须 shell:true（Node 20.12+ 安全策略，否则 EINVAL）
     const proc = spawn(isWindows ? 'npm.cmd' : 'npm', ['run', 'build'], {
       cwd: pkgDir,
       stdio: 'inherit',
-      shell: false
+      shell: isWindows
     })
     proc.on('exit', (code) => (code === 0 ? resolve() : reject(new Error(`vite build exit ${code}`))))
     proc.on('error', reject)

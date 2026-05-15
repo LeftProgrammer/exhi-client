@@ -58,13 +58,9 @@ export class SceneOrchestrator {
    * 通过 exhi-pkg:// 协议加载（与 web 内容用同一套），缺失则静默跳过。
    */
   private async loadProjectActions() {
-    try {
-      // 先探测是否存在（用 fetch 读 HEAD 之类不可靠，直接用 readPackageFile 试）
-      await window.exhibit.readPackageFile('actions.js')
-    } catch {
-      // 没有就跳过
-      return
-    }
+    // 先探测文件是否存在（不存在静默跳过，避免主进程 ENOENT 噪音）
+    const exists = await window.exhibit.existsPackageFile('actions.js')
+    if (!exists) return
     try {
       // 用 exhi-pkg:// URL 动态 import；@vite-ignore 让 Vite 不静态分析
       const url = resolvePkgUrl('actions.js')
