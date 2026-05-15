@@ -2,14 +2,30 @@
 import { ref } from 'vue'
 
 interface Props {
-  title: string
-  subtitle: string
-  iconUrl: string
+  /** 卡片背景图（含设计稿里的边框/角标/光带的整张图）*/
+  bgUrl: string
+  /** 卡片标题图（含中文标题 + 拼音副标题，整张图来自蓝湖切图）*/
+  titleImage?: string
+  /** fallback 标题（titleImage 缺失或加载失败时显示） */
+  titleFallback: string
+  /** fallback 副标题（仅在没有 titleImage 时使用） */
+  subtitleFallback?: string
+  /** 标题在卡片内的横向偏移百分比（两张卡片背景图镜像时需要分别设置） */
+  titleLeft?: string
+  /** 标题在卡片内的纵向偏移百分比 */
+  titleTop?: string
+  /** 标题宽度百分比 */
+  titleWidth?: string
 }
-defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  titleLeft: '22%',
+  titleTop: '18%',
+  titleWidth: '50%'
+})
 defineEmits<{ (e: 'enter'): void }>()
 
 const pressed = ref(false)
+const imgError = ref(false)
 
 function onDown() {
   pressed.value = true
@@ -28,261 +44,106 @@ function onUp() {
     @pointerleave="onUp"
     @click="$emit('enter')"
   >
-    <!-- 4 个角的装饰角标 -->
-    <span class="corner corner--tl" />
-    <span class="corner corner--tr" />
-    <span class="corner corner--bl" />
-    <span class="corner corner--br" />
+    <!-- 卡片底图：设计稿里所有静态视觉都在这里 -->
+    <img class="entry-card__bg" :src="bgUrl" alt="" aria-hidden="true" />
 
-    <!-- 左右光带装饰 -->
-    <span class="stripe stripe--left" />
-    <span class="stripe stripe--right" />
-
-    <div class="content">
-      <div class="title-row">
-        <h2 class="title">{{ title }}</h2>
-        <p class="subtitle">{{ subtitle }}</p>
-      </div>
-
-      <div class="icon-wrap">
-        <img :src="iconUrl" alt="" class="icon" />
-        <span class="icon-halo" />
+    <!-- 标题层（靠卡片左上） -->
+    <div
+      class="entry-card__title"
+      :style="{ top: props.titleTop, left: props.titleLeft, width: props.titleWidth }"
+    >
+      <img
+        v-if="titleImage && !imgError"
+        class="entry-card__title-img"
+        :src="titleImage"
+        :alt="titleFallback"
+        @error="imgError = true"
+      />
+      <!-- titleImage 缺失时的 CSS fallback -->
+      <div v-else class="entry-card__title-fallback">
+        <h2 class="entry-card__title-text">{{ titleFallback }}</h2>
+        <p v-if="subtitleFallback" class="entry-card__subtitle">{{ subtitleFallback }}</p>
       </div>
     </div>
-
-    <!-- hover/press 时的扫光 -->
-    <span class="sweep" />
   </button>
 </template>
 
 <style scoped lang="scss">
 @use '@shared/styles/tokens' as t;
 
+$card-w: 38vh;
+$card-h: 52.5vh;
+
 .entry-card {
   position: relative;
-  width: 38vh;
-  height: 64vh;
-  background: linear-gradient(
-    180deg,
-    rgba(15, 35, 60, 0.4) 0%,
-    rgba(8, 24, 42, 0.6) 50%,
-    rgba(15, 35, 60, 0.4) 100%
-  );
-  border: 1px solid t.$color-border-soft;
-  border-radius: t.$radius-md;
-  cursor: pointer;
-  overflow: hidden;
-  transition:
-    transform t.$dur-base t.$ease-base,
-    box-shadow t.$dur-base t.$ease-base,
-    border-color t.$dur-base t.$ease-base;
-  outline: none;
+  width: $card-w;
+  height: $card-h;
+  background: transparent;
+  border: 0;
   padding: 0;
+  cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform t.$dur-base t.$ease-base;
 
   &:hover {
-    border-color: t.$color-border-strong;
-    box-shadow: t.$glow-accent;
     transform: translateY(-6px);
   }
-
   &.pressed {
     transform: translateY(-2px) scale(0.98);
     transition-duration: t.$dur-fast;
   }
 }
 
-/* ===== 角标 ===== */
-.corner {
-  position: absolute;
-  width: 5vh;
-  height: 5vh;
-  pointer-events: none;
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    background: t.$color-accent;
-    box-shadow: 0 0 8px t.$color-accent-glow;
-  }
-  /* 横条 */
-  &::before {
-    width: 100%;
-    height: 2px;
-  }
-  /* 竖条 */
-  &::after {
-    width: 2px;
-    height: 100%;
-  }
-
-  &--tl {
-    top: 0;
-    left: 0;
-    &::before {
-      top: 0;
-      left: 0;
-    }
-    &::after {
-      top: 0;
-      left: 0;
-    }
-  }
-  &--tr {
-    top: 0;
-    right: 0;
-    &::before {
-      top: 0;
-      right: 0;
-    }
-    &::after {
-      top: 0;
-      right: 0;
-    }
-  }
-  &--bl {
-    bottom: 0;
-    left: 0;
-    &::before {
-      bottom: 0;
-      left: 0;
-    }
-    &::after {
-      bottom: 0;
-      left: 0;
-    }
-  }
-  &--br {
-    bottom: 0;
-    right: 0;
-    &::before {
-      bottom: 0;
-      right: 0;
-    }
-    &::after {
-      bottom: 0;
-      right: 0;
-    }
-  }
-}
-
-/* ===== 左右光带 ===== */
-.stripe {
-  position: absolute;
-  top: 12%;
-  bottom: 12%;
-  width: 4px;
-  background: linear-gradient(
-    180deg,
-    transparent 0%,
-    t.$color-accent 20%,
-    t.$color-accent 80%,
-    transparent 100%
-  );
-  box-shadow: 0 0 12px t.$color-accent-glow;
-  pointer-events: none;
-
-  &--left {
-    left: 8%;
-  }
-  &--right {
-    right: 8%;
-  }
-}
-
-/* ===== 内容布局 ===== */
-.content {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: t.$space-lg t.$space-md;
-}
-
-.title-row {
-  text-align: center;
-  margin-bottom: t.$space-xl;
-  z-index: 2;
-}
-
-.title {
-  font-size: t.$fs-hero;
-  font-weight: t.$fw-medium;
-  letter-spacing: 0.3em;
-  color: t.$color-text-primary;
-  text-shadow: 0 0 18px rgba(0, 229, 212, 0.4);
-  margin: 0;
-}
-
-.subtitle {
-  font-size: t.$fs-h3;
-  letter-spacing: 0.4em;
-  color: t.$color-text-secondary;
-  margin-top: t.$space-sm;
-  opacity: 0.8;
-}
-
-/* ===== 图标 + 光晕 ===== */
-.icon-wrap {
-  position: relative;
-  width: 20vh;
-  height: 20vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.icon {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  z-index: 2;
-  filter: drop-shadow(0 0 12px rgba(0, 229, 212, 0.5));
-  pointer-events: none;
-}
-
-.icon-halo {
-  position: absolute;
-  inset: -10%;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(0, 229, 212, 0.25) 0%,
-    rgba(0, 229, 212, 0.08) 40%,
-    transparent 70%
-  );
-  animation: pulse 3s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 0.8;
-  }
-  50% {
-    transform: scale(1.1);
-    opacity: 1;
-  }
-}
-
-/* ===== 扫光（hover 时从下往上扫一次） ===== */
-.sweep {
+/* ===== 卡片底图 ===== */
+.entry-card__bg {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
   pointer-events: none;
-  background: linear-gradient(
-    180deg,
-    transparent 40%,
-    rgba(0, 229, 212, 0.12) 50%,
-    transparent 60%
-  );
-  transform: translateY(100%);
-  transition: transform t.$dur-slow t.$ease-base;
+  user-select: none;
+  -webkit-user-drag: none;
+  z-index: 1;
 }
-.entry-card:hover .sweep {
-  transform: translateY(-100%);
+
+/* ===== 标题层 =====
+   * 位置由 prop titleLeft / titleTop / titleWidth 传入（左右对称的卡片需要不同 left）
+   */
+.entry-card__title {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.entry-card__title-img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+/* CSS fallback：模拟标题图的视觉（领导关怀那张图没出时用） */
+.entry-card__title-fallback {
+  color: t.$color-text-primary;
+}
+
+.entry-card__title-text {
+  font-size: t.$fs-hero;
+  font-weight: t.$fw-medium;
+  letter-spacing: 0.2em;
+  margin: 0 0 t.$space-xs 0;
+  white-space: nowrap;
+}
+
+.entry-card__subtitle {
+  font-size: t.$fs-h3;
+  letter-spacing: 0.25em;
+  color: t.$color-text-secondary;
+  margin: 0;
+  opacity: 0.85;
+  font-weight: t.$fw-regular;
+  white-space: nowrap;
 }
 </style>

@@ -5,9 +5,15 @@ import { resolvePkgUrl } from '@shared/utils/url'
 
 const router = useRouter()
 
-const bgUrl = resolvePkgUrl('shared/bg-mountain.svg')
-const iconYushui = resolvePkgUrl('shared/icon-mountain.svg')
-const iconLeaders = resolvePkgUrl('shared/icon-leaders.svg')
+const bgVideoUrl = resolvePkgUrl('home/bg.mp4')
+/** 顶部装饰底纹（带光带/线条的底框，当前缺图时浏览器报 404，丢图后自动生效） */
+const headerBgUrl = resolvePkgUrl('home/header-bg.png')
+/** 顶部文字图（"情系白马 力通江海"） */
+const headerTextUrl = resolvePkgUrl('home/header.png')
+const cardBgYushui = resolvePkgUrl('home/card-bg-yushui.png')
+const cardBgLeaders = resolvePkgUrl('home/card-bg-leaders.png')
+const titleYushuiUrl = resolvePkgUrl('home/card-title-yushui.png')
+const titleLeadersUrl = resolvePkgUrl('home/card-title-leaders.png')
 
 function enterSection(sectionId: 'yushui' | 'leaders') {
   router.push({ name: 'section', params: { sectionId } })
@@ -16,68 +22,53 @@ function enterSection(sectionId: 'yushui' | 'leaders') {
 
 <template>
   <main class="home">
-    <!-- 背景层（直接走 exhi-pkg:// 协议，不经 Vite 静态资源解析） -->
-    <img class="home__bg" :src="bgUrl" alt="" aria-hidden="true" />
+    <!-- 背景视频层 -->
+    <video
+      class="home__bg-video"
+      :src="bgVideoUrl"
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="auto"
+      @contextmenu.prevent
+    />
+    <!-- 视频上方的轻度暗化（让前景元素更突出） -->
+    <div class="home__bg-veil" />
 
-    <!-- 顶部 banner -->
-    <header class="home__banner">
-      <span class="ornament ornament--left" />
-      <h1 class="home__title">情系白马 力通江海</h1>
-      <span class="ornament ornament--right" />
+    <!-- 顶部装饰栏：底纹 + 文字（双层结构）-->
+    <header class="home__header">
+      <!-- 底层：装饰栏底纹（科技感线条/光带），图缺时不显示 -->
+      <img class="home__header-bg" :src="headerBgUrl" alt="" aria-hidden="true" />
+      <!-- 上层：文字标题 -->
+      <img class="home__header-text" :src="headerTextUrl" alt="情系白马 力通江海" />
     </header>
 
-    <!-- 中央两个入口卡片 -->
+    <!-- 中央两张卡片 -->
     <section class="home__cards">
       <EntryCard
-        title="渝水新景"
-        subtitle="YU SHUI XIN JING"
-        :icon-url="iconYushui"
+        :bg-url="cardBgYushui"
+        :title-image="titleYushuiUrl"
+        title-fallback="渝水新景"
+        subtitle-fallback="YU SHUI XIN JING"
+        title-left="22%"
         @enter="enterSection('yushui')"
       />
       <EntryCard
-        title="领导关怀"
-        subtitle="LING DAO GUAN HUAI"
-        :icon-url="iconLeaders"
+        :bg-url="cardBgLeaders"
+        :title-image="titleLeadersUrl"
+        title-fallback="领导关怀"
+        subtitle-fallback="LING DAO GUAN HUAI"
+        title-left="15%"
+        title-width="60%"
         @enter="enterSection('leaders')"
       />
     </section>
-
-    <!-- 底部装饰文字 -->
-    <footer class="home__footer">
-      <span>BAIMA NAVIGATION AND POWER HUB</span>
-      <span class="dot">·</span>
-      <span>PARTY-BUILDING LEADS</span>
-      <span class="dot">·</span>
-      <span>CRAFTSMANSHIP BAIMA</span>
-    </footer>
-
-    <!-- 角落装饰 -->
-    <div class="home__corners">
-      <div class="bracket bracket--tl">
-        <span class="bracket__h" />
-        <span class="bracket__v" />
-        <span class="bracket__label">FK-80</span>
-        <span class="bracket__sub">BGH</span>
-      </div>
-      <div class="bracket bracket--tr">
-        <span class="bracket__h" />
-        <span class="bracket__v" />
-      </div>
-      <div class="bracket bracket--bl">
-        <span class="bracket__h" />
-        <span class="bracket__v" />
-      </div>
-      <div class="bracket bracket--br">
-        <span class="bracket__h" />
-        <span class="bracket__v" />
-      </div>
-    </div>
   </main>
 </template>
 
 <style scoped lang="scss">
 @use '@shared/styles/tokens' as t;
-@use '@shared/styles/mixins' as m;
 
 .home {
   position: relative;
@@ -85,59 +76,68 @@ function enterSection(sectionId: 'yushui' | 'leaders') {
   height: 100vh;
   overflow: hidden;
   background: t.$color-bg-primary;
-
-  &__bg {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    z-index: 0;
-    opacity: 0.6;
-  }
 }
 
-/* ===== Banner ===== */
-.home__banner {
-  position: relative;
+/* ===== 背景视频 ===== */
+.home__bg-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.home__bg-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at center, transparent 0%, rgba(5, 11, 26, 0.35) 70%),
+    linear-gradient(180deg, rgba(5, 11, 26, 0.2) 0%, transparent 30%, rgba(5, 11, 26, 0.4) 100%);
+}
+
+/* ===== 顶部装饰栏 =====
+   * 双层：底层是装饰栏底纹（横跨整屏宽），上层是居中的文字标题。
+   * header-bg.png 缺失时 img 自然不显示（broken icon 也不出，因为我们隐藏 alt）。
+   */
+.home__header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 2;
-  padding-top: 4vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: t.$space-md;
+  pointer-events: none;
 }
 
-.home__title {
-  font-size: t.$fs-display;
-  font-weight: t.$fw-medium;
-  letter-spacing: 0.5em;
-  color: t.$color-text-primary;
-  text-shadow: 0 0 20px t.$color-accent-glow;
-  margin: 0;
+/* 底纹：通栏宽度，按图本身高度 */
+.home__header-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
 }
 
-.ornament {
-  width: 24vh;
-  height: 2px;
-  background: linear-gradient(90deg, transparent 0%, t.$color-accent 50%, transparent 100%);
+/* 文字：居中、相对底纹叠加 */
+.home__header-text {
   position: relative;
-  &::before {
-    content: '';
-    position: absolute;
-    top: -4px;
-    width: 8px;
-    height: 8px;
-    background: t.$color-accent;
-    transform: rotate(45deg);
-    box-shadow: 0 0 10px t.$color-accent-glow;
-  }
-  &--left::before {
-    right: 0;
-  }
-  &--right::before {
-    left: 0;
-  }
+  width: 32%;
+  max-width: 800px;
+  height: auto;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
 }
 
 /* ===== 卡片区 ===== */
@@ -145,139 +145,22 @@ function enterSection(sectionId: 'yushui' | 'leaders') {
   position: relative;
   z-index: 2;
   width: 100%;
-  height: calc(100vh - 24vh);
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8vw;
-  animation: cards-in 1s t.$ease-base both;
+  gap: 6vw;
+  animation: cards-in 1.4s 0.4s t.$ease-base both;
 }
 
 @keyframes cards-in {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(30px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-/* ===== 底部 ===== */
-.home__footer {
-  position: absolute;
-  bottom: 2.4vh;
-  left: 0;
-  right: 0;
-  text-align: center;
-  z-index: 2;
-  font-size: t.$fs-small;
-  letter-spacing: 0.3em;
-  color: t.$color-text-muted;
-
-  .dot {
-    margin: 0 t.$space-sm;
-    color: t.$color-accent;
-  }
-}
-
-/* ===== 角落装饰 ===== */
-.home__corners {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-}
-.bracket {
-  position: absolute;
-  width: 8vh;
-  height: 8vh;
-
-  &__h,
-  &__v {
-    position: absolute;
-    background: t.$color-accent;
-    box-shadow: 0 0 6px t.$color-accent-glow;
-  }
-  &__h {
-    width: 100%;
-    height: 1px;
-  }
-  &__v {
-    width: 1px;
-    height: 100%;
-  }
-
-  &__label {
-    position: absolute;
-    font-size: t.$fs-mini;
-    letter-spacing: 0.2em;
-    color: t.$color-text-muted;
-  }
-  &__sub {
-    position: absolute;
-    font-size: t.$fs-mini;
-    letter-spacing: 0.2em;
-    color: t.$color-text-muted;
-    top: 4vh;
-  }
-
-  &--tl {
-    top: 2vh;
-    left: 2vh;
-    .bracket__h {
-      top: 0;
-      left: 0;
-    }
-    .bracket__v {
-      top: 0;
-      left: 0;
-    }
-    .bracket__label {
-      top: 1.5vh;
-      left: 1.5vh;
-    }
-    .bracket__sub {
-      top: 5vh;
-      left: 1.5vh;
-    }
-  }
-  &--tr {
-    top: 2vh;
-    right: 2vh;
-    .bracket__h {
-      top: 0;
-      right: 0;
-    }
-    .bracket__v {
-      top: 0;
-      right: 0;
-    }
-  }
-  &--bl {
-    bottom: 2vh;
-    left: 2vh;
-    .bracket__h {
-      bottom: 0;
-      left: 0;
-    }
-    .bracket__v {
-      bottom: 0;
-      left: 0;
-    }
-  }
-  &--br {
-    bottom: 2vh;
-    right: 2vh;
-    .bracket__h {
-      bottom: 0;
-      right: 0;
-    }
-    .bracket__v {
-      bottom: 0;
-      right: 0;
-    }
   }
 }
 </style>

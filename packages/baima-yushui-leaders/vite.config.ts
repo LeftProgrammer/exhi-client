@@ -11,14 +11,20 @@ import { resolve } from 'node:path'
  *  - build.outDir 输出到 dist/，pkg-cli 会把 dist/ 内容拷到最终项目包的 contents/
  *  - dev server 监听 5174（Runtime 的 protocol.ts 已配代理到此端口）
  *
+ * dev / build 差异：
+ *  - dev: publicDir 指向 contents/，让浏览器直接访问 /home/bg.mp4 等媒体
+ *    （配合 resolvePkgUrl 在浏览器分支的处理，可在浏览器预览首页）
+ *  - build: publicDir 设 false，避免把 contents/（大文件）复制进 dist/
+ *
  * 加新屏的步骤：
  *  1) src/<screen-id>/index.html + main.ts + App.vue
  *  2) 在下面 rollupOptions.input 加一行
  *  3) scenes.json 引用 contents/<screen-id>/index.html
  */
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   root: resolve(__dirname, 'src'),
   base: './',
+  publicDir: command === 'serve' ? resolve(__dirname, 'contents') : false,
   plugins: [vue()],
   server: {
     port: 5174,
@@ -51,4 +57,4 @@ export default defineConfig({
       '@assets': resolve(__dirname, 'contents')
     }
   }
-})
+}))
