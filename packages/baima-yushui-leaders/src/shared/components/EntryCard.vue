@@ -1,31 +1,41 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import MovingDot from '@shared/effects/MovingDot.vue'
+
+/**
+ * 流光路径内缩量。number 时四边一致；对象时分边可调。
+ * 与 MovingDot 的 Inset 同构（这里独立声明避免跨组件 type 导出耦合）。
+ */
+type Inset =
+  | number
+  | {
+      top?: number
+      right?: number
+      bottom?: number
+      left?: number
+    }
 
 interface Props {
-  /** 卡片背景图（含设计稿里的边框/角标/光带的整张图）*/
+  /** 卡片背景图 URL */
   bgUrl: string
-  /** 卡片标题图（含中文标题 + 拼音副标题，整张图来自蓝湖切图）*/
-  titleImage?: string
-  /** fallback 标题（titleImage 缺失或加载失败时显示） */
-  titleFallback: string
-  /** fallback 副标题（仅在没有 titleImage 时使用） */
-  subtitleFallback?: string
-  /** 标题在卡片内的横向偏移百分比（两张卡片背景图镜像时需要分别设置） */
-  titleLeft?: string
-  /** 标题在卡片内的纵向偏移百分比 */
-  titleTop?: string
-  /** 标题宽度百分比 */
-  titleWidth?: string
+  /** 关闭边框流光 */
+  noDot?: boolean
+  /** 流光方向：'cw' 顺时针 / 'ccw' 逆时针 */
+  direction?: 'cw' | 'ccw'
+  /** 流光路径四向内缩（贴背景图描边时用，0~50 百分比） */
+  dotInset?: Inset
+  /** 流光颜色（任何 CSS 颜色） */
+  dotColor?: string
 }
-const props = withDefaults(defineProps<Props>(), {
-  titleLeft: '22%',
-  titleTop: '18%',
-  titleWidth: '50%'
+withDefaults(defineProps<Props>(), {
+  noDot: false,
+  direction: 'cw',
+  dotInset: () => ({}),
+  dotColor: '#00e5d4'
 })
 defineEmits<{ (e: 'enter'): void }>()
 
 const pressed = ref(false)
-const imgError = ref(false)
 
 function onDown() {
   pressed.value = true
@@ -44,26 +54,22 @@ function onUp() {
     @pointerleave="onUp"
     @click="$emit('enter')"
   >
-    <!-- 卡片底图：设计稿里所有静态视觉都在这里 -->
+    <!-- 底图：所有静态视觉（边框、角标、装饰）-->
     <img class="entry-card__bg" :src="bgUrl" alt="" aria-hidden="true" />
 
-    <!-- 标题层（靠卡片左上） -->
-    <div
-      class="entry-card__title"
-      :style="{ top: props.titleTop, left: props.titleLeft, width: props.titleWidth }"
-    >
-      <img
-        v-if="titleImage && !imgError"
-        class="entry-card__title-img"
-        :src="titleImage"
-        :alt="titleFallback"
-        @error="imgError = true"
-      />
-      <!-- titleImage 缺失时的 CSS fallback -->
-      <div v-else class="entry-card__title-fallback">
-        <h2 class="entry-card__title-text">{{ titleFallback }}</h2>
-        <p v-if="subtitleFallback" class="entry-card__subtitle">{{ subtitleFallback }}</p>
-      </div>
+    <!-- 边框流光：内置圆角矩形，传 dot-inset 即可贴边走 -->
+    <MovingDot
+      v-if="!noDot"
+      :inset="dotInset"
+      speed="normal"
+      :direction="direction"
+      :color="dotColor"
+      class="entry-card__dot"
+    />
+
+    <!-- 内容层完全交给调用方（标题、图标等都通过 slot 自由摆放） -->
+    <div class="entry-card__content">
+      <slot />
     </div>
   </button>
 </template>
@@ -108,42 +114,18 @@ $card-h: 52.5vh;
   z-index: 1;
 }
 
-/* ===== 标题层 =====
-   * 位置由 prop titleLeft / titleTop / titleWidth 传入（左右对称的卡片需要不同 left）
+/* ===== 边框流光 ===== */
+.entry-card__dot {
+  z-index: 2; /* 在底图之上、内容之下 */
+}
+
+/* ===== 内容层 =====
+   * 占满整张卡片，调用方在 slot 内用绝对定位摆放标题/图标即可。
    */
-.entry-card__title {
+.entry-card__content {
   position: absolute;
-  z-index: 2;
+  inset: 0;
+  z-index: 3;
   pointer-events: none;
-}
-
-.entry-card__title-img {
-  width: 100%;
-  height: auto;
-  object-fit: contain;
-  display: block;
-}
-
-/* CSS fallback：模拟标题图的视觉（领导关怀那张图没出时用） */
-.entry-card__title-fallback {
-  color: t.$color-text-primary;
-}
-
-.entry-card__title-text {
-  font-size: t.$fs-hero;
-  font-weight: t.$fw-medium;
-  letter-spacing: 0.2em;
-  margin: 0 0 t.$space-xs 0;
-  white-space: nowrap;
-}
-
-.entry-card__subtitle {
-  font-size: t.$fs-h3;
-  letter-spacing: 0.25em;
-  color: t.$color-text-secondary;
-  margin: 0;
-  opacity: 0.85;
-  font-weight: t.$fw-regular;
-  white-space: nowrap;
 }
 </style>

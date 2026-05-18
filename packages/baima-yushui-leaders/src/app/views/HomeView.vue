@@ -31,6 +31,8 @@ function enterSection(sectionId: 'yushui' | 'leaders') {
       loop
       playsinline
       preload="auto"
+      disablepictureinpicture
+      disableremoteplayback
       @contextmenu.prevent
     />
     <!-- 视频上方的轻度暗化（让前景元素更突出） -->
@@ -46,23 +48,28 @@ function enterSection(sectionId: 'yushui' | 'leaders') {
 
     <!-- 中央两张卡片 -->
     <section class="home__cards">
+      <!--
+        dot-inset 数值是分别从两张 PNG 实测的描边位置（像素扫描 + 转百分比）：
+          渝水：L=11.18  T=3.76  R=3.40  B=4.61
+          领导：L=3.32   T=3.76  R=11.68 B=4.61
+        微小偏差由 object-fit:contain 的容器宽高比差异引起（基本可忽略）。
+      -->
       <EntryCard
         :bg-url="cardBgYushui"
-        :title-image="titleYushuiUrl"
-        title-fallback="渝水新景"
-        subtitle-fallback="YU SHUI XIN JING"
-        title-left="22%"
+        direction="ccw"
+        :dot-inset="{ top: 4, right: 3.8, bottom: 5, left: 11.6 }"
         @enter="enterSection('yushui')"
-      />
+      >
+        <img class="card-title card-title--yushui" :src="titleYushuiUrl" alt="渝水新景" />
+      </EntryCard>
       <EntryCard
         :bg-url="cardBgLeaders"
-        :title-image="titleLeadersUrl"
-        title-fallback="领导关怀"
-        subtitle-fallback="LING DAO GUAN HUAI"
-        title-left="15%"
-        title-width="60%"
+        direction="cw"
+        :dot-inset="{ top: 4, right: 11.6, bottom: 5, left: 3.8 }"
         @enter="enterSection('leaders')"
-      />
+      >
+        <img class="card-title card-title--leaders" :src="titleLeadersUrl" alt="领导关怀" />
+      </EntryCard>
     </section>
   </main>
 </template>
@@ -78,7 +85,17 @@ function enterSection(sectionId: 'yushui' | 'leaders') {
   background: t.$color-bg-primary;
 }
 
-/* ===== 背景视频 ===== */
+/* ===== 背景视频 =====
+   * 用 translateZ(0) 强制把 video 隔离到独立 GPU 合成层。
+   *
+   * 为什么这样能根治"每圈卡顿"：
+   * 视频元素和 canvas 默认共享一个合成层（z-index/绝对定位共栈）。视频
+   * 每隔几秒解码一个 I 帧时主线程会去做层合成 → 同层的 canvas 跟着被
+   * "暂停"一帧，肉眼看就是流光每圈一丝丝卡。
+   * 加 translateZ(0) 后视频走 GPU 直出，合成开销独立，跟 canvas 完全解耦。
+   *
+   * isolation:isolate 防止 video 跟其它兄弟元素被合并到同一个 stacking ctx。
+   */
 .home__bg-video {
   position: absolute;
   inset: 0;
@@ -87,6 +104,9 @@ function enterSection(sectionId: 'yushui' | 'leaders') {
   object-fit: cover;
   z-index: 0;
   pointer-events: none;
+  will-change: transform;
+  transform: translateZ(0);
+  isolation: isolate;
 }
 
 .home__bg-veil {
@@ -162,5 +182,30 @@ function enterSection(sectionId: 'yushui' | 'leaders') {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* ===== 卡片标题图 =====
+   * 通过 EntryCard 的默认 slot 注入；位置/尺寸跟蓝湖切图一一对应，
+   * 两张卡片左右镜像所以 left/width 分别设。
+   */
+.card-title {
+  position: absolute;
+  top: 18%;
+  height: auto;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+  display: block;
+}
+
+.card-title--yushui {
+  left: 22%;
+  width: 50%;
+}
+
+.card-title--leaders {
+  left: 15%;
+  width: 60%;
 }
 </style>
