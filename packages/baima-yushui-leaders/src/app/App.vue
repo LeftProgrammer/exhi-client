@@ -40,7 +40,12 @@ on('app:goto', (payload) => {
 
 <template>
   <router-view v-slot="{ Component, route }">
-    <transition name="page" mode="out-in">
+    <!--
+      不用 mode="out-in"——它会让旧页完全离场后才挂载新页，中间一段空窗。
+      用默认 mode：新旧 view 同时存在，靠 CSS 让旧 view 在过渡期 absolute 定位
+      脱离文档流，新 view 正常进场，两者交叠淡出/淡入 → 视觉无缝、不黑屏。
+    -->
+    <transition name="page">
       <component :is="Component" :key="route.path" />
     </transition>
   </router-view>
@@ -49,19 +54,33 @@ on('app:goto', (payload) => {
 <style lang="scss">
 @use '@shared/styles/tokens' as t;
 
-/* 全局页面切换动画：放在非 scoped 块里 */
-.page-enter-active,
+/* ===== 全局页面切换 =====
+ * 旧页跟新页同时存在 → 旧页用 absolute 脱离文档流（不挤压新页）→
+ * 各跑各的 opacity + scale 过渡 → 视觉无缝衔接，没有"黑屏中转"。
+ *
+ * 时长：进场 720ms（让新页从容浮现）/ 离场 420ms（旧页早走一步避免拥堵）。
+ * 缩放：进场 1.04 → 1（远到近）、离场 1 → 0.97（近到远）—— 营造空间纵深感。
+ */
+.page-enter-active {
+  transition:
+    opacity 720ms t.$ease-base,
+    transform 720ms t.$ease-base;
+}
 .page-leave-active {
   transition:
-    opacity t.$dur-page t.$ease-base,
-    transform t.$dur-page t.$ease-base;
+    opacity 420ms t.$ease-base,
+    transform 420ms t.$ease-base;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none; // 离场页禁交互，避免误点
 }
 .page-enter-from {
   opacity: 0;
-  transform: scale(1.02);
+  transform: scale(1.04);
 }
 .page-leave-to {
   opacity: 0;
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 </style>

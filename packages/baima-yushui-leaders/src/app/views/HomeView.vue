@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
 import EntryCard from '@shared/components/EntryCard.vue'
+import { usePageLeave } from '@shared/composables/usePageLeave'
 import { resolvePkgUrl } from '@shared/utils/url'
-
-const router = useRouter()
 
 const bgVideoUrl = resolvePkgUrl('home/bg.mp4')
 /** 顶部装饰底纹（带光带/线条的底框，当前缺图时浏览器报 404，丢图后自动生效） */
@@ -15,8 +13,20 @@ const cardBgLeaders = resolvePkgUrl('home/card-bg-leaders.png')
 const titleYushuiUrl = resolvePkgUrl('home/card-title-yushui.png')
 const titleLeadersUrl = resolvePkgUrl('home/card-title-leaders.png')
 
+/**
+ * 离场动画状态机：leaving 翻 true 触发卡片飞出 → 短暂延迟后切路由。
+ *
+ * 延迟时长不再等卡片飞完——全局 transition 会在 router.push 后
+ * 立刻同时跑新旧页的淡入淡出（mode 不再是 out-in），新页跟卡片飞出
+ * 几乎同步进行 → 用户看到的是「卡片飞走 + 新页从远处浮现」叠加效果，
+ * 中间没有黑屏。
+ *
+ * 这里 180ms 是让卡片先动起来一点点（视觉先有反馈），再切路由。
+ */
+const { leaving, leaveTo } = usePageLeave({ duration: 180 })
+
 function enterSection(sectionId: 'yushui' | 'leaders') {
-  router.push({ name: 'section', params: { sectionId } })
+  leaveTo({ name: 'section', params: { sectionId } })
 }
 </script>
 
@@ -46,36 +56,47 @@ function enterSection(sectionId: 'yushui' | 'leaders') {
       <img class="home__header-text" :src="headerTextUrl" alt="情系白马 力通江海" />
     </header>
 
-    <!-- 中央两张卡片 -->
-    <section class="home__cards">
+    <!--
+      中央两张卡片
+      - 进入：左卡从左侧滑入、右卡从右侧滑入（不对称仪式感）
+      - 离开：点击后两张卡分别飞回各自来的方向 + 淡出，动画完再跳路由
+      - dot-inset 是实测两张 PNG 描边位置的百分比（左右镜像不对称）
+    -->
+    <section class="home__cards" :class="{ leaving }">
       <!--
-        dot-inset 数值是分别从两张 PNG 实测的描边位置（像素扫描 + 转百分比）：
-          渝水：L=11.18  T=3.76  R=3.40  B=4.61
-          领导：L=3.32   T=3.76  R=11.68 B=4.61
-        微小偏差由 object-fit:contain 的容器宽高比差异引起（基本可忽略）。
+        每张卡片用一个 div 包一层：
+          - 外层 .home__card-wrap 承担"进/出场动画"（transform 被 animation 占用）
+          - 内层 EntryCard 完全自由，hover 缩放/位移不会被外层 animation 顶掉
+        这是处理"动画 transform 跟 hover transform 冲突"的标准做法。
       -->
-      <EntryCard
-        :bg-url="cardBgYushui"
-        direction="ccw"
-        :dot-inset="{ top: 4, right: 3.8, bottom: 5, left: 11.6 }"
-        @enter="enterSection('yushui')"
-      >
-        <img class="card-title card-title--yushui" :src="titleYushuiUrl" alt="渝水新景" />
-      </EntryCard>
-      <EntryCard
-        :bg-url="cardBgLeaders"
-        direction="cw"
-        :dot-inset="{ top: 4, right: 11.6, bottom: 5, left: 3.8 }"
-        @enter="enterSection('leaders')"
-      >
-        <img class="card-title card-title--leaders" :src="titleLeadersUrl" alt="领导关怀" />
-      </EntryCard>
+      <div class="home__card-wrap home__card-wrap--left">
+        <EntryCard
+          :bg-url="cardBgYushui"
+          direction="ccw"
+          :dot-inset="{ top: 4, right: 3.8, bottom: 5, left: 11.6 }"
+          @enter="enterSection('yushui')"
+        >
+          <img class="card-title card-title--yushui" :src="titleYushuiUrl" alt="渝水新景" />
+        </EntryCard>
+      </div>
+      <div class="home__card-wrap home__card-wrap--right">
+        <EntryCard
+          :bg-url="cardBgLeaders"
+          direction="cw"
+          shine-direction="rl"
+          :dot-inset="{ top: 4, right: 11.6, bottom: 5, left: 3.8 }"
+          @enter="enterSection('leaders')"
+        >
+          <img class="card-title card-title--leaders" :src="titleLeadersUrl" alt="领导关怀" />
+        </EntryCard>
+      </div>
     </section>
   </main>
 </template>
 
 <style scoped lang="scss">
 @use '@shared/styles/tokens' as t;
+@use '@shared/styles/transitions' as fx;
 
 .home {
   position: relative;
@@ -160,7 +181,10 @@ function enterSection(sectionId: 'yushui' | 'leaders') {
   pointer-events: none;
 }
 
-/* ===== 卡片区 ===== */
+/* ===== 卡片区 =====
+   * 容器只管布局，不挂动画。进/出场动画落在 .home__card 上，
+   * 这样两张卡可以各自从不同方向飞入/飞出。
+   */
 .home__cards {
   position: relative;
   z-index: 2;
@@ -170,18 +194,26 @@ function enterSection(sectionId: 'yushui' | 'leaders') {
   align-items: center;
   justify-content: center;
   gap: 6vw;
-  animation: cards-in 1.4s 0.4s t.$ease-base both;
 }
 
-@keyframes cards-in {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* ===== 进/出场动画 =====
+   * 挂在外层 wrap 上（不影响内部 EntryCard 的 hover 效果）。
+   * 时长跟 usePageLeave 的 duration 对齐：
+   *   - 进场 1.6s + 0.2s delay：仪式感缓入
+   *   - 离场 0.6s：干脆飞出（HomeView 那边 usePageLeave duration: 620）
+   */
+.home__card-wrap--left {
+  @include fx.enter-from-left;
+}
+.home__card-wrap--right {
+  @include fx.enter-from-right;
+}
+
+.home__cards.leaving .home__card-wrap--left {
+  @include fx.exit-to-left;
+}
+.home__cards.leaving .home__card-wrap--right {
+  @include fx.exit-to-right;
 }
 
 /* ===== 卡片标题图 =====
