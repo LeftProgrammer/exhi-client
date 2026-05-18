@@ -48,12 +48,18 @@ function enterSection(sectionId: 'yushui' | 'leaders') {
     <!-- 视频上方的轻度暗化（让前景元素更突出） -->
     <div class="home__bg-veil" />
 
-    <!-- 顶部装饰栏：底纹 + 文字（双层结构）-->
+    <!-- 顶部装饰栏：底纹 + 文字 + 独立扫光层（三层结构）-->
     <header class="home__header">
-      <!-- 底层：装饰栏底纹（科技感线条/光带），图缺时不显示 -->
+      <!-- z-index 1：装饰栏底纹（带光带/线条的底框） -->
       <img class="home__header-bg" :src="headerBgUrl" alt="" aria-hidden="true" />
-      <!-- 上层：文字标题 -->
+      <!-- z-index 2：文字标题图 -->
       <img class="home__header-text" :src="headerTextUrl" alt="情系白马 力通江海" />
+      <!--
+        z-index 3：独立扫光层，整屏宽。
+        放在最上层 → 扫光从中心向两侧扫时会"掠过"文字图（半透明青光罩文字
+        一瞬而过），文字依然清晰可见，且扫光气流通贯整屏不被打断。
+      -->
+      <div class="home__header-shine" aria-hidden="true" />
     </header>
 
     <!--
@@ -69,26 +75,37 @@ function enterSection(sectionId: 'yushui' | 'leaders') {
           - 内层 EntryCard 完全自由，hover 缩放/位移不会被外层 animation 顶掉
         这是处理"动画 transform 跟 hover transform 冲突"的标准做法。
       -->
+      <!--
+        三层结构（关键：避免不同 animation 的 transform 互相覆盖）：
+          home__card-wrap   ← 进/出场 transform（滑入飞出）
+          home__card-float  ← 悬浮微动 transform（缓慢上下浮动）
+          EntryCard         ← hover transform（鼠标移上去抬起）
+        三层各管各的 transform，永不冲突。
+      -->
       <div class="home__card-wrap home__card-wrap--left">
-        <EntryCard
-          :bg-url="cardBgYushui"
-          direction="ccw"
-          :dot-inset="{ top: 4, right: 3.8, bottom: 5, left: 11.6 }"
-          @enter="enterSection('yushui')"
-        >
-          <img class="card-title card-title--yushui" :src="titleYushuiUrl" alt="渝水新景" />
-        </EntryCard>
+        <div class="home__card-float">
+          <EntryCard
+            :bg-url="cardBgYushui"
+            direction="ccw"
+            :dot-inset="{ top: 4, right: 3.8, bottom: 5, left: 11.6 }"
+            @enter="enterSection('yushui')"
+          >
+            <img class="card-title card-title--yushui" :src="titleYushuiUrl" alt="渝水新景" />
+          </EntryCard>
+        </div>
       </div>
       <div class="home__card-wrap home__card-wrap--right">
-        <EntryCard
-          :bg-url="cardBgLeaders"
-          direction="cw"
-          shine-direction="rl"
-          :dot-inset="{ top: 4, right: 11.6, bottom: 5, left: 3.8 }"
-          @enter="enterSection('leaders')"
-        >
-          <img class="card-title card-title--leaders" :src="titleLeadersUrl" alt="领导关怀" />
-        </EntryCard>
+        <div class="home__card-float">
+          <EntryCard
+            :bg-url="cardBgLeaders"
+            direction="cw"
+            shine-direction="rl"
+            :dot-inset="{ top: 4, right: 11.6, bottom: 5, left: 3.8 }"
+            @enter="enterSection('leaders')"
+          >
+            <img class="card-title card-title--leaders" :src="titleLeadersUrl" alt="领导关怀" />
+          </EntryCard>
+        </div>
       </div>
     </section>
   </main>
@@ -156,29 +173,52 @@ function enterSection(sectionId: 'yushui' | 'leaders') {
   pointer-events: none;
 }
 
-/* 底纹：通栏宽度，按图本身高度 */
+/* z-index 1：底纹图（通栏） */
 .home__header-bg {
   position: absolute;
   top: 0;
   left: 0;
+  z-index: 1;
   width: 100%;
   height: auto;
   object-fit: contain;
+  pointer-events: none;
   user-select: none;
   -webkit-user-drag: none;
-  pointer-events: none;
+  @include fx.enter-fade-in($duration: 0.8s, $delay: 0.1s);
 }
 
-/* 文字：居中、相对底纹叠加 */
+/* z-index 2：文字标题图（居中，相对 flex 流，从上滑下淡入） */
 .home__header-text {
   position: relative;
+  z-index: 2;
   width: 32%;
   max-width: 800px;
   height: auto;
   object-fit: contain;
+  pointer-events: none;
   user-select: none;
   -webkit-user-drag: none;
+  @include fx.enter-fade-down($duration: 0.9s, $delay: 0.4s);
+}
+
+/* z-index 3：独立扫光层（覆盖整个 header，扫光从中心向两侧）
+ * 跨在文字 z-index 之上：扫光经过文字时会一瞬掠过（半透明，文字仍清晰可见），
+ * 整条气流贯通整屏不被打断。
+ *
+ * 高度取一个估计值——底纹图通常很矮（顶部装饰条），16vh 给足够余量；
+ * 真实业务里如果底纹图高度变动大，可以改成跟 home__header-bg 的实际高度
+ * 同步（用 ResizeObserver 算一下，或固定一个明确的 height 值）。
+ */
+.home__header-shine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 9vh;
+  z-index: 3;
   pointer-events: none;
+  @include fx.auto-shine-from-center($duration: 1.4s, $interval: 5s, $width: 25%);
 }
 
 /* ===== 卡片区 =====
@@ -193,7 +233,7 @@ function enterSection(sectionId: 'yushui' | 'leaders') {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6vw;
+  gap: 9vw;
 }
 
 /* ===== 进/出场动画 =====
@@ -207,6 +247,11 @@ function enterSection(sectionId: 'yushui' | 'leaders') {
 }
 .home__card-wrap--right {
   @include fx.enter-from-right;
+}
+
+/* 悬浮微动层：缓慢上下浮动 + 微缩放，5s 周期跟扫光对齐 */
+.home__card-float {
+  @include fx.float-breath;
 }
 
 .home__cards.leaving .home__card-wrap--left {
@@ -229,6 +274,12 @@ function enterSection(sectionId: 'yushui' | 'leaders') {
   -webkit-user-drag: none;
   pointer-events: none;
   display: block;
+  /**
+   * 标题在卡片"落地"后才淡入：
+   *   - 卡片 wrap 进场：0.2s delay + 0.6s duration → 0.8s 落地
+   *   - 标题在 0.9s 时开始淡入，让卡片先就位再显字
+   */
+  @include fx.enter-fade-in($duration: 0.5s, $delay: 0.9s);
 }
 
 .card-title--yushui {

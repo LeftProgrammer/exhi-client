@@ -85,7 +85,7 @@ $ease-leave: cubic-bezier(0.7, 0, 0.84, 0);
   }
 }
 
-@keyframes fx-fade-down {
+@keyframes fx-fade-down-out {
   from {
     opacity: 1;
     transform: translateY(0);
@@ -96,13 +96,35 @@ $ease-leave: cubic-bezier(0.7, 0, 0.84, 0);
   }
 }
 
+/** 进场：从顶上往下滑入（标题、banner 常用） */
+@keyframes fx-fade-from-top {
+  from {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/** 纯 opacity 淡入（不带位移），延迟错峰用 */
+@keyframes fx-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 // ===== 进/出场 mixin =====
 
-@mixin enter-from-left($duration: 1.6s, $delay: 0.2s) {
+@mixin enter-from-left($duration: 0.6s, $delay: 0.2s) {
   animation: fx-enter-from-left $duration $delay $ease-enter both;
 }
 
-@mixin enter-from-right($duration: 1.6s, $delay: 0.2s) {
+@mixin enter-from-right($duration: 0.6s, $delay: 0.2s) {
   animation: fx-enter-from-right $duration $delay $ease-enter both;
 }
 
@@ -118,8 +140,18 @@ $ease-leave: cubic-bezier(0.7, 0, 0.84, 0);
   animation: fx-fade-up $duration $delay $ease-enter both;
 }
 
+/** 顶部标题用：从上往下滑入 + 淡入 */
+@mixin enter-fade-down($duration: 0.9s, $delay: 0s) {
+  animation: fx-fade-from-top $duration $delay $ease-enter both;
+}
+
+/** 纯淡入（无位移），错峰场景常用：进场动画落地后，把文字/图标淡上来 */
+@mixin enter-fade-in($duration: 0.6s, $delay: 0s) {
+  animation: fx-fade-in $duration $delay $ease-enter both;
+}
+
 @mixin exit-fade-down($duration: 0.5s) {
-  animation: fx-fade-down $duration $ease-leave both;
+  animation: fx-fade-down-out $duration $ease-leave both;
 }
 
 // ===== 悬停扫光 =====
@@ -233,5 +265,152 @@ $ease-leave: cubic-bezier(0.7, 0, 0.84, 0);
   }
   to {
     left: -80%;
+  }
+}
+
+// ===== 定时双向扫光（顶部边框/装饰条用）=====
+//
+// 从中心往两侧定时扫光：两道亮带分别向左、向右滑出，间歇 $interval 秒。
+// 实现：::before 向左扫、::after 向右扫，用 infinite + 占空比的 keyframe
+// 拼出"亮 1.5s → 静止 $interval-1.5 s"的循环节奏。
+//
+// 调用方需要保证（mixin 不再强制覆盖布局属性）：
+//   - 自身是 positioned 容器（relative/absolute 等）
+//   - overflow: hidden（不让亮带溢出容器）
+//
+// 用法：
+//   .header-bg {
+//     position: relative;
+//     overflow: hidden;
+//     @include fx.auto-shine-from-center;
+//   }
+//
+@mixin auto-shine-from-center(
+  $color: t.$color-accent,
+  $duration: 1.4s,
+  $interval: 5s,
+  $width: 30%
+) {
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: $width;
+    /**
+     * 关键：两条亮带的**中心**严格对齐屏幕中心。
+     *   left: 50% 把亮带左边对到中心 → margin-left 再往左挪 width/2
+     *   → 亮带中心刚好落在屏幕 50% 处。
+     * 0 时刻两条亮带在中心完全重叠 → 视觉上是「一道光在中心闪起」，
+     * 然后向左/向右分裂滑出。
+     */
+    left: 50%;
+    margin-left: calc(#{$width} / -2);
+    pointer-events: none;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.1) 30%,
+      rgba($color, 0.55) 50%,
+      rgba(255, 255, 255, 0.1) 70%,
+      transparent 100%
+    );
+    will-change: transform, opacity;
+  }
+
+  &::before {
+    animation: fx-auto-shine-left $interval linear infinite;
+    animation-delay: 0.4s;
+  }
+
+  &::after {
+    animation: fx-auto-shine-right $interval linear infinite;
+    animation-delay: 0.4s;
+  }
+}
+
+/**
+ * 占空比节奏：0~38% 跑完一次扫光，38%~100% 静止等下一轮。
+ * 跟父级 $interval 联动：interval=5s 时扫光占 1.9s（38%），静止 3.1s。
+ *
+ * 位移目标 ±60vw：亮带中心从屏幕中央滑到屏幕外 ~10vw 处（足够淡出不可见）。
+ */
+@keyframes fx-auto-shine-left {
+  0% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  6% {
+    opacity: 1;
+  }
+  32% {
+    opacity: 1;
+  }
+  38% {
+    transform: translateX(-60vw);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(-60vw);
+    opacity: 0;
+  }
+}
+
+@keyframes fx-auto-shine-right {
+  0% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+  6% {
+    opacity: 1;
+  }
+  32% {
+    opacity: 1;
+  }
+  38% {
+    transform: translateX(60vw);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(60vw);
+    opacity: 0;
+  }
+}
+
+// ===== 悬浮微动 (float-breath) =====
+//
+// 卡片缓慢上下浮动 + 微缩放，营造"悬浮在空中随气流轻晃"的呼吸感。
+// 不用光晕/亮度，只动 transform —— 纯 GPU 合成，**零闪动**。
+//
+// 周期 5s 跟顶部扫光对齐；幅度小（±4px / ±0.5% scale）→ 视觉细腻不浮夸。
+// 缓动用 ease-in-out → 上下渐入渐出对称，呼吸节奏天然。
+//
+// 用法（关键：要给一个"专门承担呼吸 transform 的层"，避免跟 hover/进场 transform 冲突）：
+//
+//   <div class="card-wrap">             ← 进/出场动画
+//     <div class="card-float">          ← 这一层挂 float-breath
+//       <Card />                        ← hover transform 还能自由抬起
+//     </div>
+//   </div>
+//
+//   .card-float { @include fx.float-breath; }
+//
+// 多个卡片同步：同样的 $duration + 同样的 $delay → 浏览器以挂载时刻为绝对
+// 锚点起跑，相位永远一致。
+//
+@mixin float-breath($duration: 5s, $delay: 0s, $rise: 12px, $scale: 1.02) {
+  animation: fx-float-breath $duration $delay ease-in-out infinite;
+  --float-rise: -#{$rise}; // CSS 变量供 keyframe 取值，方便多组实例传不同幅度
+  --float-scale: #{$scale};
+}
+
+@keyframes fx-float-breath {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(var(--float-rise, -4px)) scale(var(--float-scale, 1.005));
   }
 }

@@ -71,6 +71,7 @@ function onUp() {
       speed="normal"
       :direction="direction"
       :color="dotColor"
+      :thickness="6"
       class="entry-card__dot"
     />
 
