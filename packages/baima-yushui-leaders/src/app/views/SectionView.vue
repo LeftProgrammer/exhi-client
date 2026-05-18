@@ -154,6 +154,7 @@ watch(
 
 <style scoped lang="scss">
 @use '@shared/styles/tokens' as t;
+@use '@shared/styles/transitions' as fx;
 
 .section-view {
   position: relative;
@@ -174,6 +175,58 @@ watch(
   z-index: 0;
   opacity: 0.4;
   pointer-events: none;
+}
+
+/* ===== 进场动画 =====
+ * 错峰淡入，营造"内容从远到近、从中心展开"的纵深感：
+ *   - banner 从顶部滑下                  delay 100ms
+ *   - 左侧 viewer 从左侧滑入             delay 250ms
+ *   - 右侧 tabs 从右侧滑入               delay 350ms
+ *   - 底部 controls 从底部托起           delay 450ms
+ * 配合全局页面切换（淡入 720ms），整套节奏舒展不仓促。
+ */
+.banner {
+  @include fx.enter-fade-up($duration: 0.7s, $delay: 0.1s);
+}
+.stage__viewer {
+  animation: fx-slide-in-left 0.8s 0.25s fx.$ease-enter both;
+}
+.stage__tabs {
+  animation: fx-slide-in-right 0.8s 0.35s fx.$ease-enter both;
+}
+.controls {
+  animation: fx-rise-up 0.7s 0.45s fx.$ease-enter both;
+}
+
+@keyframes fx-slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes fx-slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes fx-rise-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ===== Banner ===== */

@@ -1,0 +1,237 @@
+// ============================================================================
+// 展厅级页面动效合集
+//
+// 提供两类工具：
+//   ① keyframes：通用进/出场动画（slide-in-from-left/right、fade-up 等）
+//   ② mixins：常见交互效果（hover-shine 扫光、page-enter/page-leave 等）
+//
+// 使用：
+//   @use '@shared/styles/transitions' as fx;
+//
+//   .my-card {
+//     @include fx.enter-from-left;       // 进场
+//   }
+//   .my-card.leaving {
+//     @include fx.exit-to-left;          // 离场（受外部 .leaving 类切换）
+//   }
+//   .my-button {
+//     @include fx.hover-shine;           // 悬停扫光（依赖 .my-button:hover）
+//   }
+// ============================================================================
+@use 'tokens' as t;
+
+// ===== 缓动曲线（行业经典，比 ease-out 更"有故事感") =====
+
+/** 进场用：前期飞快、后期绵软减速。awwwards 类站点最常用 */
+$ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
+
+/** 离场用：前期缓启、后期飞快。气势感强 */
+$ease-leave: cubic-bezier(0.7, 0, 0.84, 0);
+
+// ===== 通用 keyframes =====
+
+@keyframes fx-enter-from-left {
+  from {
+    opacity: 0;
+    transform: translateX(-60vw) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes fx-enter-from-right {
+  from {
+    opacity: 0;
+    transform: translateX(60vw) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes fx-exit-to-left {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-60vw) scale(0.9);
+  }
+}
+
+@keyframes fx-exit-to-right {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(60vw) scale(0.9);
+  }
+}
+
+@keyframes fx-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fx-fade-down {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+}
+
+// ===== 进/出场 mixin =====
+
+@mixin enter-from-left($duration: 1.6s, $delay: 0.2s) {
+  animation: fx-enter-from-left $duration $delay $ease-enter both;
+}
+
+@mixin enter-from-right($duration: 1.6s, $delay: 0.2s) {
+  animation: fx-enter-from-right $duration $delay $ease-enter both;
+}
+
+@mixin exit-to-left($duration: 0.6s) {
+  animation: fx-exit-to-left $duration $ease-leave both;
+}
+
+@mixin exit-to-right($duration: 0.6s) {
+  animation: fx-exit-to-right $duration $ease-leave both;
+}
+
+@mixin enter-fade-up($duration: 0.9s, $delay: 0s) {
+  animation: fx-fade-up $duration $delay $ease-enter both;
+}
+
+@mixin exit-fade-down($duration: 0.5s) {
+  animation: fx-fade-down $duration $ease-leave both;
+}
+
+// ===== 悬停扫光 =====
+//
+// 在元素内部画一道斜向高光，**仅 hover 进入时**从左滑到右扫一次；
+// 鼠标离开时不反向播（瞬间归位，不留尾巴）。
+//
+// 实现：用 keyframe animation 而不是 transition。
+//   - shine-base 把 ::after 亮带定位到默认起点（左外侧），不带任何动画
+//   - shine-trigger 在指定状态（通常 :hover）挂上 keyframe animation
+//   - hover 离开 → animation 被移除 → ::after 立刻回到默认 left:-80%（无反向过渡）
+//
+// 用法 1（元素自身可 hover）：
+//   .btn {
+//     @include fx.shine-base;
+//     &:hover { @include fx.shine-trigger; }
+//   }
+//
+// 用法 2（父级 hover 触发，扫光层 pointer-events:none）：
+//   .card__shine { @include fx.shine-base; }
+//   .card:hover .card__shine { @include fx.shine-trigger; }
+//
+/**
+ * shine-base 只注入 ::after 视觉，不再强制设 position/overflow ——
+ * 这两个由调用方自己处理（避免覆盖调用方已有的 position: absolute 等）。
+ *
+ * 调用方需要保证：
+ *   1. 自身是 positioned 容器（position: relative/absolute/fixed/sticky）
+ *      —— ::after absolute 才有锚点
+ *   2. overflow: hidden —— 把溢出元素的亮带裁掉，避免影响周围
+ *
+ * $reverse: false（默认） → 亮带起点在左外侧，扫光从左下走向右上
+ * $reverse: true            → 亮带起点在右外侧，扫光从右上走向左下（镜像）
+ */
+@mixin shine-base($color: t.$color-accent, $angle: 18deg, $reverse: false) {
+  &::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    width: 60%;
+    height: 200%;
+    pointer-events: none;
+
+    /**
+     * 镜像扫光要同时翻转三件事：
+     *   1. 起点位置：左外侧 ↔ 右外侧
+     *   2. skew 倾角：-α ↔ +α（带形状从 / 变 \）
+     *   3. 渐变方向：100° ↔ 260°（亮波内部的"打光方向"也要镜像）
+     * 只翻 skew 不翻渐变，会出现"形状对了但内部光感不对称"的诡异效果——
+     * 这是 reverse 模式上一版的 bug。
+     */
+    @if $reverse {
+      left: 130%;
+      transform: skewX($angle);
+      background: linear-gradient(
+        260deg,
+        transparent 0%,
+        transparent 30%,
+        rgba(255, 255, 255, 0.08) 45%,
+        rgba($color, 0.35) 50%,
+        rgba(255, 255, 255, 0.08) 55%,
+        transparent 70%,
+        transparent 100%
+      );
+    } @else {
+      left: -80%;
+      transform: skewX(-$angle);
+      background: linear-gradient(
+        100deg,
+        transparent 0%,
+        transparent 30%,
+        rgba(255, 255, 255, 0.08) 45%,
+        rgba($color, 0.35) 50%,
+        rgba(255, 255, 255, 0.08) 55%,
+        transparent 70%,
+        transparent 100%
+      );
+    }
+  }
+}
+
+/**
+ * 触发：在 hover 等"进入态"用，给 ::after 挂一次 keyframe 动画。
+ * animation-fill-mode: forwards 让扫光停在终点外侧（不会回弹）。
+ * 状态结束后 animation 被卸下，::after 回到 base 起点——下次 hover 又能从头扫一遍。
+ *
+ * $reverse 跟 shine-base 的 $reverse 必须保持一致（同一个调用点上都传 / 都不传）。
+ */
+@mixin shine-trigger($duration: 1.4s, $reverse: false) {
+  &::after {
+    @if $reverse {
+      animation: fx-shine-sweep-reverse $duration $ease-enter forwards;
+    } @else {
+      animation: fx-shine-sweep $duration $ease-enter forwards;
+    }
+  }
+}
+
+@keyframes fx-shine-sweep {
+  from {
+    left: -80%;
+  }
+  to {
+    left: 130%;
+  }
+}
+
+@keyframes fx-shine-sweep-reverse {
+  from {
+    left: 130%;
+  }
+  to {
+    left: -80%;
+  }
+}

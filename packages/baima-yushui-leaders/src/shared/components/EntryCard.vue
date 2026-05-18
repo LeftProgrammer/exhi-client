@@ -26,12 +26,19 @@ interface Props {
   dotInset?: Inset
   /** 流光颜色（任何 CSS 颜色） */
   dotColor?: string
+  /**
+   * hover 扫光方向：
+   *   'lr'（默认）= 从左下扫到右上
+   *   'rl'         = 从右上扫到左下（左右镜像的卡片用，跟 PNG 边框气流方向对齐）
+   */
+  shineDirection?: 'lr' | 'rl'
 }
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   noDot: false,
   direction: 'cw',
   dotInset: () => ({}),
-  dotColor: '#00e5d4'
+  dotColor: '#00e5d4',
+  shineDirection: 'lr'
 })
 defineEmits<{ (e: 'enter'): void }>()
 
@@ -67,6 +74,13 @@ function onUp() {
       class="entry-card__dot"
     />
 
+    <!-- 扫光层：hover 时一道斜向高光，方向由 shineDirection 决定 -->
+    <div
+      class="entry-card__shine"
+      :class="`entry-card__shine--${props.shineDirection}`"
+      aria-hidden="true"
+    />
+
     <!-- 内容层完全交给调用方（标题、图标等都通过 slot 自由摆放） -->
     <div class="entry-card__content">
       <slot />
@@ -76,6 +90,7 @@ function onUp() {
 
 <style scoped lang="scss">
 @use '@shared/styles/tokens' as t;
+@use '@shared/styles/transitions' as fx;
 
 $card-w: 38vh;
 $card-h: 52.5vh;
@@ -116,7 +131,35 @@ $card-h: 52.5vh;
 
 /* ===== 边框流光 ===== */
 .entry-card__dot {
-  z-index: 2; /* 在底图之上、内容之下 */
+  z-index: 3; /* 在底图、扫光之上、内容之下 */
+}
+
+/* ===== 扫光层 =====
+   * hover 时一道斜向高光从左向右扫过；离开瞬间归位（无反向）。
+   * 扫光方向由 modifier class 决定：
+   *   --lr：从左下扫到右上（默认）
+   *   --rl：从右上扫到左下（左右镜像卡片用，跟边框气流方向对齐）
+   */
+.entry-card__shine {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: 4px;
+  overflow: hidden; // 把伪元素亮带裁在卡片内
+}
+
+.entry-card__shine--lr {
+  @include fx.shine-base;
+}
+.entry-card:hover .entry-card__shine--lr {
+  @include fx.shine-trigger($duration: 1.4s);
+}
+
+.entry-card__shine--rl {
+  @include fx.shine-base($reverse: true);
+}
+.entry-card:hover .entry-card__shine--rl {
+  @include fx.shine-trigger($duration: 1.4s, $reverse: true);
 }
 
 /* ===== 内容层 =====
@@ -125,7 +168,7 @@ $card-h: 52.5vh;
 .entry-card__content {
   position: absolute;
   inset: 0;
-  z-index: 3;
+  z-index: 4;
   pointer-events: none;
 }
 </style>
