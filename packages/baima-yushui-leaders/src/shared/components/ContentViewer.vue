@@ -39,14 +39,33 @@ const isVideo = computed(() => !!props.entry.video)
       </template>
     </div>
 
-    <!-- 文案区 -->
+    <!--
+      文案区：每行（标题 / 副标题 / 每段正文）按 --row-delay 错峰左滑入场。
+      key="entry.id" 在外层 article 上已经保证切换 entry 时整体重挂载，
+      子节点动画自动重跑。
+    -->
     <div class="viewer__text">
       <div class="viewer__head">
-        <h2 class="viewer__title">{{ entry.title }}</h2>
-        <p v-if="entry.caption" class="viewer__caption">{{ entry.caption }}</p>
+        <h2 class="viewer__title viewer__line" :style="{ '--row-delay': '0.1s' }">
+          {{ entry.title }}
+        </h2>
+        <p
+          v-if="entry.caption"
+          class="viewer__caption viewer__line"
+          :style="{ '--row-delay': '0.2s' }"
+        >
+          {{ entry.caption }}
+        </p>
       </div>
       <div v-if="entry.body?.length" class="viewer__body">
-        <p v-for="(p, i) in entry.body" :key="i">{{ p }}</p>
+        <p
+          v-for="(p, i) in entry.body"
+          :key="i"
+          class="viewer__line"
+          :style="{ '--row-delay': `${0.3 + i * 0.1}s` }"
+        >
+          {{ p }}
+        </p>
       </div>
     </div>
   </article>
@@ -72,6 +91,22 @@ const isVideo = computed(() => !!props.entry.video)
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* 文字逐行左滑入场：每行用 --row-delay 控制错峰 */
+.viewer__line {
+  animation: viewer-line-slide-in 0.5s var(--row-delay, 0s) ease-out both;
+}
+
+@keyframes viewer-line-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 

@@ -268,6 +268,65 @@ $ease-leave: cubic-bezier(0.7, 0, 0.84, 0);
   }
 }
 
+// ===== 揭幕扫光（reveal-shine-lr）=====
+//
+// 元素从左到右 clip-path 揭幕显出，**同时一道亮带跟随揭幕前沿一起扫过**。
+// 揭幕完成的瞬间亮带正好滑出右侧外。视觉上是「光剑划过 + 内容被光剑划开露出」。
+//
+// 用法（最简）：
+//   .my-title { @include fx.reveal-shine-lr; }
+//
+// 调用方要保证元素自身 position 不是 static（::after 才有锚点）。
+// 标题/标语等需要带仪式感登场的元素首选这个。
+//
+@mixin reveal-shine-lr($duration: 1.4s, $delay: 0s, $color: t.$color-accent) {
+  position: relative;
+  animation: fx-reveal-lr $duration $delay $ease-enter both;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      90deg,
+      transparent 70%,
+      rgba($color, 0.5) 85%,
+      rgba(255, 255, 255, 0.9) 92%,
+      rgba($color, 0.5) 95%,
+      transparent 100%
+    );
+    mix-blend-mode: screen;
+    animation: fx-reveal-shine-lr $duration $delay $ease-enter both;
+  }
+}
+
+@keyframes fx-reveal-lr {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes fx-reveal-shine-lr {
+  from {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translateX(20%);
+  }
+}
+
 // ===== 定时双向扫光（顶部边框/装饰条用）=====
 //
 // 从中心往两侧定时扫光：两道亮带分别向左、向右滑出，间歇 $interval 秒。

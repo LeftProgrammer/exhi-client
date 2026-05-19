@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { RouteLocationNormalizedLoaded } from 'vue-router'
 import { useRouter } from 'vue-router'
 import { useBridge } from '@shared/composables/useBridge'
 import { useIdleReset } from '@shared/composables/useIdleReset'
@@ -15,7 +16,7 @@ import { useIdleReset } from '@shared/composables/useIdleReset'
 const router = useRouter()
 const { on } = useBridge()
 
-// 20 秒无交互回首页
+// TODO: 20 秒无交互回首页
 useIdleReset(() => {
   if (router.currentRoute.value.name !== 'home') {
     router.push({ name: 'home' })
@@ -36,6 +37,18 @@ on('app:goto', (payload) => {
     }
   })
 })
+
+/**
+ * 给 <transition> 算 :key——只在"页面级身份"变化时重挂载：
+ *   - section 页：身份 = section + sectionId（同 section 内切 category/entry 不重挂）
+ *   - 其它页：身份 = 路由 name
+ */
+function viewKey(route: RouteLocationNormalizedLoaded): string {
+  if (route.name === 'section') {
+    return `section-${route.params.sectionId}`
+  }
+  return String(route.name ?? route.path)
+}
 </script>
 
 <template>
@@ -45,8 +58,14 @@ on('app:goto', (payload) => {
       用默认 mode：新旧 view 同时存在，靠 CSS 让旧 view 在过渡期 absolute 定位
       脱离文档流，新 view 正常进场，两者交叠淡出/淡入 → 视觉无缝、不黑屏。
     -->
+    <!--
+      :key 改用"路由名 + sectionId"。这样：
+        - 一/二级页切换、不同 section 之间切换 → key 变 → 整页过渡动画
+        - 同一 section 内切换 category / entryIndex → key 不变 → 不重挂载、
+          不触发整页淡入/标题扫光 → 切换流畅、按钮/标题不会闪动
+    -->
     <transition name="page">
-      <component :is="Component" :key="route.path" />
+      <component :is="Component" :key="viewKey(route)" />
     </transition>
   </router-view>
 </template>
