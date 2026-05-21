@@ -169,12 +169,12 @@ const leaders: Section = {
   banner: '情系白马 力通江海',
   categories: [
     {
-      id: 'national',
-      title: '国家级',
-      intro: '中央领导视察记录',
+      id: '2023',
+      title: '2023',
+      intro: '2023 年领导视察关怀记录',
       entries: [
         {
-          id: 'nat-01',
+          id: 'ldr-2023-01',
           title: '中央领导视察白马枢纽',
           caption: '2023 年 11 月 15 日',
           body: [
@@ -184,47 +184,28 @@ const leaders: Section = {
           placeholder: '视察照片（来源：CCTV1 新闻联播）'
         },
         {
-          id: 'nat-02',
-          title: '国务院领导调研',
-          caption: '2024 年',
-          placeholder: '调研照片'
-        }
-      ]
-    },
-    {
-      id: 'provincial',
-      title: '市级',
-      intro: '重庆市领导关怀记录',
-      entries: [
-        {
-          id: 'pro-01',
-          title: '市委领导视察',
-          caption: '2024 年春',
+          id: 'ldr-2023-02',
+          title: '市委领导视察调研',
+          caption: '2023 年',
           placeholder: '市领导视察照片'
-        },
-        {
-          id: 'pro-02',
-          title: '市政府工作调研',
-          caption: '2024 年夏',
-          placeholder: '调研照片'
         }
       ]
     },
     {
-      id: 'corporate',
-      title: '企业级',
-      intro: '集团及兄弟单位调研',
+      id: '2025',
+      title: '2025',
+      intro: '2025 年领导视察关怀记录',
       entries: [
         {
-          id: 'cor-01',
-          title: '集团董事长视察',
-          caption: '2024 年',
+          id: 'ldr-2025-01',
+          title: '领导关怀慰问',
+          caption: '2025 年',
           placeholder: '视察照片'
         },
         {
-          id: 'cor-02',
-          title: '兄弟单位调研交流',
-          caption: '2024 年',
+          id: 'ldr-2025-02',
+          title: '集团领导调研交流',
+          caption: '2025 年',
           placeholder: '调研交流照片'
         }
       ]

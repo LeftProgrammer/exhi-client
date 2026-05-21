@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { getSection, type SectionId } from '@shared/data/sections'
+import { getSection, type Category, type SectionId } from '@shared/data/sections'
 import { resolvePkgUrl } from '@shared/utils/url'
 
 const props = defineProps<{
@@ -32,30 +32,48 @@ const total = computed(() => currentCategory.value.entries.length)
 const canPrev = computed(() => total.value > 1)
 const canNext = computed(() => total.value > 1)
 
+/** 当前展区的切图目录前缀 */
+const slicesDir = computed(() =>
+  props.sectionId === 'leaders' ? 'leader-slices' : 'yushui-slices'
+)
+
 /**
- * 「渝水新景」专属切图：每个分类一张完整 PNG（自带文字 + 选中态边框）。
+ * 右侧 tab 图片：每个分类一张完整 PNG（自带文字 + 选中态边框）。
+ * 文件名约定：tab-{categoryId}-active.png。
  * 未选中视觉用 CSS opacity: 0.4 弱化；选中态原图。
  */
-const tabAssets: Record<string, string> = {
-  environment: resolvePkgUrl('yushui-slices/tab-environment-active.png'),
-  services: resolvePkgUrl('yushui-slices/tab-services-active.png'),
-  culture: resolvePkgUrl('yushui-slices/tab-culture-active.png')
-}
+const tabAssets = computed<Record<string, string>>(() =>
+  Object.fromEntries(
+    section.value.categories.map((c: Category) => [
+      c.id,
+      resolvePkgUrl(`${slicesDir.value}/tab-${c.id}-active.png`)
+    ])
+  )
+)
 
 /** 一级首页同一段背景视频 */
 const bgVideoUrl = resolvePkgUrl('home/bg.mp4')
-const bannerFrameUrl = resolvePkgUrl('yushui-slices/banner-frame.png')
-const bannerTitleUrl = resolvePkgUrl('yushui-slices/banner-title.png')
+
+const bannerFrameUrl = computed(() => {
+  if (props.sectionId === 'leaders') return resolvePkgUrl('leader-slices/header-bg.png')
+  return resolvePkgUrl('yushui-slices/banner-frame.png')
+})
+
+const bannerTitleUrl = computed(() => {
+  if (props.sectionId === 'leaders') return resolvePkgUrl('leader-slices/header.png')
+  return resolvePkgUrl('yushui-slices/banner-title.png')
+})
+
 const footerFrameUrl = resolvePkgUrl('yushui-slices/footer-frame.png')
 
-/** 圆形按钮通用旋转底图 + 各按钮中央图标（normal / active 两态） */
-const btnBgUrl = resolvePkgUrl('yushui-slices/btn-bg.png')
+/** 圆形按钮底图（normal 态，领导关怀用专属图，选中态复用渝水） */
+const btnBgUrl = computed(() => resolvePkgUrl(`${slicesDir.value}/btn-bg.png`))
 const btnBgActiveUrl = resolvePkgUrl('yushui-slices/btn-bg-active.png')
-const btnPrevUrl = resolvePkgUrl('yushui-slices/btn-left.png')
+const btnPrevUrl = computed(() => resolvePkgUrl(`${slicesDir.value}/btn-left.png`))
 const btnPrevActiveUrl = resolvePkgUrl('yushui-slices/btn-left-active.png')
-const btnNextUrl = resolvePkgUrl('yushui-slices/btn-right.png')
+const btnNextUrl = computed(() => resolvePkgUrl(`${slicesDir.value}/btn-right.png`))
 const btnNextActiveUrl = resolvePkgUrl('yushui-slices/btn-right-active.png')
-const btnHomeUrl = resolvePkgUrl('yushui-slices/btn-home.png')
+const btnHomeUrl = computed(() => resolvePkgUrl(`${slicesDir.value}/btn-home.png`))
 const btnHomeActiveUrl = resolvePkgUrl('yushui-slices/btn-home-active.png')
 
 /** 内容图（业务素材到位前显示占位） */
