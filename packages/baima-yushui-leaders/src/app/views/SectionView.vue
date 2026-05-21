@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { getSection, type Category, type SectionId } from '@shared/data/sections'
 import { resolvePkgUrl } from '@shared/utils/url'
+import { useCanvasTransition } from '@shared/composables/useCanvasTransition'
 
 const props = defineProps<{
   sectionId: string
@@ -82,13 +83,8 @@ const stageImageUrl = computed(() => {
   return null
 })
 
-/**
- * 切换动画类型：
- *   - 'category' = 大动画（分类切换 / 自动跳到下一分类）：旋转 + 缩放展开
- *   - 'entry'    = 小动画（同分类内左右切换 / 自动播下一张）：淡入 + 微缩放
- * 模板里 :class 根据这个值切换 CSS 类。
- */
 const transitionType = ref<'category' | 'entry'>('category')
+const { onLeave, onEnter } = useCanvasTransition(transitionType)
 
 /** 自动轮播间隔（ms） */
 const AUTOPLAY_INTERVAL = 6000
@@ -264,32 +260,27 @@ watch(
       <div class="content-frame__inner">
         <!--
           左侧 / 中部：内容画布。
-          :key 用 "category-entry" 组合 → entry 或 category 任意变化都重挂载，
-          重新跑入场动画。
-          :class 按 transitionType 切换大/小两套动画：
-            - canvas__media--enter-category：分类切换 / 自动跳分类 → 大动画
-            - canvas__media--enter-entry   ：同分类左右切换 / 自动播下一张 → 小动画
+          :key 变化 → Vue 重挂载元素，触发 <Transition> JS 钩子；
+          onEnter 根据 transitionType 分派光圈展开（category）或景深滑入（entry）。
         -->
         <div class="canvas">
-          <div
-            :key="`${currentCategory.id}-${currentEntry.id}`"
-            class="canvas__media"
-            :class="`canvas__media--enter-${transitionType}`"
-          >
-            <img
-              v-if="stageImageUrl"
-              class="canvas__image"
-              :src="stageImageUrl"
-              :alt="currentEntry.title"
-            />
-            <div v-else class="canvas__placeholder">
-              <span class="canvas__placeholder-icon">📷</span>
-              <p class="canvas__placeholder-title">{{ currentEntry.title }}</p>
-              <p class="canvas__placeholder-hint">
-                {{ currentEntry.placeholder ?? '资源待补充' }}
-              </p>
+          <Transition :css="false" @enter="onEnter" @leave="onLeave">
+            <div :key="`${currentCategory.id}-${currentEntry.id}`" class="canvas__media">
+              <img
+                v-if="stageImageUrl"
+                class="canvas__image"
+                :src="stageImageUrl"
+                :alt="currentEntry.title"
+              />
+              <div v-else class="canvas__placeholder">
+                <span class="canvas__placeholder-icon">📷</span>
+                <p class="canvas__placeholder-title">{{ currentEntry.title }}</p>
+                <p class="canvas__placeholder-hint">
+                  {{ currentEntry.placeholder ?? '资源待补充' }}
+                </p>
+              </div>
             </div>
-          </div>
+          </Transition>
         </div>
 
         <!-- 底部：贴 frame 内侧底边 -->
@@ -577,53 +568,18 @@ watch(
   display: flex;
   align-items: center;
   justify-content: center;
+  perspective: 1400px;
+  perspective-origin: 50% 50%;
 }
 
 .canvas__media {
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  transform-origin: 30% 30%; /* 让 category 切换的旋转/缩放视觉锚点偏左上 */
-}
-
-/**
-   * 分类切换（大动画）：旋转 + 缩放展开 + 淡入。
-   * 从左上角放大旋转出现，配 ease-out-expo 曲线，有"画卷展开"感。
-   */
-.canvas__media--enter-category {
-  animation: media-enter-category 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@keyframes media-enter-category {
-  from {
-    opacity: 0;
-    transform: scale(0.5) rotate(-6deg) translate(-8%, -8%);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) rotate(0) translate(0, 0);
-  }
-}
-
-/**
-   * 同分类切换（小动画）：淡入 + 轻微缩放和右滑。
-   * 轻快利落，不抢戏。
-   */
-.canvas__media--enter-entry {
-  animation: media-enter-entry 0.45s ease-out both;
-}
-
-@keyframes media-enter-entry {
-  from {
-    opacity: 0;
-    transform: scale(0.98) translateX(2%);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateX(0);
-  }
+  /* GSAP 动画使用 will-change 提示 GPU 层合成 */
+  will-change: transform, opacity, filter;
 }
 
 .canvas__image {
@@ -703,7 +659,7 @@ watch(
 
   &:hover {
     opacity: 1;
-    transform: translateX(-4px);
+    transform: translateX(-12px);
     filter: drop-shadow(0 0 12px rgba(0, 229, 212, 0.5));
   }
   &:active {
@@ -801,10 +757,20 @@ watch(
   cursor: pointer;
   outline: none;
   -webkit-tap-highlight-color: transparent;
-  transition: transform t.$dur-base t.$ease-base;
+  transition:
+    transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+    filter 0.25s t.$ease-base;
+
+  &:hover:not(:disabled) {
+    transform: scale(1.18) translateY(-3px);
+    filter: drop-shadow(0 0 10px rgba(0, 229, 212, 0.75))
+      drop-shadow(0 4px 12px rgba(0, 229, 212, 0.35));
+  }
 
   &:active:not(:disabled) {
     transform: scale(0.94);
+    filter: drop-shadow(0 0 6px rgba(0, 229, 212, 0.5));
+    transition-duration: 0.1s;
   }
 
   /* 禁用态：整体灰度 + 半透明 */
@@ -828,14 +794,15 @@ watch(
   transition: opacity t.$dur-base t.$ease-base;
 }
 
-/* 底图：持续匀速旋转 8s 一圈 */
+/* 底图 normal：慢转 10s；active 层：hover 时淡入，加速转 2s */
 .footer__btn-bg {
   z-index: 1;
-  animation: footer-btn-spin 8s linear infinite;
+  animation: footer-btn-spin 10s linear infinite;
 }
 .footer__btn-bg--active {
   z-index: 2;
   opacity: 0;
+  animation: footer-btn-spin 2s linear infinite;
 }
 
 /* 图标：normal 默认显示，active 默认隐藏 */
