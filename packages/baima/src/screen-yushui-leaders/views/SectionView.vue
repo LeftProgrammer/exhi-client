@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { getSection, type Category, type SectionId } from '@shared/data/sections'
+import { getSection, type Category, type SectionId } from '@yushui/data/sections'
 import { resolvePkgUrl } from '@shared/utils/url'
-import { useCanvasTransition } from '@shared/composables/useCanvasTransition'
+import { useCanvasTransition } from '@yushui/composables/useCanvasTransition'
 
 const props = defineProps<{
   sectionId: string

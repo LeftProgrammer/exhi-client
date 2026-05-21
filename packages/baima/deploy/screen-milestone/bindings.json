@@ -8,7 +8,5 @@
     { "on": "cmd.reload", "do": "scene.reload" }
   ],
   "macros": {},
-  "standalone": {
-    "onStartup": []
-  }
+  "standalone": { "onStartup": [] }
 }

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { CategoryEntry } from '@shared/data/sections'
+import type { CategoryEntry } from '@yushui/data/sections'
 import { resolvePkgUrl } from '@shared/utils/url'
 
 const props = defineProps<{ entry: CategoryEntry }>()

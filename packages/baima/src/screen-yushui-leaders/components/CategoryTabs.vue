@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import type { Category } from '@shared/data/sections'
+export interface TabItem {
+  id: string
+  title: string
+}
 
 defineProps<{
-  categories: Category[]
+  tabs: TabItem[]
   activeId: string
 }>()
 defineEmits<{ (e: 'select', id: string): void }>()
@@ -11,14 +14,14 @@ defineEmits<{ (e: 'select', id: string): void }>()
 <template>
   <ul class="tabs">
     <li
-      v-for="cat in categories"
-      :key="cat.id"
+      v-for="tab in tabs"
+      :key="tab.id"
       class="tab"
-      :class="{ 'tab--active': cat.id === activeId }"
-      @click="$emit('select', cat.id)"
+      :class="{ 'tab--active': tab.id === activeId }"
+      @click="$emit('select', tab.id)"
     >
       <span class="tab__bg" />
-      <span class="tab__text">{{ cat.title }}</span>
+      <span class="tab__text">{{ tab.title }}</span>
       <span class="tab__indicator" />
     </li>
   </ul>
@@ -47,25 +50,16 @@ defineEmits<{ (e: 'select', id: string): void }>()
   transition: transform t.$dur-fast t.$ease-base;
   -webkit-tap-highlight-color: transparent;
 
-  &:active {
-    transform: scale(0.97);
-  }
+  &:active { transform: scale(0.97); }
 
   &__bg {
     position: absolute;
     inset: 0;
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      rgba(0, 229, 212, 0.08) 50%,
-      rgba(0, 229, 212, 0.18) 100%
-    );
+    background: linear-gradient(90deg, transparent 0%, rgba(0,229,212,0.08) 50%, rgba(0,229,212,0.18) 100%);
     border: 1px solid t.$color-border-soft;
     border-right: none;
     border-radius: t.$radius-md 0 0 t.$radius-md;
-    transition:
-      background t.$dur-base t.$ease-base,
-      border-color t.$dur-base t.$ease-base;
+    transition: background t.$dur-base t.$ease-base, border-color t.$dur-base t.$ease-base;
   }
 
   &__text {
@@ -93,21 +87,14 @@ defineEmits<{ (e: 'select', id: string): void }>()
 
   &--active {
     .tab__bg {
-      background: linear-gradient(
-        90deg,
-        rgba(0, 229, 212, 0.05) 0%,
-        rgba(0, 229, 212, 0.18) 50%,
-        rgba(0, 229, 212, 0.4) 100%
-      );
+      background: linear-gradient(90deg, rgba(0,229,212,0.05) 0%, rgba(0,229,212,0.18) 50%, rgba(0,229,212,0.4) 100%);
       border-color: t.$color-border-strong;
     }
     .tab__text {
       color: t.$color-text-primary;
       text-shadow: 0 0 8px t.$color-accent-glow;
     }
-    .tab__indicator {
-      opacity: 1;
-    }
+    .tab__indicator { opacity: 1; }
   }
 }
 </style>

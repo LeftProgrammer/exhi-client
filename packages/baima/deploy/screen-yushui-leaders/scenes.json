@@ -2,7 +2,7 @@
   "scenes": {
     "app": {
       "type": "web",
-      "src": "contents/app/index.html",
+      "src": "contents/screen-yushui-leaders/index.html",
       "allowInteraction": true,
       "injectBridge": true
     }

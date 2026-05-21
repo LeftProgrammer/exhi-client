@@ -4,7 +4,7 @@ import {
   slidePushOut,
   vortexRevealIn,
   slideInFromRight
-} from '@shared/effects/gsapPresets'
+} from '@yushui/effects/gsapPresets'
 
 /**
  * 画布切换动效 composable。

@@ -1,10 +1,11 @@
 {
-  "name": "@exhi-pkg/baima-yushui-leaders",
+  "name": "@exhi-pkg/baima",
   "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --open /screen-yushui-leaders/",
+    "dev:milestone": "vite --port 5175 --open /screen-milestone/",
     "build": "vite build",
     "typecheck": "vue-tsc --noEmit"
   },

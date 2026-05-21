@@ -1,6 +1,6 @@
 <script setup lang="ts">
-  import EntryCard from '@shared/components/EntryCard.vue'
-  import { usePageLeave } from '@shared/composables/usePageLeave'
+  import EntryCard from '@yushui/components/EntryCard.vue'
+  import { usePageLeave } from '@yushui/composables/usePageLeave'
   import { resolvePkgUrl } from '@shared/utils/url'
 
   const bgVideoUrl = resolvePkgUrl('home/bg.mp4')

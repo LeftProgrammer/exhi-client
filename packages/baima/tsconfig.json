@@ -15,9 +15,10 @@
     "isolatedModules": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@shared/*": ["src/shared/*"],
-      "@assets/*": ["contents/*"]
+      "@shared/*":    ["src/shared/*"],
+      "@yushui/*":    ["src/screen-yushui-leaders/*"],
+      "@milestone/*": ["src/screen-milestone/*"],
+      "@assets/*":    ["contents/*"]
     },
     "types": ["vite/client"]
   },

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import MovingDot from '@shared/effects/MovingDot.vue'
+import MovingDot from '@yushui/effects/MovingDot.vue'
 
 /**
  * 流光路径内缩量。number 时四边一致；对象时分边可调。

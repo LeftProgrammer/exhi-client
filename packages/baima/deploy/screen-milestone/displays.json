@@ -1,0 +1,11 @@
+{
+  "displays": [
+    {
+      "id": "main",
+      "match": { "primary": true },
+      "designBase": { "width": 1080, "height": 1920 },
+      "defaultScene": "app",
+      "fitPolicy": "scale"
+    }
+  ]
+}
