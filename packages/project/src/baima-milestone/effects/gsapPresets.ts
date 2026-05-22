@@ -19,13 +19,13 @@ export function playEnterSequence(headers: Element[], rows: Element[]): gsap.cor
 
   // 初始隐藏
   gsap.set([...headers, ...rows], { opacity: 0 })
-  gsap.set(rows, { x: -60 })
+  gsap.set(rows, { x: -400 })
 
-  // 1. 背景/标题渐显
-  tl.to(headers, { opacity: 1, duration: 0.6, ease: 'power2.out', stagger: 0.08 })
+  // 1. 背景/标题缓慢渐显
+  tl.to(headers, { opacity: 1, duration: 0.8, ease: 'power3.out', stagger: 0.1 })
 
-  // 2. 各行依次从左滑入（0.3s 间隔）
-  tl.to(rows, { opacity: 1, x: 0, duration: 0.7, ease: 'expo.out', stagger: 0.3 }, '-=0.2')
+  // 2. 各行依次从左滑入
+  tl.to(rows, { opacity: 1, x: 0, duration: 1.6, ease: 'power4.out', stagger: 0.3 }, '-=0.5')
 
   return tl
 }

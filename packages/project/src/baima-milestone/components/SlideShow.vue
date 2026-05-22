@@ -9,16 +9,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, type Component } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, type Component } from 'vue'
 import { slides, IDLE_MS } from '@baima-milestone/data/slides'
 import { slideFadeOut, slideFadeIn } from '@baima-milestone/effects/gsapPresets'
-import PageParticipants from './PageParticipants.vue'
-import PagePlanning from './PagePlanning.vue'
+import Page1 from './Page1.vue'
+import Page2 from './Page2.vue'
 
 // 组件映射：id → 组件（暂未实现的页面返回 null）
 const COMPONENT_MAP: Record<string, Component | null> = {
-  participants: PageParticipants,
-  planning: PagePlanning
+  participants: Page1,
+  planning: Page2
 }
 
 const currentIndex = ref(0)
@@ -70,6 +70,7 @@ onMounted(() => {
   setupBridge()
   resetIdle()
   window.addEventListener('keydown', onKeyDown)
+  nextTick(() => pageRef.value?.play())
 })
 
 onBeforeUnmount(() => {
@@ -84,6 +85,7 @@ function onLeave(el: Element, done: () => void) {
 }
 
 function onEnter(el: Element, done: () => void) {
+  pageRef.value?.reset()
   slideFadeIn(el, () => {
     pageRef.value?.play()
     done()
