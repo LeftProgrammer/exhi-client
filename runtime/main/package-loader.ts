@@ -214,6 +214,42 @@ export class PackageLoader {
       }
     }
 
+    // 0.5 生产模式：若 exe 内嵌种子版本 > 槽版本，强制用种子覆盖槽（安装新 exe 后生效）
+    if (app.isPackaged && this.defaultProject) {
+      const seedPath = path.join(process.resourcesPath, 'packages', this.defaultProject)
+      if (this.isValidPackage(seedPath)) {
+        try {
+          const seedManifest = this.readJson<Manifest>(path.join(seedPath, 'manifest.json'))
+          const current0 = this.currentSlot()
+          const slotPath0 = current0 ? this.slotPath(current0) : this.slotPath(PACKAGE_SLOT_A)
+          let slotVersion = ''
+          if (this.isValidPackage(slotPath0)) {
+            try {
+              const slotManifest = this.readJson<Manifest>(path.join(slotPath0, 'manifest.json'))
+              if (slotManifest.projectId === seedManifest.projectId) {
+                slotVersion = slotManifest.version
+              }
+            } catch {}
+          }
+          if (slotVersion !== seedManifest.version) {
+            logger.info(
+              `种子版本 ${seedManifest.version} ≠ 槽版本 ${slotVersion || '(无)'}，覆盖 slot-a`
+            )
+            fs.rmSync(this.slotPath(PACKAGE_SLOT_A), { recursive: true, force: true })
+            copyDir(seedPath, this.slotPath(PACKAGE_SLOT_A))
+            this.writePointer(PACKAGE_SLOT_A)
+            return {
+              rootPath: this.slotPath(PACKAGE_SLOT_A),
+              contentRoot: this.slotPath(PACKAGE_SLOT_A),
+              slot: PACKAGE_SLOT_A
+            }
+          }
+        } catch (e) {
+          logger.warn('种子版本检查失败，跳过:', e)
+        }
+      }
+    }
+
     // 1. 双槽 + 指针，失败自动回滚到另一个槽
     const current = this.currentSlot()
     const slots = current ? [current, this.otherSlot(current)] : [PACKAGE_SLOT_A, PACKAGE_SLOT_B]
@@ -246,7 +282,7 @@ export class PackageLoader {
       throw new Error('开发模式找不到项目包，请设置 EXHI_DEV_PACKAGE（如 npm run dev:yushui）')
     }
 
-    // 3. 生产种子
+    // 3. 生产种子（首次安装，槽完全为空）
     if (app.isPackaged) {
       const seedPath = path.join(process.resourcesPath, 'packages', this.defaultProject)
       if (this.isValidPackage(seedPath)) {

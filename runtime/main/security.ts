@@ -67,6 +67,31 @@ export function unregisterAllHotkeys() {
   globalShortcut.unregisterAll()
 }
 
+/**
+ * 注册数字键 1-5 全局快捷键，向渲染层发 slide.goto 事件。
+ * 用 globalShortcut 而非渲染层 keydown，避免 kiosk 模式下窗口焦点导致按键收不到。
+ */
+export function registerSlideHotkeys() {
+  for (let i = 1; i <= 5; i++) {
+    const index = i - 1
+    try {
+      globalShortcut.register(String(i), () => {
+        for (const win of BrowserWindow.getAllWindows()) {
+          if (!win.isDestroyed()) {
+            win.webContents.send(IPC.BRIDGE_EVENT_FROM_MAIN, {
+              name: 'slide.goto',
+              payload: { index }
+            })
+          }
+        }
+      })
+    } catch (e) {
+      logger.warn(`数字键 ${i} 注册失败:`, e)
+    }
+  }
+  logger.info('幻灯片切换热键已注册: 1-5')
+}
+
 /** 注册运维热键：Ctrl+Shift+Alt+Q 退出程序，Ctrl+Shift+Alt+W 退出 kiosk 模式 */
 export function registerQuitHotkey() {
   if (!app.isPackaged) return
