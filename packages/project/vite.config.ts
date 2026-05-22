@@ -1,28 +1,63 @@
-import { defineConfig } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { resolve } from 'node:path'
+import fs from 'node:fs'
+import path from 'node:path'
 
 // 与 runtime/main/protocol.ts 的 DEV_CONTENT_URL 保持一致
 const DEV_PORT = 5174
 
+const DEPLOY_DIR = resolve(__dirname, 'deploy')
+const ASSET_RE = /\.(png|jpe?g|gif|svg|webp|avif|mp4|webm|ico|woff2?)$/i
+const MIME: Record<string, string> = {
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.gif': 'image/gif',
+  '.svg': 'image/svg+xml',
+  '.webp': 'image/webp',
+  '.avif': 'image/avif',
+  '.mp4': 'video/mp4',
+  '.webm': 'video/webm',
+  '.ico': 'image/x-icon',
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2'
+}
+
 /**
- * dev 模式下，从 EXHI_DEV_PACKAGE 推算当前项目包的 contents/ 目录。
- * EXHI_DEV_PACKAGE 形如 "project/deploy/baima-milestone"，
- * 去掉开头的 "project/" 得到相对于本文件所在目录（packages/project/）的路径。
+ * 开发模式下，从所有 deploy/<pkg>/contents/ 目录提供静态素材。
+ * 不依赖 publicDir（publicDir 只能指向单一目录，多项目共用 dev server 时会互相 404）。
  */
-function resolveDevPublicDir(): string {
-  const pkg = process.env['EXHI_DEV_PACKAGE'] ?? ''
-  const rel = pkg.startsWith('project/') ? pkg.slice('project/'.length) : pkg
-  if (rel) return resolve(__dirname, rel, 'contents')
-  // 未设置时回退（仅兜底，正常情况下两个 dev 脚本都会设置该变量）
-  return resolve(__dirname, 'deploy/baima-yushui-leaders/contents')
+function serveDeployContents(): Plugin {
+  return {
+    name: 'serve-deploy-contents',
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const url = (req.url ?? '/').split('?')[0]
+        if (!ASSET_RE.test(url)) return next()
+        const pkgs = fs.readdirSync(DEPLOY_DIR, { withFileTypes: true })
+        for (const pkg of pkgs) {
+          if (!pkg.isDirectory()) continue
+          const file = path.join(DEPLOY_DIR, pkg.name, 'contents', url)
+          if (fs.existsSync(file)) {
+            const ext = path.extname(file).toLowerCase()
+            res.setHeader('Content-Type', MIME[ext] ?? 'application/octet-stream')
+            res.setHeader('Content-Length', fs.statSync(file).size)
+            fs.createReadStream(file).pipe(res)
+            return
+          }
+        }
+        next()
+      })
+    }
+  }
 }
 
 export default defineConfig(({ command }) => ({
   root: resolve(__dirname, 'src'),
   base: './',
-  publicDir: command === 'serve' ? resolveDevPublicDir() : false,
-  plugins: [vue()],
+  publicDir: false,
+  plugins: [vue(), ...(command === 'serve' ? [serveDeployContents()] : [])],
   server: {
     port: DEV_PORT,
     strictPort: true,

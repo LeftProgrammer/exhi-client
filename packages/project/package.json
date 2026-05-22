@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "set EXHI_DEV_PACKAGE=project/deploy/baima-yushui-leaders&& vite --open /baima-yushui-leaders/",
-    "dev:milestone": "set EXHI_DEV_PACKAGE=project/deploy/baima-milestone&& vite --open /baima-milestone/",
+    "dev": "vite --open /baima-yushui-leaders/",
+    "dev:milestone": "vite --open /baima-milestone/",
     "build": "vite build",
     "typecheck": "vue-tsc --noEmit"
   },
