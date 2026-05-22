@@ -69,28 +69,28 @@ const yushui: Section = {
             '工程在建设过程中坚持生态优先，采用生态护坡技术，',
             '使施工岸线与自然景观和谐相融，呈现绿水青山的画面。'
           ],
-          image: 'yushui/environment/env-01.svg',
+          image: 'yushui/images/environment/env-01.svg',
           placeholder: '生态护坡照片（内容团队补充）'
         },
         {
           id: 'env-02',
           title: '办公生活景观',
           caption: '项目部园区',
-          image: 'yushui/environment/env-02.svg',
+          image: 'yushui/images/environment/env-02.svg',
           placeholder: '园区/办公生活照片'
         },
         {
           id: 'env-03',
           title: '库区风景',
           caption: '清晨的乌江',
-          image: 'yushui/environment/env-03.svg',
+          image: 'yushui/images/environment/env-03.svg',
           placeholder: '库区航拍照片'
         },
         {
           id: 'env-04',
           title: '交通道路景观',
           caption: '配套工程',
-          image: 'yushui/environment/env-04.svg',
+          image: 'yushui/images/environment/env-04.svg',
           placeholder: '配套道路照片'
         }
       ]
@@ -104,28 +104,28 @@ const yushui: Section = {
           id: 'svc-01',
           title: '航标导标设施',
           caption: '现代化助航系统',
-          image: 'yushui/services/svc-01.svg',
+          image: 'yushui/images/services/svc-01.svg',
           placeholder: '航标照片'
         },
         {
           id: 'svc-02',
           title: '过江桥梁',
           caption: '白马乌江大桥',
-          image: 'yushui/services/svc-02.svg',
+          image: 'yushui/images/services/svc-02.svg',
           placeholder: '大桥照片'
         },
         {
           id: 'svc-03',
           title: '服务区 / 停车区',
           caption: '便民设施齐全',
-          image: 'yushui/services/svc-03.svg',
+          image: 'yushui/images/services/svc-03.svg',
           placeholder: '服务区照片'
         },
         {
           id: 'svc-04',
           title: '锚泊区',
           caption: '船只锚泊配套',
-          image: 'yushui/services/svc-04.svg',
+          image: 'yushui/images/services/svc-04.svg',
           placeholder: '锚泊区照片'
         }
       ]
@@ -139,21 +139,21 @@ const yushui: Section = {
           id: 'cul-01',
           title: '水清岸绿',
           caption: '竣工后的美丽画卷',
-          image: 'yushui/culture/cul-01.svg',
+          image: 'yushui/images/culture/cul-01.svg',
           placeholder: '美景照片'
         },
         {
           id: 'cul-02',
           title: '水运繁忙',
           caption: '船只通行场景',
-          image: 'yushui/culture/cul-02.svg',
+          image: 'yushui/images/culture/cul-02.svg',
           placeholder: '船只航行照片'
         },
         {
           id: 'cul-03',
           title: '文化景观',
           caption: '项目周边文化遗产',
-          image: 'yushui/culture/cul-03.svg',
+          image: 'yushui/images/culture/cul-03.svg',
           placeholder: '文化景观照片'
         }
       ]
