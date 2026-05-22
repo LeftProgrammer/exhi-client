@@ -106,10 +106,15 @@ async function assembleProject(project) {
   const pkgContentsDir = path.join(deployDir, 'contents')
   if (await exists(pkgContentsDir)) {
     for (const entry of await fs.readdir(pkgContentsDir, { withFileTypes: true })) {
-      if (!entry.isDirectory()) continue
       // assets/ 由 dist 提供，不从 deploy/contents 再复制
       if (entry.name === 'assets') continue
-      await copyDir(path.join(pkgContentsDir, entry.name), path.join(contentsOut, entry.name))
+      const src = path.join(pkgContentsDir, entry.name)
+      const dest = path.join(contentsOut, entry.name)
+      if (entry.isDirectory()) {
+        await copyDir(src, dest)
+      } else {
+        await fs.copyFile(src, dest)
+      }
     }
   }
 
