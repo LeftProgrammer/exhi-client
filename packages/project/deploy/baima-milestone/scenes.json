@@ -1,0 +1,10 @@
+{
+  "scenes": {
+    "app": {
+      "type": "web",
+      "src": "contents/baima-milestone/index.html",
+      "allowInteraction": false,
+      "injectBridge": true
+    }
+  }
+}

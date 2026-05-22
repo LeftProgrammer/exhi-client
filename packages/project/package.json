@@ -1,0 +1,15 @@
+{
+  "name": "@exhi-pkg/project",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --open /baima-yushui-leaders/",
+    "dev:milestone": "vite --open /baima-milestone/",
+    "build": "vite build",
+    "typecheck": "vue-tsc --noEmit"
+  },
+  "dependencies": {
+    "vue-router": "^4.5.0"
+  }
+}

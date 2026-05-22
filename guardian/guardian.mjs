@@ -28,8 +28,7 @@ import path from 'node:path'
 
 const CLIENT_EXE_RAW = process.env.EXHI_CLIENT_EXE
 const USERDATA =
-  process.env.EXHI_USERDATA ||
-  path.join(os.homedir(), 'AppData', 'Roaming', 'exhi-client')
+  process.env.EXHI_USERDATA || path.join(os.homedir(), 'AppData', 'Roaming', 'exhi-client')
 const STALE_MS = Number(process.env.EXHI_STALE_MS ?? '30000')
 const CHECK_MS = Number(process.env.EXHI_CHECK_MS ?? '10000')
 
@@ -81,30 +80,20 @@ function tryStart(reason) {
   lastRestartAt = now
   console.log(`[guardian] ${new Date().toISOString()} 重启客户端: ${reason}`)
   try {
-    fs.appendFileSync(
-      RESTART_LOG,
-      `${new Date().toISOString()}\t${reason}\n`,
-      'utf-8'
-    )
+    fs.appendFileSync(RESTART_LOG, `${new Date().toISOString()}\t${reason}\n`, 'utf-8')
   } catch {
     /* ignore */
   }
   // 启动 EXE
-  // 客户端 EXE 在 electron-builder.yml 里声明了 requireAdministrator，
-  // 直接 spawn 会被 Windows UAC 拦截 (EACCES)。
-  // 用 cmd /c start 让 Windows 走标准启动流程：
+  // 用 cmd /c start 让 Windows 走标准启动流程，避免 detached spawn 的权限问题：
   //   - 若 Guardian 自身已是管理员 → 子进程继承，无提示直接起
-  //   - 若 Guardian 不是管理员 → 弹 UAC 同意框
+  //   - 若 Guardian 不是管理员 → 弹 UAC 同意框（生产部署时 Guardian 应以管理员运行）
   try {
-    const child = spawn(
-      'cmd.exe',
-      ['/c', 'start', '', '/B', CLIENT_EXE],
-      {
-        detached: true,
-        stdio: 'ignore',
-        windowsHide: true
-      }
-    )
+    const child = spawn('cmd.exe', ['/c', 'start', '', '/B', CLIENT_EXE], {
+      detached: true,
+      stdio: 'ignore',
+      windowsHide: true
+    })
     child.on('error', (e) => console.error('[guardian] spawn error:', e.message))
     child.unref()
   } catch (e) {

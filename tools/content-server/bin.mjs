@@ -10,7 +10,7 @@ import path from 'node:path'
  * 用法:
  *   node tools/content-server/bin.mjs [--root=<dir>] [--port=18090]
  *
- * 默认 root = ./build/packages
+ * 默认 root = ./build/packages（配合 dist:yushui 用 --root=build/baima-yushui-leaders/packages）
  *
  * 暴露：
  *   GET /<projectId>-<version>/manifest.json
@@ -25,8 +25,9 @@ const port = Number(parseOption('--port') ?? '18090')
 
 if (!fs.existsSync(root)) {
   console.error(`root 不存在: ${root}`)
+  console.error('提示：先运行 npm run dist:yushui 或 dist:milestone 生成项目包')
   console.error(
-    '提示：先用 npm run pkg:build packages/demo-hall -- --out=build/packages 构建项目包'
+    '      然后指定路径：npm run content-server -- --root=build/baima-yushui-leaders/packages'
   )
   process.exit(1)
 }

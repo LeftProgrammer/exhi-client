@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>框架诊断</title>
+    <script src="exhi-pkg://pkg/__exhi__/bridge.js"></script>
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body {
+        width: 100%; height: 100%;
+        background: #0a1020;
+        color: #c8d8f0;
+        font-family: 'Consolas', 'Microsoft YaHei', monospace;
+        overflow: hidden;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto 1fr;
+        height: 100%;
+        padding: 40px;
+        gap: 24px;
+      }
+      .header {
+        grid-column: 1 / -1;
+        display: flex;
+        align-items: baseline;
+        gap: 24px;
+      }
+      .header h1 { font-size: 48px; color: #fff; letter-spacing: 0.05em; }
+      .header .sub { font-size: 20px; opacity: 0.5; }
+      .card {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 12px;
+        padding: 24px;
+        overflow: hidden;
+      }
+      .card h2 { font-size: 16px; color: #4ade80; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.1em; }
+      .row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 15px; }
+      .row:last-child { border-bottom: none; }
+      .val { color: #7dd3fc; }
+      .ok  { color: #4ade80; }
+      .err { color: #f87171; }
+      .log {
+        font-size: 13px; line-height: 1.7;
+        overflow-y: auto; height: 100%;
+        color: #94a3b8;
+      }
+      .log .entry { padding: 2px 0; }
+      .log .t { color: #475569; margin-right: 8px; }
+      .pulse { width: 10px; height: 10px; background: #4ade80; border-radius: 50%; display: inline-block; margin-right: 8px; animation: pulse 1.5s infinite; }
+      @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.2} }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <div class="header">
+        <h1><span class="pulse"></span>框架诊断</h1>
+        <span class="sub">test-pkg · 用于框架级测试</span>
+      </div>
+
+      <div class="card" id="card-env">
+        <h2>环境信息</h2>
+        <div class="row"><span>UA</span><span class="val" id="ua">—</span></div>
+        <div class="row"><span>分辨率</span><span class="val" id="resolution">—</span></div>
+        <div class="row"><span>时间</span><span class="val" id="time">—</span></div>
+      </div>
+
+      <div class="card" id="card-bridge">
+        <h2>Bridge 状态</h2>
+        <div class="row"><span>bridge.js 加载</span><span id="bridge-loaded">—</span></div>
+        <div class="row"><span>ready</span><span id="bridge-ready">—</span></div>
+        <div class="row"><span>displayId</span><span class="val" id="bridge-display">—</span></div>
+        <div class="row"><span>packageId</span><span class="val" id="bridge-pkg">—</span></div>
+        <div class="row"><span>version</span><span class="val" id="bridge-ver">—</span></div>
+      </div>
+
+      <div class="card" style="grid-column: 1 / -1;">
+        <h2>事件日志</h2>
+        <div class="log" id="log"></div>
+      </div>
+    </div>
+
+    <script>
+      const $ = id => document.getElementById(id)
+
+      // 环境
+      $('ua').textContent = navigator.userAgent.includes('Electron') ? 'Electron ✓' : 'Browser'
+      $('resolution').textContent = `${window.innerWidth} × ${window.innerHeight}`
+      setInterval(() => { $('time').textContent = new Date().toLocaleTimeString('zh-CN') }, 1000)
+
+      const logEl = $('log')
+      function log(msg, cls = '') {
+        const t = new Date().toLocaleTimeString('zh-CN')
+        const d = document.createElement('div')
+        d.className = 'entry'
+        d.innerHTML = `<span class="t">${t}</span><span class="${cls}">${msg}</span>`
+        logEl.prepend(d)
+      }
+
+      // Bridge
+      $('bridge-loaded').innerHTML = window.exhibitBridge
+        ? '<span class="ok">已注入</span>'
+        : '<span class="err">未注入</span>'
+
+      ;(async () => {
+        if (!window.exhibitBridge) { log('bridge 未注入，请检查 injectBridge: true', 'err'); return }
+
+        await window.exhibitBridge.ready
+        const info = window.exhibitBridge.getInfo()
+
+        $('bridge-ready').innerHTML    = '<span class="ok">就绪</span>'
+        $('bridge-display').textContent = info?.displayId ?? '—'
+        $('bridge-pkg').textContent     = info?.packageInfo?.projectId ?? '—'
+        $('bridge-ver').textContent     = info?.packageInfo?.version ?? '—'
+
+        log(`bridge 就绪 display=${info?.displayId} pkg=${info?.packageInfo?.projectId}@${info?.packageInfo?.version}`, 'ok')
+
+        // 订阅场景切换事件
+        window.exhibitBridge.on('scene:changed', e => {
+          log(`scene:changed display=${e.displayId} → ${e.sceneId}`)
+        })
+      })()
+    </script>
+  </body>
+</html>

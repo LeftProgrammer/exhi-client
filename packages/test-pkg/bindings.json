@@ -1,0 +1,68 @@
+{
+  "bindings": [
+    {
+      "on": "cmd.gotoScene",
+      "do": "scene.switch",
+      "params": { "sceneId": "$payload.sceneId", "display": "$payload.display" }
+    },
+    { "on": "cmd.play", "do": "renderer.play" },
+    { "on": "cmd.pause", "do": "renderer.pause" },
+    { "on": "cmd.seek", "do": "renderer.seek", "params": { "time": "$payload.time" } },
+    { "on": "cmd.setRate", "do": "renderer.setRate", "params": { "rate": "$payload.rate" } },
+    { "on": "cmd.reload", "do": "scene.reload" },
+    { "on": "cmd.volume", "do": "system.setVolume", "params": { "value": "$payload.value" } },
+    {
+      "on": "cmd.system.reboot",
+      "do": "system.reboot",
+      "params": { "delaySec": "$payload.delaySec" }
+    },
+    {
+      "on": "cmd.system.shutdown",
+      "do": "system.shutdown",
+      "params": { "delaySec": "$payload.delaySec" }
+    },
+    { "on": "cmd.system.restartApp", "do": "system.restartApp" }
+  ],
+
+  "macros": {
+    "scenario.opening": {
+      "description": "开场：音量 80% + 全屏切 welcome",
+      "steps": [
+        { "do": "system.setVolume", "params": { "value": 0.8 } },
+        { "do": "scene.switchAll", "params": { "sceneId": "welcome" } }
+      ]
+    },
+    "scenario.touch-mode": {
+      "description": "互动模式：全屏切触摸演示",
+      "steps": [{ "do": "scene.switchAll", "params": { "sceneId": "touch-demo" } }]
+    },
+    "scenario.closing": {
+      "description": "闭馆：黑屏 + 静音",
+      "steps": [
+        { "do": "system.setVolume", "params": { "value": 0 } },
+        { "do": "scene.switchAll", "params": { "sceneId": "blank" } }
+      ]
+    },
+    "scenario.nested-macro": {
+      "description": "嵌套 macro 测试：先触摸模式，再切回 welcome",
+      "steps": [
+        { "do": "macro", "params": { "name": "scenario.touch-mode" } },
+        { "do": "scene.switchAll", "params": { "sceneId": "welcome" } }
+      ]
+    },
+    "scenario.go-with-args": {
+      "description": "带参 macro：$args.sceneId / $args.display",
+      "steps": [
+        {
+          "do": "scene.switch",
+          "params": { "sceneId": "$args.sceneId", "display": "$args.display" }
+        }
+      ]
+    }
+  },
+
+  "standalone": {
+    "description": "无中控时保持默认场景",
+    "onStartup": []
+  }
+}

@@ -2,7 +2,25 @@
   "permissions": {
     "allow": [
       "Bash(git restore *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(powershell -Command \"Remove-Item -Recurse -Force 'e:\\\\project\\\\baima\\\\exhi-client\\\\packages\\\\baima-yushui-leaders','e:\\\\project\\\\baima\\\\exhi-client\\\\packages\\\\baima-milestone' -ErrorAction SilentlyContinue; Write-Host 'done'\")",
+      "Bash(powershell -Command \"Remove-Item -Recurse -Force 'e:\\\\project\\\\baima\\\\exhi-client\\\\packages\\\\baima-yushui-leaders'\")",
+      "Bash(powershell -Command \"Move-Item 'e:\\\\project\\\\baima\\\\exhi-client\\\\packages\\\\baima' 'e:\\\\project\\\\baima\\\\exhi-client\\\\packages\\\\project'\")",
+      "Bash(powershell -Command \"Move-Item 'e:\\\\project\\\\baima\\\\exhi-client\\\\packages\\\\baima' 'e:\\\\project\\\\baima\\\\exhi-client\\\\packages\\\\project' -Force\")",
+      "Bash(robocopy \"e:\\\\project\\\\baima\\\\exhi-client\\\\packages\\\\baima\" \"e:\\\\project\\\\baima\\\\exhi-client\\\\packages\\\\project\" /E /COPYALL /NFL /NDL /NJH /NJS)",
+      "Bash(npm prune *)",
+      "Bash(node tools/pkg-assemble/bin.mjs --skip-build)",
+      "Bash(set EXHI_SEED=baima-yushui-leaders)",
+      "Bash(electron-builder --dir --config electron-builder.config.mjs)",
+      "Bash(npx electron-builder *)",
+      "Bash(cmd /c \"set EXHI_SEED=baima-yushui-leaders && npx electron-builder --dir --config electron-builder.config.mjs\")",
+      "Bash(EXHI_SEED=baima-yushui-leaders npx electron-builder --dir --config electron-builder.config.mjs)",
+      "Bash(node tools/dist-cli/bin.mjs screen-yushui-leaders --dir)",
+      "Bash(grep -v \"^--$\")",
+      "Bash(grep -B 2 -A 2 \"seedFrom\\\\|build/\\\\${seed}\" /e/project/baima/exhi-client/electron-builder.config.mjs)",
+      "Bash(node tools/dist-cli/bin.mjs baima-yushui-leaders --dir)",
+      "Bash(awk '{print $NF}')",
+      "Bash(xargs -I {} basename {})"
     ]
   }
 }

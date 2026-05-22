@@ -21,9 +21,21 @@
 ```json
 {
   "displays": [
-    { "id": "wall",  "match": { "size": "5760x1080" }, "designBase": { "width": 5760, "height": 1080 } },
-    { "id": "touch", "match": { "size": "1080x1920" }, "designBase": { "width": 1080, "height": 1920 } },
-    { "id": "side",  "match": { "size": "1920x1080" }, "designBase": { "width": 1920, "height": 1080 } }
+    {
+      "id": "wall",
+      "match": { "size": "5760x1080" },
+      "designBase": { "width": 5760, "height": 1080 }
+    },
+    {
+      "id": "touch",
+      "match": { "size": "1080x1920" },
+      "designBase": { "width": 1080, "height": 1920 }
+    },
+    {
+      "id": "side",
+      "match": { "size": "1920x1080" },
+      "designBase": { "width": 1920, "height": 1080 }
+    }
   ]
 }
 ```
@@ -36,16 +48,16 @@
 
 ### 2.1 硬性要求
 
-| 项 | 要求 | 不达标会怎样 |
-|---|---|---|
-| 编码 | **H.264 + AAC** | H.265 完全播不出来（Chromium 不支持） |
-| 容器 | MP4 | mkv/mov 可能解码异常 |
-| 颜色 | BT.709 / yuv420p | yuv444 一些场景会偏色 |
-| 分辨率 | **= 目标屏 designBase** | 大了浪费带宽，小了被放大变糊 |
-| 帧率 | 25 或 30 fps（视频墙建议 30）| 50/60 fps 在低配工控机会掉帧 |
-| 码率 | 1080p ≤10 Mbps、5760×1080 ≤30 Mbps | 太高低配工控机解码不过来 |
-| 关键帧间隔 | 2 秒一个 I 帧 | 太长 seek 会卡 |
-| 时长 | 单段 ≤10 分钟 | 太长内存占用高 |
+| 项         | 要求                               | 不达标会怎样                          |
+| ---------- | ---------------------------------- | ------------------------------------- |
+| 编码       | **H.264 + AAC**                    | H.265 完全播不出来（Chromium 不支持） |
+| 容器       | MP4                                | mkv/mov 可能解码异常                  |
+| 颜色       | BT.709 / yuv420p                   | yuv444 一些场景会偏色                 |
+| 分辨率     | **= 目标屏 designBase**            | 大了浪费带宽，小了被放大变糊          |
+| 帧率       | 25 或 30 fps（视频墙建议 30）      | 50/60 fps 在低配工控机会掉帧          |
+| 码率       | 1080p ≤10 Mbps、5760×1080 ≤30 Mbps | 太高低配工控机解码不过来              |
+| 关键帧间隔 | 2 秒一个 I 帧                      | 太长 seek 会卡                        |
+| 时长       | 单段 ≤10 分钟                      | 太长内存占用高                        |
 
 ### 2.2 推荐 ffmpeg 转码命令
 
@@ -87,13 +99,13 @@ ffprobe -v error -show_format -show_streams 目标.mp4 | grep -E "codec_name|wid
 
 ## 3. 图片规范
 
-| 项 | 要求 |
-|---|---|
-| 格式 | JPG（照片）/ PNG（含透明）/ WebP（推荐） |
-| 分辨率 | 全屏图 = 目标屏 designBase；局部图按设计稿尺寸 |
-| 单图大小 | ≤5MB，超过用 WebP 或降低画质 |
-| 色彩空间 | sRGB（不要用 P3） |
-| DPI | 72（屏幕显示，不要按印刷 300 出） |
+| 项       | 要求                                           |
+| -------- | ---------------------------------------------- |
+| 格式     | JPG（照片）/ PNG（含透明）/ WebP（推荐）       |
+| 分辨率   | 全屏图 = 目标屏 designBase；局部图按设计稿尺寸 |
+| 单图大小 | ≤5MB，超过用 WebP 或降低画质                   |
+| 色彩空间 | sRGB（不要用 P3）                              |
+| DPI      | 72（屏幕显示，不要按印刷 300 出）              |
 
 **关键**：4K 屏的全屏图就出 3840×2160，**不要出 1920×1080 让客户端放大**。
 
@@ -107,30 +119,46 @@ ffprobe -v error -show_format -show_streams 目标.mp4 | grep -E "codec_name|wid
 
 ```css
 /* ❌ 禁止 */
-.title { font-size: 96px; }
-.container { width: 1200px; padding: 40px; }
-.icon { width: 80px; height: 80px; }
+.title {
+  font-size: 96px;
+}
+.container {
+  width: 1200px;
+  padding: 40px;
+}
+.icon {
+  width: 80px;
+  height: 80px;
+}
 ```
 
 **强制**写法：
 
 ```css
 /* ✅ 推荐 */
-.title { font-size: 5vh; }              /* 按屏高 */
-.container { width: 60vw; padding: 2vw; }  /* 按屏宽 */
-.icon { width: 4vw; height: 4vw; }       /* 按屏宽，正方形 */
+.title {
+  font-size: 5vh;
+} /* 按屏高 */
+.container {
+  width: 60vw;
+  padding: 2vw;
+} /* 按屏宽 */
+.icon {
+  width: 4vw;
+  height: 4vw;
+} /* 按屏宽，正方形 */
 ```
 
 ### 4.2 单位选择对照
 
-| 场景 | 推荐单位 |
-|---|---|
-| 字号 | `vh`（按屏高，更稳定，不受拼接屏宽度影响） |
-| 横向尺寸 | `vw` |
-| 纵向尺寸 | `vh` |
-| 间距 | `vw` / `vh` 视方向 |
-| 组件内部相对尺寸 | `em` / `rem` |
-| 边框、阴影 | `px` 可接受（细微差异不敏感）|
+| 场景             | 推荐单位                                   |
+| ---------------- | ------------------------------------------ |
+| 字号             | `vh`（按屏高，更稳定，不受拼接屏宽度影响） |
+| 横向尺寸         | `vw`                                       |
+| 纵向尺寸         | `vh`                                       |
+| 间距             | `vw` / `vh` 视方向                         |
+| 组件内部相对尺寸 | `em` / `rem`                               |
+| 边框、阴影       | `px` 可接受（细微差异不敏感）              |
 
 ### 4.3 用 designBase 写换算（如果实在习惯像素思维）
 
@@ -160,11 +188,13 @@ font-family: '思源黑体', 'Microsoft YaHei', sans-serif;
 
 /* ✅ 推荐：项目包内嵌字体 */
 @font-face {
-  font-family: 'BaimaFont';
+  font-family: 'ProjectFont';
   src: url('./fonts/SourceHanSans-Bold.woff2') format('woff2');
-  font-display: block;  /* 等字体加载完再显示，避免闪烁 */
+  font-display: block; /* 等字体加载完再显示，避免闪烁 */
 }
-body { font-family: 'BaimaFont', sans-serif; }
+body {
+  font-family: 'ProjectFont', sans-serif;
+}
 ```
 
 字体文件放在 `contents/<exhibit>/fonts/` 下，跟 HTML 同级目录。
@@ -181,14 +211,24 @@ body { font-family: 'BaimaFont', sans-serif; }
 
 ```html
 <style>
-  html, body {
-    margin: 0; width: 100vw; height: 100vh;
+  html,
+  body {
+    margin: 0;
+    width: 100vw;
+    height: 100vh;
     overflow: hidden;
-    user-select: none; -webkit-user-select: none;
+    user-select: none;
+    -webkit-user-select: none;
     -webkit-user-drag: none;
   }
-  img, a { -webkit-user-drag: none; pointer-events: none; }
-  button { pointer-events: auto; }
+  img,
+  a {
+    -webkit-user-drag: none;
+    pointer-events: none;
+  }
+  button {
+    pointer-events: auto;
+  }
 </style>
 <body oncontextmenu="return false">
   <!-- 内容 -->
@@ -232,6 +272,7 @@ contents/
 ```
 
 **禁忌**：
+
 - ❌ 文件名带中文（曾经踩过 URL 编码坑）
 - ❌ 文件名带空格
 - ❌ 大写文件名（Windows 下不区分大小写，但 NSIS 安装和 OTA 同步会受影响）
@@ -241,14 +282,15 @@ contents/
 
 ## 6. 项目包大小约束
 
-| 项 | 上限 |
-|---|---|
-| 单个视频 | ≤200MB（拼接屏视频例外，可到 800MB） |
-| 单个图片 | ≤5MB |
-| 单个 HTML 资源包（含 js/css/字体/图片） | ≤100MB |
-| 整个项目包 | **≤2GB**，超过要拆分 |
+| 项                                      | 上限                                 |
+| --------------------------------------- | ------------------------------------ |
+| 单个视频                                | ≤200MB（拼接屏视频例外，可到 800MB） |
+| 单个图片                                | ≤5MB                                 |
+| 单个 HTML 资源包（含 js/css/字体/图片） | ≤100MB                               |
+| 整个项目包                              | **≤2GB**，超过要拆分                 |
 
 太大的项目包：
+
 - 首次部署同步慢
 - OTA 升级慢
 - 万一损坏重新下载成本高
@@ -308,20 +350,20 @@ ls 源素材/
 # wall-bg-raw.mov
 
 # 2. 用 ffmpeg 转 1080p H.264
-ffmpeg -i 源素材/opening-raw.mp4 -c:v libx264 -crf 20 -c:a aac packages/baima/contents/wall/opening.mp4
+ffmpeg -i 源素材/opening-raw.mp4 -c:v libx264 -crf 20 -c:a aac packages/project/contents/wall/opening.mp4
 
-# 3. 用模板写触摸页（参考 packages/demo-hall/contents/touch/index.html）
+# 3. 用模板写触摸页（参考 packages/project/dist/baima-yushui-leaders/ 构建产物）
 
 # 4. 在 dev 跑一遍
 npm run dev:online
 npm run hub:goto -- --sceneId=intro-video --display=wall
 
 # 5. 自检
-npm run pkg:verify packages/baima
+npm run pkg:verify packages/project
 
 # 6. 提交
-git add packages/baima
-git commit -m "feat(baima): content v1.0"
+git add packages/project
+git commit -m "feat(project): content v1.0"
 ```
 
 ---
@@ -329,5 +371,5 @@ git commit -m "feat(baima): content v1.0"
 ## 10. 还有问题？
 
 - 视频编码问题 → 联系前端工程师
-- 排版 / 触摸交互问题 → 参考 `packages/demo-hall/contents/touch/index.html` 作为模板
+- 排版 / 触摸交互问题 → 参考 `packages/project/src/baima-yushui-leaders/` 中已有页面
 - 拼接屏视频做不出 5760×1080 → 跟硬件商要原始分辨率素材或求助专业剪辑

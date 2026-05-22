@@ -24,6 +24,21 @@ import path from 'node:path'
  * 真要离线分发可在 build 后用 7z 手动打包。
  */
 
+// ============ build ============
+
+/** walk 时跳过的目录（项目工程文件，不进项目包） */
+const EXCLUDE_DIRS = new Set(['src', 'dist', 'node_modules', '.git', '.vscode', '.idea', 'public'])
+/** walk 时跳过的根级文件（vite/ts/npm 工程文件） */
+const EXCLUDE_FILES = new Set([
+  'package.json',
+  'package-lock.json',
+  'pnpm-lock.yaml',
+  'tsconfig.json',
+  'vite.config.ts',
+  'vite.config.js',
+  '.gitignore'
+])
+
 const args = process.argv.slice(2)
 const sub = args[0]
 
@@ -46,21 +61,6 @@ if (sub === 'build') {
   printHelp()
   process.exit(0)
 }
-
-// ============ build ============
-
-/** walk 时跳过的目录（项目工程文件，不进项目包） */
-const EXCLUDE_DIRS = new Set(['src', 'dist', 'node_modules', '.git', '.vscode', '.idea', 'public'])
-/** walk 时跳过的根级文件（vite/ts/npm 工程文件） */
-const EXCLUDE_FILES = new Set([
-  'package.json',
-  'package-lock.json',
-  'pnpm-lock.yaml',
-  'tsconfig.json',
-  'vite.config.ts',
-  'vite.config.js',
-  '.gitignore'
-])
 
 async function build(srcDir, outBase) {
   console.log(`[pack-cli] 构建 ${srcDir}`)

@@ -32,9 +32,11 @@ Windows 设置 → 系统 → 显示器 → 标识 → 给每块屏命名（如 
 
 ### 2.1 拷贝安装包
 
-把 `智慧展厅客户端-1.0.0-x64.exe`（NSIS 安装包）拷到目标机器，双击安装。
+把 `智慧展厅客户端-<projectId>-1.0.0-x64.exe`（NSIS 安装包）拷到目标机器，双击安装。
 
-或者用免安装版：把 `build/win-unpacked/` 整个目录拷过去，直接跑 `智慧展厅客户端.exe`。
+或者用免安装版：把 `build/<projectId>/win-unpacked/` 整个目录拷过去，直接跑 `智慧展厅客户端.exe`。
+
+> `<projectId>` 即展区标识，如 `baima-yushui-leaders` 或 `baima-milestone`。
 
 ### 2.2 创建 settings.json（可选）
 
@@ -71,6 +73,7 @@ Windows 设置 → 系统 → 显示器 → 标识 → 给每块屏命名（如 
 ### 方法 A：Windows 分配的访问（Assigned Access，Pro/Enterprise）
 
 设置 → 帐户 → 家庭和其他用户 → 设置一台 Kiosk
+
 - 创建一个本地账户 `exhi`
 - 应用：选择"智慧展厅客户端"
 - 重启后，登录 `exhi` 账户自动全屏启动客户端，按 Win+L 也无法切走
@@ -78,6 +81,7 @@ Windows 设置 → 系统 → 显示器 → 标识 → 给每块屏命名（如 
 ### 方法 B：Shell Launcher（Windows 10/11 IoT/Enterprise）
 
 PowerShell（管理员）：
+
 ```powershell
 $path = "${env:ProgramFiles}\智慧展厅客户端\智慧展厅客户端.exe"
 $user = "exhi"
@@ -143,8 +147,10 @@ Start-ScheduledTask -TaskName ExhiClientGuardian
 ### 5.2 发布新版本
 
 ```powershell
-# 1. 打包
-npm run dist
+# 1. 打包（以渝水展区为例）
+npm run dist:yushui
+# 或里程碑展区
+npm run dist:milestone
 
 # 2. 推到频道目录
 npm run release -- --channel=stable --out=release/
@@ -155,6 +161,7 @@ npm run release -- --channel=stable --out=release/
 ### 5.3 触发更新
 
 中控发：
+
 ```bash
 # 立即下载并安装
 hub:send cmd.runtime.update --applyAt=now
@@ -196,6 +203,7 @@ hub:send cmd.runtime.cancel
 ### 客户端启动后黑屏
 
 检查：
+
 - `%APPDATA%\exhi-client\logs\main-*.log` 末尾错误
 - `displays.json` 的 `defaultScene` 是否在 `scenes.json` 中存在
 - 项目包内容（视频编码必须 H.264，不支持 H.265）

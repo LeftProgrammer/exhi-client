@@ -9,8 +9,8 @@ import { fileURLToPath } from 'node:url'
  * 启动指定项目包的 Vite dev server（带 HMR）。
  *
  * 用法：
- *   npm run dev:content baima-exhibition
- *   npm run dev:content packages/baima-exhibition   (也支持完整路径)
+ *   npm run dev:content project
+ *   npm run dev:content packages/project   (也支持完整路径)
  *
  * 启动后：
  *   - Vite 监听 5174（项目包 vite.config.ts 配的端口）
@@ -19,7 +19,7 @@ import { fileURLToPath } from 'node:url'
  *
  * 配合：
  *   终端 1: npm run hub
- *   终端 2: npm run dev:content baima-exhibition
+ *   终端 2: npm run dev:content project
  *   终端 3: npm run dev:online
  */
 
@@ -30,11 +30,11 @@ const ROOT = path.resolve(__dirname, '../..')
 const arg = process.argv[2]
 if (!arg) {
   console.error('用法: npm run dev:content <package-id-or-path>')
-  console.error('  例如：npm run dev:content baima-exhibition')
+  console.error('  例如：npm run dev:content project')
   process.exit(1)
 }
 
-// 支持 "baima-exhibition" 或 "packages/baima-exhibition" 两种写法
+// 支持 "project" 或 "packages/project" 两种写法
 const pkgDir = arg.startsWith('packages/')
   ? path.resolve(ROOT, arg)
   : path.resolve(ROOT, 'packages', arg)

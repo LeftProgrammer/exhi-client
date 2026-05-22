@@ -1,0 +1,10 @@
+{
+  "scenes": {
+    "app": {
+      "type": "web",
+      "src": "contents/baima-yushui-leaders/index.html",
+      "allowInteraction": true,
+      "injectBridge": true
+    }
+  }
+}

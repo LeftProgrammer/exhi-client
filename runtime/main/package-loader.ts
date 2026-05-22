@@ -59,9 +59,19 @@ export class PackageLoader {
 
   constructor() {
     this.packageRoot = path.join(app.getPath('userData'), PACKAGE_DIR)
-    // 默认项目包：dev fallback / 生产种子用
-    // 环境变量 EXHI_DEV_PACKAGE 可在 dev 切换（如 "baima-exhibition"）
-    this.defaultProject = process.env['EXHI_DEV_PACKAGE'] || 'demo-hall'
+    // 优先级：dev 环境变量 > resources/default-project.txt（打包时写入）
+    this.defaultProject =
+      process.env['EXHI_DEV_PACKAGE'] || PackageLoader.readDefaultProjectFile() || ''
+  }
+
+  private static readDefaultProjectFile(): string | null {
+    try {
+      const filePath = path.join(process.resourcesPath, 'default-project.txt')
+      const val = fs.readFileSync(filePath, 'utf-8').trim()
+      return val || null
+    } catch {
+      return null
+    }
   }
 
   /** 启动期加载当前激活包 */
@@ -182,6 +192,15 @@ export class PackageLoader {
    * 解析当前激活包路径（含自动回滚）。
    */
   private resolveActivePackagePath(): { rootPath: string; slot: string | null } {
+    // 0. dev 模式下若显式设置了 EXHI_DEV_PACKAGE，优先加载（跳过槽检查）
+    if (!app.isPackaged && this.defaultProject) {
+      const devPath = path.join(app.getAppPath(), 'packages', this.defaultProject)
+      if (this.isValidPackage(devPath)) {
+        logger.info('开发模式加载指定项目包:', devPath)
+        return { rootPath: devPath, slot: null }
+      }
+    }
+
     // 1. 双槽 + 指针，失败自动回滚到另一个槽
     const current = this.currentSlot()
     const slots = current ? [current, this.otherSlot(current)] : [PACKAGE_SLOT_A, PACKAGE_SLOT_B]
@@ -197,13 +216,9 @@ export class PackageLoader {
       }
     }
 
-    // 2. dev fallback
+    // 2. dev 模式无槽且无 EXHI_DEV_PACKAGE → 给出明确提示
     if (!app.isPackaged) {
-      const devPath = path.join(app.getAppPath(), 'packages', this.defaultProject)
-      if (this.isValidPackage(devPath)) {
-        logger.info('开发模式 fallback 到工程内项目包:', devPath)
-        return { rootPath: devPath, slot: null }
-      }
+      throw new Error('开发模式找不到项目包，请设置 EXHI_DEV_PACKAGE（如 npm run dev:yushui）')
     }
 
     // 3. 生产种子

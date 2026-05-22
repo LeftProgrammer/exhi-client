@@ -5,5 +5,5 @@ dist
 *.d.ts
 runtime/renderer/src/types/bridge.d.ts
 packages/*/contents/**
-packages/demo-hall/**
+packages/*/actions.js
 guardian/guardian.mjs

@@ -6,7 +6,7 @@
  *
  * 示例：
  *  feat: M11 加白马互动屏
- *  feat(baima): 加领导关怀照片墙
+ *  feat(project): 加领导关怀照片墙
  *  fix(runtime): 修复 dev proxy 在 Windows 下 EINVAL
  *
  * subject 不强制大小写、不强制结尾、不强制英文——展厅项目中文 message 常见

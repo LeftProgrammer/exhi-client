@@ -15,7 +15,7 @@ import { PackageLoader, diffManifestFiles } from './package-loader'
  *  A) 整包 zip：url 以 .zip 结尾
  *     → 下载到临时文件 → 解压到目标槽（暂不实现 zip 解压，留待用 unzipper/yauzl 接入）
  *  B) 目录式：源服务器按 manifest 暴露 base 路径
- *     例：url = "https://content.example.com/baima/1.0.1/"
+ *     例：url = "https://content.example.com/project/1.0.1/"
  *     → 先 GET <base>/manifest.json
  *     → 按 files 增量下载到目标槽（已存在且 sha256 匹配的跳过）
  *
