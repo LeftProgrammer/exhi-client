@@ -34,7 +34,7 @@ const canPrev = computed(() => total.value > 1)
 const canNext = computed(() => total.value > 1)
 
 /** 当前展区的切图目录前缀 */
-const slicesDir = computed(() => (props.sectionId === 'leaders' ? 'leader/slices' : 'yushui'))
+const slicesDir = computed(() => (props.sectionId === 'leaders' ? 'leader' : 'yushui'))
 
 /**
  * 右侧 tab 图片：每个分类一张完整 PNG（自带文字 + 选中态边框）。
@@ -54,12 +54,12 @@ const tabAssets = computed<Record<string, string>>(() =>
 const bgVideoUrl = resolvePkgUrl('home/bg.mp4')
 
 const bannerFrameUrl = computed(() => {
-  if (props.sectionId === 'leaders') return resolvePkgUrl('leader/slices/header-bg.png')
+  if (props.sectionId === 'leaders') return resolvePkgUrl('leader/header-bg.png')
   return resolvePkgUrl('yushui/banner-frame.png')
 })
 
 const bannerTitleUrl = computed(() => {
-  if (props.sectionId === 'leaders') return resolvePkgUrl('leader/slices/header.png')
+  if (props.sectionId === 'leaders') return resolvePkgUrl('leader/header.png')
   return resolvePkgUrl('yushui/banner-title.png')
 })
 
