@@ -14,11 +14,16 @@ import { slides, IDLE_MS } from '@baima-milestone/data/slides'
 import { slideFadeOut, slideFadeIn } from '@baima-milestone/effects/gsapPresets'
 import Page1 from './Page1.vue'
 import Page2 from './Page2.vue'
+import Page3 from './Page3.vue'
+import Page4 from './Page4.vue'
+import Page5 from './Page5.vue'
 
-// 组件映射：id → 组件（暂未实现的页面返回 null）
 const COMPONENT_MAP: Record<string, Component | null> = {
-  participants: Page1,
-  planning: Page2
+  page1: Page1,
+  page2: Page2,
+  page3: Page3,
+  page4: Page4,
+  page5: Page5
 }
 
 const currentIndex = ref(0)
@@ -36,14 +41,12 @@ function goto(i: number) {
   resetIdle()
 }
 
-// ---- 键盘 1-5 切页 ----
 function onKeyDown(e: KeyboardEvent) {
   const n = parseInt(e.key)
   if (n >= 1 && n <= 5) goto(n - 1)
   resetIdle()
 }
 
-// ---- Idle 20s 自动回待机页 ----
 let idleTimer: ReturnType<typeof setTimeout> | null = null
 
 function resetIdle() {
@@ -51,7 +54,6 @@ function resetIdle() {
   idleTimer = setTimeout(() => goto(0), IDLE_MS)
 }
 
-// ---- Bridge 事件 ----
 const bridgeOff: Array<() => void> = []
 
 function setupBridge() {
@@ -79,7 +81,6 @@ onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKeyDown)
 })
 
-// ---- 切页动效 ----
 function onLeave(el: Element, done: () => void) {
   slideFadeOut(el, done)
 }
