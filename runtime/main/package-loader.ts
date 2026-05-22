@@ -22,6 +22,13 @@ import { aggregateChecksum, sha256File } from './hash'
  */
 export interface LoadedPackage {
   rootPath: string
+  /**
+   * 协议服务根目录（exhi-pkg:// 文件查找用）。
+   * 仅在 dev 模式 Vite 工程结构下与 rootPath 不同（rootPath 指 deploy/ 配置目录，
+   * contentRoot 指含 contents/ 的上层项目目录）。
+   * 生产模式下两者相同，可忽略此字段。
+   */
+  contentRoot: string
   /** 当前激活的槽位名（如 "slot-a"），若是 dev fallback 则为 null */
   slot: string | null
   manifest: Manifest
@@ -76,12 +83,12 @@ export class PackageLoader {
 
   /** 启动期加载当前激活包 */
   load(): LoadedPackage {
-    const { rootPath, slot } = this.resolveActivePackagePath()
+    const { rootPath, contentRoot, slot } = this.resolveActivePackagePath()
     logger.info(`加载项目包: ${rootPath} (slot=${slot ?? 'dev-fallback'})`)
 
     const pkg = this.readPackage(rootPath)
     logger.info(`项目包: ${pkg.manifest.projectId} v${pkg.manifest.version}`)
-    return { rootPath, slot, ...pkg }
+    return { rootPath, contentRoot, slot, ...pkg }
   }
 
   /** 读取并解析一个项目包目录（不切换、不写 pointer） */
@@ -190,14 +197,31 @@ export class PackageLoader {
 
   /**
    * 解析当前激活包路径（含自动回滚）。
+   * rootPath  —— JSON 配置读取根（manifest / scenes / displays / bindings）
+   * contentRoot —— exhi-pkg:// 文件服务根（含 contents/；dev Vite 工程下与 rootPath 不同）
    */
-  private resolveActivePackagePath(): { rootPath: string; slot: string | null } {
+  private resolveActivePackagePath(): {
+    rootPath: string
+    contentRoot: string
+    slot: string | null
+  } {
     // 0. dev 模式下若显式设置了 EXHI_DEV_PACKAGE，优先加载（跳过槽检查）
     if (!app.isPackaged && this.defaultProject) {
       const devPath = path.join(app.getAppPath(), 'packages', this.defaultProject)
       if (this.isValidPackage(devPath)) {
         logger.info('开发模式加载指定项目包:', devPath)
-        return { rootPath: devPath, slot: null }
+        // Vite 工程结构：config 在 deploy/<id>/，contents 在祖先目录
+        // 向上最多找 2 级，找到有 contents/ 的目录作为协议服务根
+        let contentRoot = devPath
+        let cur = path.dirname(devPath)
+        for (let i = 0; i < 2; i++) {
+          if (fs.existsSync(path.join(cur, 'contents'))) {
+            contentRoot = cur
+            break
+          }
+          cur = path.dirname(cur)
+        }
+        return { rootPath: devPath, contentRoot, slot: null }
       }
     }
 
@@ -212,7 +236,7 @@ export class PackageLoader {
           logger.warn(`指针 ${current} 的槽无效，回滚到 ${slot}`)
           this.writePointer(slot)
         }
-        return { rootPath: p, slot }
+        return { rootPath: p, contentRoot: p, slot }
       }
     }
 
@@ -229,7 +253,7 @@ export class PackageLoader {
         logger.info('首次启动，从种子包复制到 slot-a')
         copyDir(seedPath, target)
         this.writePointer(PACKAGE_SLOT_A)
-        return { rootPath: target, slot: PACKAGE_SLOT_A }
+        return { rootPath: target, contentRoot: target, slot: PACKAGE_SLOT_A }
       }
     }
 

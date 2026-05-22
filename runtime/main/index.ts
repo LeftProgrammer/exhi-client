@@ -75,7 +75,7 @@ app.whenReady().then(async () => {
     const loader = new PackageLoader()
     const pkg = loader.load()
     logger.info(`项目包加载成功: ${pkg.manifest.name} (${pkg.manifest.projectId})`)
-    attachProtocolHandler(pkg.rootPath)
+    attachProtocolHandler(pkg.contentRoot)
 
     const updater = new PackageUpdater(loader, deviceId, () => wsClient)
 
