@@ -7,12 +7,12 @@
     @touchend="onTouchEnd"
   >
     <!-- 背景 -->
-    <img ref="bgRef" class="layer-bg" :src="url('milestone/planning/bg.png')" alt="" />
-    <img ref="decoRef" class="layer-deco" :src="url('milestone/planning/deco.png')" alt="" />
+    <img ref="bgRef" class="layer-bg" :src="url('planning/bg.png')" alt="" />
+    <img ref="decoRef" class="layer-deco" :src="url('planning/deco.png')" alt="" />
 
     <!-- 固定标题 -->
     <div class="header">
-      <img ref="titleRef" class="header__title" :src="url('milestone/planning/title.png')" alt="" />
+      <img ref="titleRef" class="header__title" :src="url('planning/title.png')" alt="" />
     </div>
 
     <!-- 可滚动内容区 -->
@@ -23,7 +23,7 @@
           :key="i"
           :ref="(el) => setEntryRef(el, i)"
           class="entry-item"
-          :src="url(`milestone/planning/entry-${String(i + 1).padStart(2, '0')}.png`)"
+          :src="url(`planning/entry-${String(i + 1).padStart(2, '0')}.png`)"
           alt=""
         />
       </div>

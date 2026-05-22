@@ -35,7 +35,7 @@ const canNext = computed(() => total.value > 1)
 
 /** 当前展区的切图目录前缀 */
 const slicesDir = computed(() =>
-  props.sectionId === 'leaders' ? 'leader-slices' : 'yushui-slices'
+  props.sectionId === 'leaders' ? 'leader/slices' : 'yushui/slices'
 )
 
 /**
@@ -56,26 +56,26 @@ const tabAssets = computed<Record<string, string>>(() =>
 const bgVideoUrl = resolvePkgUrl('home/bg.mp4')
 
 const bannerFrameUrl = computed(() => {
-  if (props.sectionId === 'leaders') return resolvePkgUrl('leader-slices/header-bg.png')
-  return resolvePkgUrl('yushui-slices/banner-frame.png')
+  if (props.sectionId === 'leaders') return resolvePkgUrl('leader/slices/header-bg.png')
+  return resolvePkgUrl('yushui/slices/banner-frame.png')
 })
 
 const bannerTitleUrl = computed(() => {
-  if (props.sectionId === 'leaders') return resolvePkgUrl('leader-slices/header.png')
-  return resolvePkgUrl('yushui-slices/banner-title.png')
+  if (props.sectionId === 'leaders') return resolvePkgUrl('leader/slices/header.png')
+  return resolvePkgUrl('yushui/slices/banner-title.png')
 })
 
-const footerFrameUrl = resolvePkgUrl('yushui-slices/footer-frame.png')
+const footerFrameUrl = resolvePkgUrl('yushui/slices/footer-frame.png')
 
 /** 圆形按钮底图（normal 态，领导关怀用专属图，选中态复用渝水） */
 const btnBgUrl = computed(() => resolvePkgUrl(`${slicesDir.value}/btn-bg.png`))
-const btnBgActiveUrl = resolvePkgUrl('yushui-slices/btn-bg-active.png')
+const btnBgActiveUrl = resolvePkgUrl('yushui/slices/btn-bg-active.png')
 const btnPrevUrl = computed(() => resolvePkgUrl(`${slicesDir.value}/btn-left.png`))
-const btnPrevActiveUrl = resolvePkgUrl('yushui-slices/btn-left-active.png')
+const btnPrevActiveUrl = resolvePkgUrl('yushui/slices/btn-left-active.png')
 const btnNextUrl = computed(() => resolvePkgUrl(`${slicesDir.value}/btn-right.png`))
-const btnNextActiveUrl = resolvePkgUrl('yushui-slices/btn-right-active.png')
+const btnNextActiveUrl = resolvePkgUrl('yushui/slices/btn-right-active.png')
 const btnHomeUrl = computed(() => resolvePkgUrl(`${slicesDir.value}/btn-home.png`))
-const btnHomeActiveUrl = resolvePkgUrl('yushui-slices/btn-home-active.png')
+const btnHomeActiveUrl = resolvePkgUrl('yushui/slices/btn-home-active.png')
 
 /** 内容图（业务素材到位前显示占位） */
 const stageImageUrl = computed(() => {

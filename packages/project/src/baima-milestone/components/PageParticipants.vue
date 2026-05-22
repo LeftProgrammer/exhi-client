@@ -7,22 +7,12 @@
     @touchend="onTouchEnd"
   >
     <!-- 背景 -->
-    <img ref="bgRef" class="layer-bg" :src="url('milestone/participants/bg.png')" alt="" />
+    <img ref="bgRef" class="layer-bg" :src="url('participants/bg.png')" alt="" />
 
     <!-- 固定头部 -->
     <div class="header">
-      <img
-        ref="topBarRef"
-        class="header__bar"
-        :src="url('milestone/participants/top-bar.png')"
-        alt=""
-      />
-      <img
-        ref="titleRef"
-        class="header__title"
-        :src="url('milestone/participants/title.png')"
-        alt=""
-      />
+      <img ref="topBarRef" class="header__bar" :src="url('participants/top-bar.png')" alt="" />
+      <img ref="titleRef" class="header__title" :src="url('participants/title.png')" alt="" />
     </div>
 
     <!-- 可滚动内容区 -->
@@ -33,7 +23,7 @@
           :key="n"
           :ref="(el) => setRowRef(el, n - 1)"
           class="row-item"
-          :src="url(`milestone/participants/row-${n}.png`)"
+          :src="url(`participants/row-${n}.png`)"
           alt=""
         />
       </div>
