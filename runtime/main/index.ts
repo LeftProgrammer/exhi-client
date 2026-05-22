@@ -5,7 +5,6 @@ import {
   registerDiagHotkey,
   registerHotkeyBlocking,
   registerQuitHotkey,
-  registerSlideHotkeys,
   unregisterAllHotkeys
 } from './security'
 import { PackageLoader } from './package-loader'
@@ -151,7 +150,6 @@ app.whenReady().then(async () => {
     registerHotkeyBlocking()
     registerDiagHotkey()
     registerQuitHotkey()
-    registerSlideHotkeys()
 
     // 定时刷新（每天 04:00）
     scheduledRestart = new ScheduledRestart(winManager, 4, 0)

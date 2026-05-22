@@ -31,6 +31,11 @@ interface ExhibitBridgeApi {
 declare global {
   interface Window {
     exhibitBridge?: ExhibitBridgeApi
+    exhibit?: {
+      onBridgeEventFromMain(
+        cb: (ev: { name: string; payload?: unknown; targetDisplayId?: string }) => void
+      ): () => void
+    }
   }
 }
 

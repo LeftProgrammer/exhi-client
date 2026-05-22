@@ -58,13 +58,15 @@ function resetIdle() {
 const bridgeOff: Array<() => void> = []
 
 function setupBridge() {
-  if (!window.exhibitBridge) return
+  if (!window.exhibit?.onBridgeEventFromMain) return
   bridgeOff.push(
-    window.exhibitBridge.on('slide.next', () => goto(currentIndex.value + 1)),
-    window.exhibitBridge.on('slide.prev', () => goto(currentIndex.value - 1)),
-    window.exhibitBridge.on('slide.goto', (p) => {
-      const idx = (p as { index?: number })?.index
-      if (idx !== undefined) goto(idx)
+    window.exhibit.onBridgeEventFromMain((ev) => {
+      if (ev.name === 'slide.next') goto(currentIndex.value + 1)
+      else if (ev.name === 'slide.prev') goto(currentIndex.value - 1)
+      else if (ev.name === 'slide.goto') {
+        const idx = (ev.payload as { index?: number })?.index
+        if (idx !== undefined) goto(idx)
+      }
     })
   )
 }
