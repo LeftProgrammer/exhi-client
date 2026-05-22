@@ -50,8 +50,9 @@ function onKeyDown(e: KeyboardEvent) {
 let idleTimer: ReturnType<typeof setTimeout> | null = null
 
 function resetIdle() {
-  if (idleTimer !== null) clearTimeout(idleTimer)
-  idleTimer = setTimeout(() => goto(0), IDLE_MS)
+  // TODO：暂时不用
+  // if (idleTimer !== null) clearTimeout(idleTimer)
+  // idleTimer = setTimeout(() => goto(0), IDLE_MS)
 }
 
 const bridgeOff: Array<() => void> = []

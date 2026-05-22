@@ -194,6 +194,7 @@ hub:send cmd.runtime.cancel
 - [ ] 中控可看到 `evt.metrics` 实时指标
 - [ ] 中控可调 `cmd.diag.screenshot` 拉取截图
 - [ ] 隐藏热键（Ctrl+Shift+Alt+E ×3）可唤出诊断面板
+- [ ] 运维退出热键（Ctrl+Shift+Alt+Q）可退出客户端
 - [ ] 切换项目包 `cmd.package.update --applyAt=idle` 凌晨自动切
 
 ---

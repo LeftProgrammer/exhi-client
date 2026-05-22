@@ -220,6 +220,18 @@ export class PackageLoader {
     for (const slot of slots) {
       const p = this.slotPath(slot)
       if (this.isValidPackage(p)) {
+        // projectId 不匹配 → 跳过（防止旧项目的槽被错误加载）
+        try {
+          const m = this.readJson<Manifest>(path.join(p, 'manifest.json'))
+          if (this.defaultProject && m.projectId !== this.defaultProject) {
+            logger.warn(
+              `槽 ${slot} projectId=${m.projectId} 与期望 ${this.defaultProject} 不符，跳过`
+            )
+            continue
+          }
+        } catch {
+          continue
+        }
         // 与当前指针不一致 → 自动回滚指针
         if (current && slot !== current) {
           logger.warn(`指针 ${current} 的槽无效，回滚到 ${slot}`)

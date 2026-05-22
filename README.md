@@ -415,6 +415,10 @@ npm run hub:send -- cmd.diag.screenshot --display=main     # 远程截图（JPG 
 
 任意窗口聚焦，5 秒内连按 3 次 **Ctrl+Shift+Alt+E** → 弹出诊断面板。
 
+### 退出 Kiosk
+
+**Ctrl+Shift+Alt+Q** → 立即退出客户端（仅打包后生效，开发模式无效）。用于现场运维需要临时关闭程序时使用，不对外公开。
+
 ### 健康指标
 
 客户端连线后 hub 终端持续收到：

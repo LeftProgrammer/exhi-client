@@ -67,6 +67,21 @@ export function unregisterAllHotkeys() {
   globalShortcut.unregisterAll()
 }
 
+/** 注册运维退出热键（Ctrl+Shift+Alt+Q），用于现场无鼠标时退出 kiosk */
+export function registerQuitHotkey() {
+  if (!app.isPackaged) return
+  const key = 'CommandOrControl+Shift+Alt+Q'
+  try {
+    globalShortcut.register(key, () => {
+      logger.info('退出热键触发，app.quit()')
+      app.quit()
+    })
+    logger.info(`退出热键已注册: ${key}`)
+  } catch (e) {
+    logger.warn('退出热键注册失败:', e)
+  }
+}
+
 /**
  * 注册诊断面板唤起热键（Ctrl+Shift+Alt+E）。
  *
