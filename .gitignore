@@ -11,5 +11,4 @@ logs
 .cache
 .eslintcache
 .env
-.env.local
 *.tsbuildinfo
