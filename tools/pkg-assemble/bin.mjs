@@ -35,7 +35,6 @@ const ROOT = path.resolve(__dirname, '../..')
 const PKG_DIR = path.join(ROOT, 'packages/project')
 const DEPLOY_DIR = path.join(PKG_DIR, 'deploy')
 const DIST_DIR = path.join(PKG_DIR, 'dist')
-const CONTENTS_DIR = path.join(PKG_DIR, 'contents')
 
 const args = process.argv.slice(2)
 const projectArg = parseOpt(args, '--project') ?? 'all'
@@ -103,13 +102,14 @@ async function assembleProject(project) {
     await copyDir(distAssets, path.join(contentsOut, 'assets'))
   }
 
-  // 4. 复制 packages/project/contents/ 下的静态素材（图片/视频等）
-  if (await exists(CONTENTS_DIR)) {
-    for (const entry of await fs.readdir(CONTENTS_DIR, { withFileTypes: true })) {
+  // 4. 复制该项目包的静态素材：deploy/<project>/contents/（Route B：各包自包含）
+  const pkgContentsDir = path.join(deployDir, 'contents')
+  if (await exists(pkgContentsDir)) {
+    for (const entry of await fs.readdir(pkgContentsDir, { withFileTypes: true })) {
       if (!entry.isDirectory()) continue
-      // assets/ 由 dist 提供，不从 contents/ 再复制
+      // assets/ 由 dist 提供，不从 deploy/contents 再复制
       if (entry.name === 'assets') continue
-      await copyDir(path.join(CONTENTS_DIR, entry.name), path.join(contentsOut, entry.name))
+      await copyDir(path.join(pkgContentsDir, entry.name), path.join(contentsOut, entry.name))
     }
   }
 

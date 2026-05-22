@@ -24,9 +24,8 @@ export interface LoadedPackage {
   rootPath: string
   /**
    * 协议服务根目录（exhi-pkg:// 文件查找用）。
-   * 仅在 dev 模式 Vite 工程结构下与 rootPath 不同（rootPath 指 deploy/ 配置目录，
-   * contentRoot 指含 contents/ 的上层项目目录）。
-   * 生产模式下两者相同，可忽略此字段。
+   * Route B 结构：contents/ 在各自 deploy/<id>/contents/，与 rootPath 相同。
+   * 生产槽位两者也相同。保留字段以便将来扩展。
    */
   contentRoot: string
   /** 当前激活的槽位名（如 "slot-a"），若是 dev fallback 则为 null */
@@ -210,18 +209,8 @@ export class PackageLoader {
       const devPath = path.join(app.getAppPath(), 'packages', this.defaultProject)
       if (this.isValidPackage(devPath)) {
         logger.info('开发模式加载指定项目包:', devPath)
-        // Vite 工程结构：config 在 deploy/<id>/，contents 在祖先目录
-        // 向上最多找 2 级，找到有 contents/ 的目录作为协议服务根
-        let contentRoot = devPath
-        let cur = path.dirname(devPath)
-        for (let i = 0; i < 2; i++) {
-          if (fs.existsSync(path.join(cur, 'contents'))) {
-            contentRoot = cur
-            break
-          }
-          cur = path.dirname(cur)
-        }
-        return { rootPath: devPath, contentRoot, slot: null }
+        // Route B 结构：contents/ 直接在 deploy/<id>/ 内部，contentRoot === rootPath
+        return { rootPath: devPath, contentRoot: devPath, slot: null }
       }
     }
 
