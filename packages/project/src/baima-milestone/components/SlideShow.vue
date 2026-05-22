@@ -1,102 +1,93 @@
 <template>
-  <div class="slideshow">
+  <div class="slideshow" @touchstart="resetIdle" @keydown.passive="resetIdle">
     <Transition :css="false" @leave="onLeave" @enter="onEnter">
-      <div :key="current.id" class="slide">
-        <video
-          v-if="current.bgVideo"
-          class="slide__bg"
-          :src="resolvePkgUrl(current.bgVideo)"
-          autoplay
-          loop
-          muted
-          playsinline
-        />
-        <img
-          v-else-if="current.bg"
-          class="slide__bg"
-          :src="resolvePkgUrl(current.bg)"
-          :alt="current.id"
-        />
-        <div v-else class="slide__placeholder">
-          {{ current.placeholder ?? current.id }}
-        </div>
-      </div>
+      <KeepAlive>
+        <component :is="currentComponent" :key="currentIndex" ref="pageRef" />
+      </KeepAlive>
     </Transition>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import { slides } from '@baima-milestone/data/slides'
-import { slideFadeIn, slideFadeOut } from '@baima-milestone/effects/gsapPresets'
-import { resolvePkgUrl } from '@shared/utils/url'
+import { computed, onBeforeUnmount, onMounted, ref, type Component } from 'vue'
+import { slides, IDLE_MS } from '@baima-milestone/data/slides'
+import { slideFadeOut, slideFadeIn } from '@baima-milestone/effects/gsapPresets'
+import PageParticipants from './PageParticipants.vue'
+import PagePlanning from './PagePlanning.vue'
 
-const AUTO_ADVANCE_MS = 8000
-
-const index = ref(0)
-const current = computed(() => slides[index.value])
-
-function next() {
-  index.value = (index.value + 1) % slides.length
+// 组件映射：id → 组件（暂未实现的页面返回 null）
+const COMPONENT_MAP: Record<string, Component | null> = {
+  participants: PageParticipants,
+  planning: PagePlanning
 }
-function prev() {
-  index.value = (index.value - 1 + slides.length) % slides.length
-}
+
+const currentIndex = ref(0)
+const pageRef = ref<{ play: () => void; reset: () => void } | null>(null)
+
+const currentComponent = computed(() => {
+  const id = slides[currentIndex.value]?.id ?? ''
+  return COMPONENT_MAP[id] ?? null
+})
+
 function goto(i: number) {
-  if (i >= 0 && i < slides.length) index.value = i
+  if (i < 0 || i >= slides.length) return
+  if (i === currentIndex.value) return
+  currentIndex.value = i
+  resetIdle()
 }
 
-let timer: ReturnType<typeof setInterval> | null = null
-function startTimer() {
-  if (AUTO_ADVANCE_MS <= 0) return
-  timer = setInterval(next, AUTO_ADVANCE_MS)
-}
-function stopTimer() {
-  if (timer !== null) {
-    clearInterval(timer)
-    timer = null
-  }
+// ---- 键盘 1-5 切页 ----
+function onKeyDown(e: KeyboardEvent) {
+  const n = parseInt(e.key)
+  if (n >= 1 && n <= 5) goto(n - 1)
+  resetIdle()
 }
 
+// ---- Idle 20s 自动回待机页 ----
+let idleTimer: ReturnType<typeof setTimeout> | null = null
+
+function resetIdle() {
+  if (idleTimer !== null) clearTimeout(idleTimer)
+  idleTimer = setTimeout(() => goto(0), IDLE_MS)
+}
+
+// ---- Bridge 事件 ----
 const bridgeOff: Array<() => void> = []
+
 function setupBridge() {
   if (!window.exhibitBridge) return
   bridgeOff.push(
-    window.exhibitBridge.on('slide.next', () => {
-      stopTimer()
-      next()
-      startTimer()
-    }),
-    window.exhibitBridge.on('slide.prev', () => {
-      stopTimer()
-      prev()
-      startTimer()
-    }),
+    window.exhibitBridge.on('slide.next', () => goto(currentIndex.value + 1)),
+    window.exhibitBridge.on('slide.prev', () => goto(currentIndex.value - 1)),
     window.exhibitBridge.on('slide.goto', (p) => {
       const idx = (p as { index?: number })?.index
-      if (idx !== undefined) {
-        stopTimer()
-        goto(idx)
-        startTimer()
-      }
+      if (idx !== undefined) goto(idx)
     })
   )
 }
 
 onMounted(() => {
   setupBridge()
-  startTimer()
-})
-onBeforeUnmount(() => {
-  stopTimer()
-  bridgeOff.forEach((f) => f())
+  resetIdle()
+  window.addEventListener('keydown', onKeyDown)
 })
 
+onBeforeUnmount(() => {
+  if (idleTimer !== null) clearTimeout(idleTimer)
+  bridgeOff.forEach((f) => f())
+  window.removeEventListener('keydown', onKeyDown)
+})
+
+// ---- 切页动效 ----
 function onLeave(el: Element, done: () => void) {
   slideFadeOut(el, done)
 }
+
 function onEnter(el: Element, done: () => void) {
-  slideFadeIn(el, done)
+  slideFadeIn(el, () => {
+    pageRef.value?.play()
+    done()
+  })
 }
 </script>
 
@@ -106,30 +97,6 @@ function onEnter(el: Element, done: () => void) {
   width: 100%;
   height: 100%;
   overflow: hidden;
-}
-
-.slide {
-  position: absolute;
-  inset: 0;
-
-  &__bg {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  &__placeholder {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    font-size: 28px;
-    color: #4a7aaa;
-    font-family: 'Microsoft YaHei', sans-serif;
-    text-align: center;
-    padding: 60px;
-    line-height: 1.6;
-  }
+  outline: none;
 }
 </style>

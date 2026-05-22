@@ -17,7 +17,7 @@ import { BRIDGE_SCRIPT } from './bridge-script'
  *   2) attachProtocolHandler（app.ready 之后，且 packageRoot 已知时调用）
  *
  * M10 新增：dev 模式下，所有非媒体类资源优先去 Vite dev server 拉，
- *   拿到 HMR 体验。环境变量 EXHI_DEV_CONTENT_URL 控制（默认 http://localhost:5174）。
+ *   拿到 HMR 体验。代理地址 http://localhost:5174（与 packages/project/vite.config.ts 对齐）。
  *   策略：vite multi-page 模式下，main.ts 的 import 会被 vite 重写成基于
  *   vite root 的绝对路径（如 /hello/App.vue），不带 contents/ 前缀，
  *   所以代理判断改为"黑名单"——媒体类（mp4/jpg 等）走磁盘，其他全部走 proxy。
@@ -43,7 +43,7 @@ export function registerPkgScheme() {
 }
 
 /** dev 模式：优先去 vite dev server 拿 HTML/JS/CSS（HMR 体验）；视频图片仍走磁盘 */
-const DEV_CONTENT_URL = process.env['EXHI_DEV_CONTENT_URL'] || 'http://localhost:5174'
+const DEV_CONTENT_URL = 'http://localhost:5174'
 
 export function attachProtocolHandler(packageRoot: string) {
   const rootResolved = path.resolve(packageRoot)

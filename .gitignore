@@ -11,5 +11,6 @@ logs
 .cache
 .eslintcache
 .env
-.env.local
 *.tsbuildinfo
+# 原始切图目录（含中文文件名，不提交）
+packages/project/src/**/*_slices/
