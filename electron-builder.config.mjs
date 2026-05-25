@@ -8,6 +8,7 @@
  * 种子包来源：build/<id>/packages/<id>/（由 npm run dist:* 生成）
  */
 
+import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -23,6 +24,11 @@ if (!seed) {
 
 const seedFrom = path.join(__dirname, `build/${seed}/packages/${seed}`)
 
+// exe 文件名版本号取项目 manifest.json 的 version，而非根 package.json
+// 这样改内容只需改 manifest.json，打出的 exe 文件名自动体现版本
+const manifestPath = path.join(seedFrom, 'manifest.json')
+const contentVersion = JSON.parse(fs.readFileSync(manifestPath, 'utf-8')).version
+
 /**
  * 命名体系：
  *   exhi     展厅类项目通用前缀
@@ -31,7 +37,7 @@ const seedFrom = path.join(__dirname, `build/${seed}/packages/${seed}`)
  *
  *   appId:       com.exhi.baima.milestone / com.exhi.baima.yushui
  *   productName: Exhi Baima Milestone / Exhi Baima Yushui（显示名、安装目录、快捷方式）
- *   exe 文件名:  exhi-baima-milestone-1.0.0-x64.exe（无重复，简洁唯一）
+ *   exe 文件名:  exhi-baima-milestone-{manifest.version}-x64.exe（版本号取项目 manifest.json）
  */
 const APP_IDS = {
   'baima-milestone': 'com.exhi.baima.milestone',
@@ -84,7 +90,7 @@ export default {
 
   win: {
     target: [{ target: 'nsis', arch: ['x64'] }],
-    artifactName: `exhi-${seed}-\${version}-\${arch}.\${ext}`,
+    artifactName: `exhi-${seed}-${contentVersion}-\${arch}.\${ext}`,
     requestedExecutionLevel: 'asInvoker'
   },
 
