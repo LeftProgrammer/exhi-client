@@ -432,7 +432,7 @@ npm run hub:send -- cmd.diag.screenshot --display=main     # 远程截图（JPG 
 打包后测试进程守护：
 
 ```powershell
-$env:EXHI_CLIENT_EXE = "build\baima-yushui-leaders\win-unpacked\智慧展厅客户端.exe"
+$env:EXHI_CLIENT_EXE = "build\baima-yushui-leaders\win-unpacked\白马展厅·渝水领导.exe"
 npm run guardian
 ```
 

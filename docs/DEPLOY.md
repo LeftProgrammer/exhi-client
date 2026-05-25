@@ -32,11 +32,16 @@ Windows 设置 → 系统 → 显示器 → 标识 → 给每块屏命名（如 
 
 ### 2.1 拷贝安装包
 
-把 `智慧展厅客户端-<projectId>-1.0.0-x64.exe`（NSIS 安装包）拷到目标机器，双击安装。
+把对应展区的安装包拷到目标机器，双击安装：
 
-或者用免安装版：把 `build/<projectId>/win-unpacked/` 整个目录拷过去，直接跑 `智慧展厅客户端.exe`。
+| 展区            | 安装包文件名                                           | 程序名            |
+| --------------- | ------------------------------------------------------ | ----------------- |
+| 里程碑滑轨      | `白马展厅·里程碑-baima-milestone-x.x.x-x64.exe`        | 白马展厅·里程碑   |
+| 渝水+领导触摸屏 | `白马展厅·渝水领导-baima-yushui-leaders-x.x.x-x64.exe` | 白马展厅·渝水领导 |
 
-> `<projectId>` 即展区标识，如 `baima-yushui-leaders` 或 `baima-milestone`。
+或者用免安装版：把 `build/<projectId>/win-unpacked/` 整个目录拷过去，直接运行其中的 `.exe`。
+
+> 每个展区有独立的 `appId`，同一台机器可以同时安装多个展区的程序互不干扰。
 
 ### 2.2 创建 settings.json（可选）
 
@@ -75,7 +80,7 @@ Windows 设置 → 系统 → 显示器 → 标识 → 给每块屏命名（如 
 设置 → 帐户 → 家庭和其他用户 → 设置一台 Kiosk
 
 - 创建一个本地账户 `exhi`
-- 应用：选择"智慧展厅客户端"
+- 应用：选择对应展区的程序（如"白马展厅·里程碑"）
 - 重启后，登录 `exhi` 账户自动全屏启动客户端，按 Win+L 也无法切走
 
 ### 方法 B：Shell Launcher（Windows 10/11 IoT/Enterprise）
@@ -83,7 +88,7 @@ Windows 设置 → 系统 → 显示器 → 标识 → 给每块屏命名（如 
 PowerShell（管理员）：
 
 ```powershell
-$path = "${env:ProgramFiles}\智慧展厅客户端\智慧展厅客户端.exe"
+$path = "${env:ProgramFiles}\白马展厅·里程碑\白马展厅·里程碑.exe"  # 按实际展区程序名替换
 $user = "exhi"
 $config = @"
 <?xml version="1.0" encoding="utf-8" ?>
@@ -116,8 +121,8 @@ Win+R → `shell:startup` → 把客户端快捷方式拖进去。
 
 ```powershell
 # 管理员 PowerShell
-cd "C:\Program Files\智慧展厅客户端\guardian"
-.\install-task.ps1 -ClientExe "C:\Program Files\智慧展厅客户端\智慧展厅客户端.exe"
+cd "C:\Program Files\白马展厅·里程碑\guardian"  # 按实际展区程序名替换
+.\install-task.ps1 -ClientExe "C:\Program Files\白马展厅·里程碑\白马展厅·里程碑.exe"
 
 # 立刻启动
 Start-ScheduledTask -TaskName ExhiClientGuardian
@@ -138,8 +143,8 @@ Start-ScheduledTask -TaskName ExhiClientGuardian
   └─ runtime/
       ├─ stable/
       │   ├─ latest.yml
-      │   ├─ 智慧展厅客户端-1.0.0-x64.exe
-      │   └─ 智慧展厅客户端-1.0.0-x64.exe.blockmap
+      │   ├─ 白马展厅·里程碑-baima-milestone-1.0.0-x64.exe
+      │   └─ 白马展厅·里程碑-baima-milestone-1.0.0-x64.exe.blockmap
       └─ beta/
           └─ ...
 ```

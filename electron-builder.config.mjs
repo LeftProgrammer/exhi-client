@@ -23,10 +23,16 @@ if (!seed) {
 
 const seedFrom = path.join(__dirname, `build/${seed}/packages/${seed}`)
 
+const PRODUCT_NAMES = {
+  'baima-milestone': '白马展厅·里程碑',
+  'baima-yushui-leaders': '白马展厅·渝水领导'
+}
+const productName = PRODUCT_NAMES[seed] ?? '智慧展厅客户端'
+
 /** @type {import('electron-builder').Configuration} */
 export default {
-  appId: 'com.exhi.client',
-  productName: '智慧展厅客户端',
+  appId: `com.exhi.${seed}`,
+  productName,
   copyright: 'Copyright © 2026 exhi-team',
 
   directories: {
@@ -74,7 +80,7 @@ export default {
     allowToChangeInstallationDirectory: true,
     createDesktopShortcut: true,
     createStartMenuShortcut: true,
-    shortcutName: '智慧展厅客户端'
+    shortcutName: productName
   },
 
   // OTA 更新源：生产部署前替换为真实地址，或通过 settings.json 的 updateFeedUrl 覆盖
