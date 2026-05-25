@@ -1,0 +1,10 @@
+{
+  "scenes": {
+    "app": {
+      "type": "web",
+      "src": "contents/baima-duowei/index.html",
+      "allowInteraction": true,
+      "injectBridge": true
+    }
+  }
+}
