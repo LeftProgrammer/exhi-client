@@ -3,7 +3,7 @@
     "app": {
       "type": "web",
       "src": "contents/baima-milestone/index.html",
-      "allowInteraction": false,
+      "allowInteraction": true,
       "injectBridge": true
     }
   }
