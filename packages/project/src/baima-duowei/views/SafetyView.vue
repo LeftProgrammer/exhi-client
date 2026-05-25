@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { resolvePkgUrl } from '@shared/utils/url'
+import PageHeader from '../components/PageHeader.vue'
 
 const router = useRouter()
 
@@ -54,10 +55,7 @@ function goHome() {
     />
     <div class="safety__veil" />
 
-    <header class="safety__header">
-      <img class="safety__header-title" :src="headerTitle" alt="安全成效" />
-      <div class="safety__header-shine" aria-hidden="true" />
-    </header>
+    <PageHeader :title-src="headerTitle" title-alt="安全成效" />
 
     <section class="safety__content">
       <div class="safety__block-title">
@@ -195,30 +193,6 @@ function goHome() {
   z-index: 1;
   pointer-events: none;
   background: rgba(5, 11, 26, 0.5);
-}
-
-// ── 标题 ──
-.safety__header {
-  position: relative;
-  z-index: 2;
-  flex-shrink: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.safety__header-title {
-  display: block;
-  width: 100%;
-  height: auto;
-  @include fx.enter-fade-in($duration: 0.9s, $delay: 0.2s);
-}
-
-.safety__header-shine {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  overflow: hidden;
-  @include fx.auto-shine-from-center($duration: 1.2s, $interval: 6s, $width: 30%);
 }
 
 // ── 内容区 ──

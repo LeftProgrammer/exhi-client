@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { resolvePkgUrl } from '@shared/utils/url'
+import PageHeader from '../components/PageHeader.vue'
 
 const router = useRouter()
 
 const bgVideo = resolvePkgUrl('home/bg.mp4')
-const headerBg = resolvePkgUrl('home/header-bg.png')
 const headerTitle = resolvePkgUrl('home/header-title.png')
 
 const buttons = [
@@ -36,11 +36,7 @@ function goTo(name: string) {
     />
     <div class="home__veil" />
 
-    <header class="home__header">
-      <img class="home__header-bg" :src="headerBg" alt="" aria-hidden="true" />
-      <img class="home__header-title" :src="headerTitle" alt="多维筑安" />
-      <div class="home__header-shine" aria-hidden="true" />
-    </header>
+    <PageHeader class="home__header" :title-src="headerTitle" title-alt="多维筑安" />
 
     <nav class="home__nav">
       <button v-for="btn in buttons" :key="btn.name" class="home__btn" @click="goTo(btn.name)">
@@ -89,36 +85,6 @@ function goTo(name: string) {
   left: 0;
   right: 0;
   z-index: 2;
-  pointer-events: none;
-}
-
-.home__header-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: auto;
-  @include fx.enter-fade-in($duration: 0.8s, $delay: 0.1s);
-}
-
-.home__header-title {
-  position: relative;
-  display: block;
-  width: 100%;
-  height: auto;
-  @include fx.enter-fade-in($duration: 0.9s, $delay: 0.3s);
-}
-
-.home__header-shine {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 100%;
-  z-index: 3;
-  pointer-events: none;
-  overflow: hidden;
-  @include fx.auto-shine-from-center($duration: 1.2s, $interval: 6s, $width: 30%);
 }
 
 .home__nav {
