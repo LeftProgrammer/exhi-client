@@ -53,7 +53,22 @@ if (!skipAssemble) {
 console.log('[dist-cli] 编译 runtime...')
 await runNpm(['run', 'build'], ROOT)
 
-// 3. electron-builder（注入 EXHI_SEED，输出到 build/<projectId>/）
+// 3. 清理旧 exe / blockmap，避免积累历史版本
+const buildDir = path.join(ROOT, `build/${projectId}`)
+if (
+  await fs
+    .access(buildDir)
+    .then(() => true)
+    .catch(() => false)
+) {
+  for (const f of await fs.readdir(buildDir)) {
+    if (f.endsWith('.exe') || f.endsWith('.blockmap') || f.endsWith('.yml')) {
+      await fs.rm(path.join(buildDir, f))
+    }
+  }
+}
+
+// 4. electron-builder（注入 EXHI_SEED，输出到 build/<projectId>/）
 console.log(`[dist-cli] 打包 exe → build/${projectId}/`)
 const builderArgs = ['--config', 'electron-builder.config.mjs']
 if (dirOnly) builderArgs.push('--dir')
