@@ -41,11 +41,13 @@ const contentVersion = JSON.parse(fs.readFileSync(manifestPath, 'utf-8')).versio
  */
 const APP_IDS = {
   'baima-milestone': 'com.exhi.baima.milestone',
-  'baima-yushui-leaders': 'com.exhi.baima.yushui'
+  'baima-yushui-leaders': 'com.exhi.baima.yushui',
+  'baima-duowei': 'com.exhi.baima.duowei'
 }
 const PRODUCT_NAMES = {
   'baima-milestone': 'Exhi Baima Milestone',
-  'baima-yushui-leaders': 'Exhi Baima Yushui'
+  'baima-yushui-leaders': 'Exhi Baima Yushui',
+  'baima-duowei': 'Exhi Baima Duowei'
 }
 const appId = APP_IDS[seed] ?? `com.exhi.${seed}`
 const productName = PRODUCT_NAMES[seed] ?? 'Exhi Client'

@@ -71,7 +71,8 @@ export default defineConfig(({ command }) => ({
     rollupOptions: {
       input: {
         'baima-yushui-leaders': resolve(__dirname, 'src/baima-yushui-leaders/index.html'),
-        'baima-milestone': resolve(__dirname, 'src/baima-milestone/index.html')
+        'baima-milestone': resolve(__dirname, 'src/baima-milestone/index.html'),
+        'baima-duowei': resolve(__dirname, 'src/baima-duowei/index.html')
       }
     }
   },
@@ -80,6 +81,7 @@ export default defineConfig(({ command }) => ({
       '@shared': resolve(__dirname, 'src/shared'),
       '@baima-yushui': resolve(__dirname, 'src/baima-yushui-leaders'),
       '@baima-milestone': resolve(__dirname, 'src/baima-milestone'),
+      '@baima-duowei': resolve(__dirname, 'src/baima-duowei'),
       '@assets': resolve(__dirname, 'deploy/baima-yushui-leaders/contents')
     }
   }
