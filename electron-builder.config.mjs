@@ -23,15 +23,30 @@ if (!seed) {
 
 const seedFrom = path.join(__dirname, `build/${seed}/packages/${seed}`)
 
+/**
+ * 命名体系：
+ *   exhi     展厅类项目通用前缀
+ *   baima    白马展厅项目
+ *   *        具体展区
+ *
+ *   appId:       com.exhi.baima.milestone / com.exhi.baima.yushui
+ *   productName: Exhi Baima Milestone / Exhi Baima Yushui（显示名、安装目录、快捷方式）
+ *   exe 文件名:  exhi-baima-milestone-1.0.0-x64.exe（无重复，简洁唯一）
+ */
+const APP_IDS = {
+  'baima-milestone': 'com.exhi.baima.milestone',
+  'baima-yushui-leaders': 'com.exhi.baima.yushui'
+}
 const PRODUCT_NAMES = {
   'baima-milestone': 'Exhi Baima Milestone',
   'baima-yushui-leaders': 'Exhi Baima Yushui'
 }
+const appId = APP_IDS[seed] ?? `com.exhi.${seed}`
 const productName = PRODUCT_NAMES[seed] ?? 'Exhi Client'
 
 /** @type {import('electron-builder').Configuration} */
 export default {
-  appId: `com.exhi.${seed}`,
+  appId,
   productName,
   copyright: 'Copyright © 2026 exhi-team',
 
@@ -69,7 +84,7 @@ export default {
 
   win: {
     target: [{ target: 'nsis', arch: ['x64'] }],
-    artifactName: `\${productName}-${seed}-\${version}-\${arch}.\${ext}`,
+    artifactName: `exhi-${seed}-\${version}-\${arch}.\${ext}`,
     requestedExecutionLevel: 'asInvoker'
   },
 

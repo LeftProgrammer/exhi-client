@@ -34,10 +34,10 @@ Windows 设置 → 系统 → 显示器 → 标识 → 给每块屏命名（如 
 
 把对应展区的安装包拷到目标机器，双击安装：
 
-| 展区            | 安装包文件名                                           | 程序名               |
-| --------------- | ------------------------------------------------------ | -------------------- |
-| 里程碑滑轨      | `Exhi Baima Milestone-baima-milestone-x.x.x-x64.exe`   | Exhi Baima Milestone |
-| 渝水+领导触摸屏 | `Exhi Baima Yushui-baima-yushui-leaders-x.x.x-x64.exe` | Exhi Baima Yushui    |
+| 展区            | 安装包文件名                              | 程序名               |
+| --------------- | ----------------------------------------- | -------------------- |
+| 里程碑滑轨      | `exhi-baima-milestone-x.x.x-x64.exe`      | Exhi Baima Milestone |
+| 渝水+领导触摸屏 | `exhi-baima-yushui-leaders-x.x.x-x64.exe` | Exhi Baima Yushui    |
 
 或者用免安装版：把 `build/<projectId>/win-unpacked/` 整个目录拷过去，直接运行其中的 `.exe`。
 
@@ -143,8 +143,8 @@ Start-ScheduledTask -TaskName ExhiClientGuardian
   └─ runtime/
       ├─ stable/
       │   ├─ latest.yml
-      │   ├─ Exhi Baima Milestone-baima-milestone-1.0.0-x64.exe
-      │   └─ Exhi Baima Milestone-baima-milestone-1.0.0-x64.exe.blockmap
+      │   ├─ exhi-baima-milestone-1.0.0-x64.exe
+      │   └─ exhi-baima-milestone-1.0.0-x64.exe.blockmap
       └─ beta/
           └─ ...
 ```
