@@ -48,7 +48,11 @@
       "Bash(git -C \"e:/project/baima/exhi-client\" show HEAD~10:packages/project/deploy/baima-milestone/contents/planning/deco.png)",
       "Bash(git -C \"e:/project/baima/exhi-client\" log --all --oneline -- \"**/deco.png\")",
       "Bash(git -C \"e:/project/baima/exhi-client\" show 975944c --name-status)",
-      "Bash(git -C \"e:/project/baima/exhi-client\" show 758c353:packages/project/deploy/baima-milestone/contents/planning/deco.png)"
+      "Bash(git -C \"e:/project/baima/exhi-client\" show 758c353:packages/project/deploy/baima-milestone/contents/planning/deco.png)",
+      "Bash(xargs cat *)",
+      "Bash(python3 -c ' *)",
+      "Bash(python -c ' *)",
+      "Bash(identify \"e:/project/baima/exhi-client/packages/project/deploy/baima-duowei/contents/home/header-bg.png\")"
     ],
     "additionalDirectories": [
       "e:\\project\\baima\\exhi-client\\packages\\project\\contents\\milestone",

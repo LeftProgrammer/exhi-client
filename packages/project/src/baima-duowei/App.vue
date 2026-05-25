@@ -6,11 +6,12 @@ import { useIdleReset } from '@baima-yushui/composables/useIdleReset'
 const router = useRouter()
 const { on } = useBridge()
 
-useIdleReset(() => {
-  if (router.currentRoute.value.name !== 'home') {
-    router.push({ name: 'home' })
-  }
-}, 20_000)
+// TODO
+// useIdleReset(() => {
+//   if (router.currentRoute.value.name !== 'home') {
+//     router.push({ name: 'home' })
+//   }
+// }, 20_000)
 
 on('app:home', () => router.push({ name: 'home' }))
 </script>

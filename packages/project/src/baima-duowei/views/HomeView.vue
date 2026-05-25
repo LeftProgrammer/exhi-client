@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { resolvePkgUrl } from '@shared/utils/url'
-import PageHeader from '../components/PageHeader.vue'
+import SecondaryPage from '../components/SecondaryPage.vue'
 
 const router = useRouter()
 
 const bgVideo = resolvePkgUrl('home/bg.mp4')
+const headerBg = resolvePkgUrl('home/header-bg.png')
 const headerTitle = resolvePkgUrl('home/header-title.png')
 
 const buttons = [
@@ -21,109 +22,73 @@ function goTo(name: string) {
 </script>
 
 <template>
-  <main class="home">
-    <video
-      class="home__video"
-      :src="bgVideo"
-      autoplay
-      muted
-      loop
-      playsinline
-      preload="auto"
-      disablepictureinpicture
-      disableremoteplayback
-      @contextmenu.prevent
-    />
-    <div class="home__veil" />
-
-    <PageHeader class="home__header" :title-src="headerTitle" title-alt="多维筑安" />
-
+  <SecondaryPage :bg-video="bgVideo" :bg-overlay="headerBg" :title-src="headerTitle" title-alt="多维筑安">
     <nav class="home__nav">
-      <button v-for="btn in buttons" :key="btn.name" class="home__btn" @click="goTo(btn.name)">
-        <img :src="btn.img" :alt="btn.label" />
-      </button>
+      <div
+        v-for="(btn, i) in buttons"
+        :key="btn.name"
+        class="home__btn-wrap"
+        :style="{ '--step': i }"
+      >
+        <button class="home__btn" @click="goTo(btn.name)">
+          <img :src="btn.img" :alt="btn.label" />
+        </button>
+      </div>
     </nav>
-  </main>
+  </SecondaryPage>
 </template>
 
 <style scoped lang="scss">
-@use '@shared/styles/tokens' as t;
-@use '@shared/styles/transitions' as fx;
-
-.home {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-  background: t.$color-bg-primary;
-}
-
-.home__video {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: 0;
-  pointer-events: none;
-  will-change: transform;
-  transform: translateZ(0);
-  isolation: isolate;
-}
-
-.home__veil {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background: radial-gradient(circle at center, transparent 0%, rgba(5, 11, 26, 0.3) 70%);
-}
-
-.home__header {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 2;
-}
-
 .home__nav {
   position: absolute;
-  right: 5%;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 2;
+  left: 56%;
+  top: 12%;
+  z-index: 4;
   display: flex;
   flex-direction: column;
   gap: 2vh;
 }
 
+/* 外层：阶梯偏移 + 入场动画 */
+.home__btn-wrap {
+  margin-left: calc(var(--step, 0) * 5vw);
+  animation: btn-enter 0.9s calc(var(--step, 0) * 0.25s + 1s) cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* 内层：纯交互，不受 animation fill-mode 影响 */
 .home__btn {
   display: block;
   background: none;
   border: none;
   padding: 0;
   cursor: pointer;
-  transition:
-    transform 0.25s ease,
-    filter 0.25s ease;
-
-  @include fx.enter-from-right;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 
   img {
     display: block;
-    width: 32vw;
+    width: 24vw;
     height: auto;
   }
 
   &:hover {
-    transform: scale(1.04) translateX(-4px);
-    filter: brightness(1.15) drop-shadow(0 0 12px rgba(80, 200, 255, 0.6));
+    transform: translateX(2vw);
   }
 
   &:active {
-    transform: scale(0.97);
-    transition-duration: 0.1s;
+    transform: translateX(3.5vw) scaleX(0.96);
+    transition: transform 0.08s ease;
+  }
+}
+
+@keyframes btn-enter {
+  from {
+    opacity: 0;
+    transform: translateX(10vw);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 </style>
