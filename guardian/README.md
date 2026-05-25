@@ -23,11 +23,12 @@
 
 ```powershell
 # 用打包后的 EXE 路径
-$env:EXHI_CLIENT_EXE = "E:\path\to\智慧展厅客户端.exe"
+$env:EXHI_CLIENT_EXE = "E:\path\to\Exhi Baima Milestone.exe"
 node guardian/guardian.mjs
 ```
 
 测试方法：
+
 1. 启动 Guardian
 2. 启动客户端
 3. 用任务管理器强杀客户端进程
@@ -40,7 +41,7 @@ node guardian/guardian.mjs
 
 ```powershell
 cd guardian
-.\install-task.ps1 -ClientExe "C:\Program Files\智慧展厅客户端\智慧展厅客户端.exe"
+.\install-task.ps1 -ClientExe "C:\Program Files\Exhi Baima Milestone\Exhi Baima Milestone.exe"
 
 # 立即启动
 Start-ScheduledTask -TaskName ExhiClientGuardian
@@ -56,12 +57,12 @@ Unregister-ScheduledTask -TaskName ExhiClientGuardian -Confirm:$false
 
 ## 参数
 
-| 环境变量 | 默认 | 说明 |
-|---|---|---|
-| `EXHI_CLIENT_EXE` | （必填） | 客户端 EXE 绝对路径 |
-| `EXHI_USERDATA` | `%APPDATA%/exhi-client` | userData 目录 |
-| `EXHI_STALE_MS` | `30000` | 心跳超时阈值（毫秒） |
-| `EXHI_CHECK_MS` | `10000` | 巡检间隔（毫秒） |
+| 环境变量          | 默认                    | 说明                 |
+| ----------------- | ----------------------- | -------------------- |
+| `EXHI_CLIENT_EXE` | （必填）                | 客户端 EXE 绝对路径  |
+| `EXHI_USERDATA`   | `%APPDATA%/exhi-client` | userData 目录        |
+| `EXHI_STALE_MS`   | `30000`                 | 心跳超时阈值（毫秒） |
+| `EXHI_CHECK_MS`   | `10000`                 | 巡检间隔（毫秒）     |
 
 ## 日志
 

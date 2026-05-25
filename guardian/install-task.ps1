@@ -2,7 +2,7 @@
 # 把 Guardian 注册为 Windows 任务计划，开机自启 + 失败自动重试。
 #
 # 用法（需管理员）：
-#   .\install-task.ps1 -ClientExe "C:\Program Files\智慧展厅客户端\智慧展厅客户端.exe"
+#   .\install-task.ps1 -ClientExe "C:\Program Files\Exhi Baima Milestone\Exhi Baima Milestone.exe"
 #
 # 卸载：
 #   Unregister-ScheduledTask -TaskName ExhiClientGuardian -Confirm:$false

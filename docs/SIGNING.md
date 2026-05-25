@@ -69,13 +69,13 @@ param([string]$file)
 打包后用 PowerShell：
 
 ```powershell
-Get-AuthenticodeSignature "build\智慧展厅客户端-1.0.0-x64.exe"
+Get-AuthenticodeSignature "build\Exhi-Baima-Milestone-1.0.0-x64.exe"
 ```
 
 期望输出 `Status : Valid`、`SignerCertificate` 有内容。
 
 ```powershell
-signtool verify /pa /v "build\智慧展厅客户端-1.0.0-x64.exe"
+signtool verify /pa /v "build\Exhi-Baima-Milestone-1.0.0-x64.exe"
 ```
 
 ## 4. CI 签名（可选）

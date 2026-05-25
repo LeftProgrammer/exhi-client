@@ -24,10 +24,10 @@ if (!seed) {
 const seedFrom = path.join(__dirname, `build/${seed}/packages/${seed}`)
 
 const PRODUCT_NAMES = {
-  'baima-milestone': '白马展厅·里程碑',
-  'baima-yushui-leaders': '白马展厅·渝水领导'
+  'baima-milestone': 'Exhi Baima Milestone',
+  'baima-yushui-leaders': 'Exhi Baima Yushui'
 }
-const productName = PRODUCT_NAMES[seed] ?? '智慧展厅客户端'
+const productName = PRODUCT_NAMES[seed] ?? 'Exhi Client'
 
 /** @type {import('electron-builder').Configuration} */
 export default {
