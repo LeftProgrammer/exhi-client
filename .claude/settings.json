@@ -39,7 +39,16 @@
       "Bash(sed -i \"s|participants/|page1/|g\" e:/project/baima/exhi-client/packages/project/src/baima-milestone/components/Page1.vue)",
       "Bash(sed -i \"s|planning/|page2/|g\"      e:/project/baima/exhi-client/packages/project/src/baima-milestone/components/Page2.vue)",
       "Bash(sed -i 's/  import { onMounted, ref } from '\\\\''vue'\\\\''/  import { ref } from '\\\\''vue'\\\\''/' e:/project/baima/exhi-client/packages/project/src/baima-milestone/components/Page2.vue)",
-      "Bash(sed -i '/^  onMounted\\(\\(\\) => play\\(\\)\\)$/d' e:/project/baima/exhi-client/packages/project/src/baima-milestone/components/Page2.vue)"
+      "Bash(sed -i '/^  onMounted\\(\\(\\) => play\\(\\)\\)$/d' e:/project/baima/exhi-client/packages/project/src/baima-milestone/components/Page2.vue)",
+      "Bash(git -C \"e:/project/baima/exhi-client\" status resources/)",
+      "Bash(taskkill /F /IM \"智慧展厅客户端.exe\")",
+      "Bash(taskkill /F /IM \"electron.exe\")",
+      "Read(//c/Users/1/AppData/Roaming/智慧展厅客户端/**)",
+      "Read(//c/Users/1/AppData/Roaming/**)",
+      "Bash(git -C \"e:/project/baima/exhi-client\" show HEAD~10:packages/project/deploy/baima-milestone/contents/planning/deco.png)",
+      "Bash(git -C \"e:/project/baima/exhi-client\" log --all --oneline -- \"**/deco.png\")",
+      "Bash(git -C \"e:/project/baima/exhi-client\" show 975944c --name-status)",
+      "Bash(git -C \"e:/project/baima/exhi-client\" show 758c353:packages/project/deploy/baima-milestone/contents/planning/deco.png)"
     ],
     "additionalDirectories": [
       "e:\\project\\baima\\exhi-client\\packages\\project\\contents\\milestone",

@@ -124,6 +124,15 @@ export class WindowManager {
 
     win.once('ready-to-show', () => {
       win.show()
+      win.focus()
+      win.webContents.focus()
+      // Windows 下 kiosk 启动时 OS 可能在 show 后延迟激活，500ms 后再夺一次焦确保稳定
+      setTimeout(() => {
+        if (!win.isDestroyed()) {
+          win.focus()
+          win.webContents.focus()
+        }
+      }, 500)
       logger.info(`窗口已显示: display=${cfg.id}, 物理屏 id=${display.id}`)
     })
 

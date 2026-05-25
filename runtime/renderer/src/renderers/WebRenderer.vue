@@ -89,8 +89,38 @@ function handleMessage(e: MessageEvent) {
 /** 接收来自主进程的"广播事件"，转发到 iframe（仅当目标包括本屏时） */
 let unsubMainEvent: (() => void) | null = null
 
+/**
+ * iframe 加载完成后主动聚焦 + 父层键盘事件转发到 iframe。
+ *
+ * 背景：iframe 默认不获取键盘焦点，kiosk + alwaysOnTop + frame:false 时主窗口都
+ * 不一定能稳定拿到 OS 激活焦点。为了让项目内的 window.addEventListener('keydown')
+ * 能稳定工作，做两件事：
+ *  1. iframe load 后调用 contentWindow.focus()
+ *  2. 父层监听 keydown，转发同步 KeyboardEvent 给 iframe（不依赖 iframe 焦点）
+ */
+function onIframeLoad() {
+  emit('ready')
+  try {
+    iframeRef.value?.contentWindow?.focus()
+  } catch (e) {
+    console.warn('[WebRenderer] iframe focus 失败', e)
+  }
+}
+
+function relayKeyToIframe(e: KeyboardEvent) {
+  if (!iframeRef.value?.contentWindow) return
+  // 跳过组合键（已留给 globalShortcut 用，如 Ctrl+Shift+Alt+Q/W/E）
+  if (e.ctrlKey || e.metaKey || e.altKey) return
+  // 跨域 iframe 不能直接访问 contentWindow 属性，用 postMessage 传递按键信息
+  iframeRef.value.contentWindow.postMessage(
+    { _exhi: 'keyrelay', key: e.key, code: e.code, shiftKey: e.shiftKey },
+    '*'
+  )
+}
+
 onMounted(() => {
   window.addEventListener('message', handleMessage)
+  window.addEventListener('keydown', relayKeyToIframe)
   unsubMainEvent = window.exhibit.onBridgeEventFromMain((ev) => {
     if (ev.targetDisplayId && ev.targetDisplayId !== device.displayId) return
     postToIframe({ _exhi: 'event', name: ev.name, payload: ev.payload })
@@ -99,6 +129,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('message', handleMessage)
+  window.removeEventListener('keydown', relayKeyToIframe)
   unsubMainEvent?.()
   unsubMainEvent = null
 })
@@ -115,7 +146,7 @@ onBeforeUnmount(() => {
     }"
     frameborder="0"
     allow="autoplay; fullscreen"
-    @load="emit('ready')"
+    @load="onIframeLoad"
   />
 </template>
 

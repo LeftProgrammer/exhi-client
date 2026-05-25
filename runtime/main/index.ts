@@ -2,6 +2,7 @@ import { app, BrowserWindow } from 'electron'
 import { initLogger, logger } from './logger'
 import {
   applySecurity,
+  registerDevToolsHotkey,
   registerDiagHotkey,
   registerHotkeyBlocking,
   registerQuitHotkey,
@@ -150,6 +151,7 @@ app.whenReady().then(async () => {
     registerHotkeyBlocking()
     registerDiagHotkey()
     registerQuitHotkey()
+    registerDevToolsHotkey()
 
     // 定时刷新（每天 04:00）
     scheduledRestart = new ScheduledRestart(winManager, 4, 0)

@@ -53,6 +53,14 @@ export const BRIDGE_SCRIPT = `
           try { cbs[i](data.payload); } catch (err) { console.warn('[exhibitBridge] 订阅回调出错', err); }
         }
         break;
+      case 'keyrelay':
+        try {
+          window.dispatchEvent(new KeyboardEvent('keydown', {
+            key: data.key, code: data.code, shiftKey: !!data.shiftKey,
+            bubbles: true, cancelable: true
+          }));
+        } catch (err) { console.warn('[exhibitBridge] keyrelay 失败', err); }
+        break;
     }
   });
 

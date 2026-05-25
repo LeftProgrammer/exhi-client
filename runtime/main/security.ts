@@ -67,6 +67,26 @@ export function unregisterAllHotkeys() {
   globalShortcut.unregisterAll()
 }
 
+/** 注册调试热键（Ctrl+Shift+Alt+D），打开/关闭 DevTools */
+export function registerDevToolsHotkey() {
+  const key = 'CommandOrControl+Shift+Alt+D'
+  try {
+    globalShortcut.register(key, () => {
+      for (const win of BrowserWindow.getAllWindows()) {
+        if (win.isDestroyed()) continue
+        if (win.webContents.isDevToolsOpened()) {
+          win.webContents.closeDevTools()
+        } else {
+          win.webContents.openDevTools({ mode: 'detach' })
+        }
+      }
+    })
+    logger.info(`调试热键已注册: ${key}`)
+  } catch (e) {
+    logger.warn('调试热键注册失败:', e)
+  }
+}
+
 /** 注册运维热键：Ctrl+Shift+Alt+Q 退出程序，Ctrl+Shift+Alt+W 退出 kiosk 模式 */
 export function registerQuitHotkey() {
   if (!app.isPackaged) return
@@ -83,12 +103,27 @@ export function registerQuitHotkey() {
 
   try {
     globalShortcut.register('CommandOrControl+Shift+Alt+W', () => {
-      logger.info('退出 kiosk 热键触发')
-      for (const win of BrowserWindow.getAllWindows()) {
-        if (win.isDestroyed()) continue
-        win.setKiosk(false)
-        win.setAlwaysOnTop(false)
-        win.setFullScreen(false)
+      const wins = BrowserWindow.getAllWindows().filter((w) => !w.isDestroyed())
+      if (!wins.length) return
+      // 以第一个窗口的 kiosk 状态判断当前模式
+      const inKiosk = wins[0].isKiosk()
+      logger.info(`kiosk 切换: ${inKiosk ? '退出' : '恢复'}`)
+      for (const win of wins) {
+        if (inKiosk) {
+          win.setKiosk(false)
+          win.setAlwaysOnTop(false)
+          win.setFullScreen(false)
+          win.setMovable(true)
+          win.setResizable(true)
+          win.setSkipTaskbar(false)
+        } else {
+          win.setMovable(false)
+          win.setResizable(false)
+          win.setSkipTaskbar(true)
+          win.setAlwaysOnTop(true)
+          win.setKiosk(true)
+          win.focus()
+        }
       }
     })
     logger.info('退出 kiosk 热键已注册: Ctrl+Shift+Alt+W')
