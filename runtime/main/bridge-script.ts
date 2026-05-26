@@ -1,7 +1,6 @@
 /**
  * exhibitBridge：注入到展项 HTML（iframe）的浏览器侧脚本。
  *
- * 项目包里的 HTML 通过 <script src="exhi-pkg://pkg/__exhi__/bridge.js"></script> 引入。
  * 协议处理器（protocol.ts）拦截该路径并返回此文件内容。
  *
  * 实现机制：iframe ←postMessage→ 父 WebRenderer ←IPC→ 主进程。

@@ -21,7 +21,10 @@ const props = defineProps<{
   blockBg: string
   blockText: string
   bottom?: string
+  showPageNav?: boolean
 }>()
+
+const emit = defineEmits<{ prev: []; next: [] }>()
 
 const router = useRouter()
 
@@ -31,8 +34,12 @@ const btnInnerNormal = resolvePkgUrl('shared/btn-inner-normal.png')
 const btnInnerActive = resolvePkgUrl('shared/btn-inner-active.png')
 const btnHomeNormal = resolvePkgUrl('shared/btn-home-normal.png')
 const btnHomeActive = resolvePkgUrl('shared/btn-home-active.png')
+const btnPrevNormal = resolvePkgUrl('shared/btn-prev-normal.png')
+const btnPrevActive = resolvePkgUrl('shared/btn-prev-active.png')
 
 const homeHover = ref(false)
+const prevHover = ref(false)
+const nextHover = ref(false)
 
 function goHome() {
   router.push({ name: 'home' })
@@ -62,6 +69,53 @@ function goHome() {
       </div>
 
       <nav class="content-area__nav">
+        <!-- 上一页 -->
+        <button
+          v-if="props.showPageNav"
+          class="content-area__nav-btn"
+          @mouseenter="prevHover = true"
+          @mouseleave="prevHover = false"
+          @touchstart="prevHover = true"
+          @touchend="prevHover = false"
+          @click="emit('prev')"
+        >
+          <img :src="btnOuterNormal" class="btn-layer btn-outer--normal" alt="" />
+          <img :src="btnOuterActive" class="btn-layer btn-outer--active" alt="" />
+          <div class="btn-spin-wrap">
+            <img :src="btnInnerNormal" class="btn-layer btn-inner--normal" alt="" />
+            <img :src="btnInnerActive" class="btn-layer btn-inner--active" alt="" />
+          </div>
+          <img
+            :src="prevHover ? btnPrevActive : btnPrevNormal"
+            class="btn-layer btn-icon"
+            alt="上一页"
+          />
+        </button>
+
+        <!-- 下一页（图标水平翻转复用 prev） -->
+        <button
+          v-if="props.showPageNav"
+          class="content-area__nav-btn"
+          @mouseenter="nextHover = true"
+          @mouseleave="nextHover = false"
+          @touchstart="nextHover = true"
+          @touchend="nextHover = false"
+          @click="emit('next')"
+        >
+          <img :src="btnOuterNormal" class="btn-layer btn-outer--normal" alt="" />
+          <img :src="btnOuterActive" class="btn-layer btn-outer--active" alt="" />
+          <div class="btn-spin-wrap">
+            <img :src="btnInnerNormal" class="btn-layer btn-inner--normal" alt="" />
+            <img :src="btnInnerActive" class="btn-layer btn-inner--active" alt="" />
+          </div>
+          <img
+            :src="nextHover ? btnPrevActive : btnPrevNormal"
+            class="btn-layer btn-icon btn-icon--flip"
+            alt="下一页"
+          />
+        </button>
+
+        <!-- 首页 -->
         <button
           class="content-area__nav-btn"
           @mouseenter="homeHover = true"
@@ -70,15 +124,12 @@ function goHome() {
           @touchend="homeHover = false"
           @click="goHome"
         >
-          <!-- 外框静止，hover 切换 opacity -->
           <img :src="btnOuterNormal" class="btn-layer btn-outer--normal" alt="" />
           <img :src="btnOuterActive" class="btn-layer btn-outer--active" alt="" />
-          <!-- 内层圆盘旋转：包裹 div 负责旋转，img 负责 hover 切换 -->
           <div class="btn-spin-wrap">
             <img :src="btnInnerNormal" class="btn-layer btn-inner--normal" alt="" />
             <img :src="btnInnerActive" class="btn-layer btn-inner--active" alt="" />
           </div>
-          <!-- 图标 -->
           <img
             :src="homeHover ? btnHomeActive : btnHomeNormal"
             class="btn-layer btn-icon"
@@ -274,6 +325,10 @@ function goHome() {
 
   .btn-icon--flip {
     transform: scaleX(-1);
+  }
+
+  &:hover .btn-icon--flip {
+    transform: scaleX(-1) scale(1.12);
   }
 }
 </style>

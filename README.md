@@ -160,7 +160,6 @@ npm run hub:send -- cmd.reload
 任意展项 HTML 头部加一行：
 
 ```html
-<script src="exhi-pkg://pkg/__exhi__/bridge.js"></script>
 ```
 
 ```js

@@ -222,7 +222,7 @@ export default function register(exhi) {
 
 1. **manifest.json 的 `runtimeRange`**：声明兼容的 Runtime 版本
 2. **scenes.json 的 `type` 字段**：`video / image / web / composite`（Runtime 内置）
-3. **`exhi-pkg://pkg/__exhi__/bridge.js`**：引入 bridge 脚本
+3. **`exhi-pkg://pkg/__exhi__/bridge.js`**：bridge 脚本（仅 `type: "web"` 的 iframe 场景需要引入；Vue SPA 展区不需要）
 4. **bindings.json 的 `do` 字段**：`scene.* / renderer.* / system.*`（Runtime 内置 Action）
 
 只要这 4 处不变，Runtime 升级不影响项目包。
@@ -247,7 +247,7 @@ export default function register(exhi) {
 - [ ] `deploy/<id>/scenes.json`：每个 display.defaultScene 都有定义
 - [ ] `deploy/<id>/bindings.json`：至少有 `cmd.gotoScene` 绑定
 - [ ] Vite 入口已注册（`vite.config.ts` + `tsconfig.json`）
-- [ ] `src/<id>/index.html` 引入 `<script src="exhi-pkg://pkg/__exhi__/bridge.js"></script>`
+- [ ] 若含 `type: "web"` 的 iframe 场景，其 HTML 需引入 `<script src="exhi-pkg://pkg/__exhi__/bridge.js"></script>`（Vue SPA 展区不需要）
 - [ ] 触摸屏内容：禁右键、`user-select: none`、按钮 ≥ 88px
 - [ ] 根目录加 `dev:<id>` 和 `dist:<id>` 脚本
 

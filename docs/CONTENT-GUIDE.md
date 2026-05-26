@@ -240,7 +240,6 @@ body {
 如果要从触摸内容控制其他屏（如点按钮让主屏切视频），加载 bridge：
 
 ```html
-<script src="exhi-pkg://pkg/__exhi__/bridge.js"></script>
 <script>
   exhibitBridge.dispatch({
     type: 'cmd.gotoScene',
