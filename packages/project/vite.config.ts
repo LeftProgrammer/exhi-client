@@ -24,6 +24,31 @@ const MIME: Record<string, string> = {
   '.woff2': 'font/woff2'
 }
 
+const MPA_ENTRIES = ['baima-duowei', 'baima-yushui-leaders', 'baima-milestone']
+
+/**
+ * /baima-duowei 不带尾部斜杠时 302 重定向到 /baima-duowei/
+ * 必须带 / 才能让浏览器正确解析 HTML 内的相对路径。
+ */
+function mpaTrailingSlash(): Plugin {
+  return {
+    name: 'mpa-trailing-slash',
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const url = (req.url ?? '').split('?')[0]
+        for (const entry of MPA_ENTRIES) {
+          if (url === `/${entry}`) {
+            res.writeHead(302, { Location: `/${entry}/` })
+            res.end()
+            return
+          }
+        }
+        next()
+      })
+    }
+  }
+}
+
 /**
  * 开发模式下，从所有 deploy/<pkg>/contents/ 目录提供静态素材。
  * 不依赖 publicDir（publicDir 只能指向单一目录，多项目共用 dev server 时会互相 404）。
@@ -57,7 +82,7 @@ export default defineConfig(({ command }) => ({
   root: resolve(__dirname, 'src'),
   base: './',
   publicDir: false,
-  plugins: [vue(), ...(command === 'serve' ? [serveDeployContents()] : [])],
+  plugins: [vue(), ...(command === 'serve' ? [mpaTrailingSlash(), serveDeployContents()] : [])],
   server: {
     port: DEV_PORT,
     strictPort: true,

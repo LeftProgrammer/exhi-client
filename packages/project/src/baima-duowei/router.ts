@@ -1,4 +1,9 @@
-import { createRouter, createMemoryHistory, type RouteRecordRaw } from 'vue-router'
+import {
+  createRouter,
+  createMemoryHistory,
+  createWebHashHistory,
+  type RouteRecordRaw
+} from 'vue-router'
 import HomeView from './views/HomeView.vue'
 import SafetyView from './views/SafetyView.vue'
 import TechView from './views/TechView.vue'
@@ -15,6 +20,6 @@ const routes: RouteRecordRaw[] = [
 ]
 
 export const router = createRouter({
-  history: createMemoryHistory(),
+  history: import.meta.env.DEV ? createWebHashHistory() : createMemoryHistory(),
   routes
 })

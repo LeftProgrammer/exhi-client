@@ -1,12 +1,7 @@
-import { createRouter, createMemoryHistory, type RouteRecordRaw } from 'vue-router'
+import { createRouter, createMemoryHistory, createWebHashHistory, type RouteRecordRaw } from 'vue-router'
 import HomeView from './views/HomeView.vue'
 import SectionView from './views/SectionView.vue'
 
-/**
- * 用 createMemoryHistory：
- *  - 我们运行在 exhi-pkg:// 协议 + iframe 环境，不依赖 URL 栏
- *  - 避免和 dev 模式 vite 的 history fallback 冲突
- */
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
@@ -28,6 +23,6 @@ const routes: RouteRecordRaw[] = [
 ]
 
 export const router = createRouter({
-  history: createMemoryHistory(),
+  history: import.meta.env.DEV ? createWebHashHistory() : createMemoryHistory(),
   routes
 })
