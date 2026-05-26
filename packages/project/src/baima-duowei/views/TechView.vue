@@ -7,54 +7,55 @@ import ContentArea from '../components/ContentArea.vue'
 const TOTAL = 2
 const page = ref(0)
 
-function goPrev() { if (page.value > 0) page.value-- }
-function goNext() { if (page.value < TOTAL - 1) page.value++ }
+function goPrev() {
+  if (page.value > 0) page.value--
+}
+function goNext() {
+  if (page.value < TOTAL - 1) page.value++
+}
 
-const headerBg    = resolvePkgUrl('safety/header-bg.png')
+const headerBg = resolvePkgUrl('shared/header-bg.png')
 const headerTitle = resolvePkgUrl('tech/tech1/header-title.png')
 
 // 公共
-const blockBg    = resolvePkgUrl('shared/block-title-bg.png')
-const contentBg  = resolvePkgUrl('shared/content-bg.png')
+const contentBg = resolvePkgUrl('shared/content-bg.png')
 
 // Tech 1
 const t1 = {
-  blockText:   resolvePkgUrl('tech/tech1/block-title-text.png'),
-  overlay:     resolvePkgUrl('tech/tech1/content-overlay.png'),
-  leftTop:     resolvePkgUrl('tech/tech1/left-top.png'),
-  leftBottom:  resolvePkgUrl('tech/tech1/left-bottom.png'),
-  rightText:   resolvePkgUrl('tech/tech1/right-text.png'),
+  blockTitle: resolvePkgUrl('tech/tech1/block-title.png'),
+  overlay: resolvePkgUrl('tech/tech1/content-overlay.png'),
+  leftTop: resolvePkgUrl('tech/tech1/left-top.png'),
+  leftBottom: resolvePkgUrl('tech/tech1/left-bottom.png'),
+  rightText: resolvePkgUrl('tech/tech1/right-text.png')
 }
 
 // Tech 2
 const t2 = {
-  blockText:   resolvePkgUrl('tech/tech2/block-title-text.png'),
-  overlay:     resolvePkgUrl('tech/tech2/content-overlay.png'),
-  leftText:    resolvePkgUrl('tech/tech2/left-text.png'),
-  rightTopL:   resolvePkgUrl('tech/tech2/right-top-left.png'),
-  rightTopR:   resolvePkgUrl('tech/tech2/right-top-right.png'),
+  blockTitle: resolvePkgUrl('tech/tech2/block-title.png'),
+  overlay: resolvePkgUrl('tech/tech2/content-overlay.png'),
+  leftText: resolvePkgUrl('tech/tech2/left-text.png'),
+  rightTopL: resolvePkgUrl('tech/tech2/right-top-left.png'),
+  rightTopR: resolvePkgUrl('tech/tech2/right-top-right.png'),
   rightBottom: resolvePkgUrl('tech/tech2/right-bottom.png'),
-  imgs: Array.from({ length: 8 }, (_, i) => resolvePkgUrl(`tech/tech2/left-img-${i + 1}.png`)),
+  imgs: Array.from({ length: 8 }, (_, i) => resolvePkgUrl(`tech/tech2/left-img-${i + 1}.png`))
 }
 </script>
 
 <template>
   <SecondaryPage :bg-overlay="headerBg" :title-src="headerTitle" title-alt="智慧技术">
-
     <Transition name="page-fade" mode="out-in">
       <!-- ── Tech 1 ── -->
       <ContentArea
         v-if="page === 0"
         key="tech1"
         :content-bg="contentBg"
-        :block-bg="blockBg"
-        :block-text="t1.blockText"
+        :content-overlay="t1.overlay"
+        :block-title="t1.blockTitle"
         :show-page-nav="true"
         @prev="goPrev"
         @next="goNext"
       >
         <div class="t1">
-          <img class="t1__overlay" :src="t1.overlay" alt="" aria-hidden="true" />
           <img class="t1__left-top" :src="t1.leftTop" alt="" />
           <img class="t1__left-bottom" :src="t1.leftBottom" alt="" />
           <img class="t1__right-text" :src="t1.rightText" alt="" />
@@ -66,14 +67,13 @@ const t2 = {
         v-else
         key="tech2"
         :content-bg="contentBg"
-        :block-bg="blockBg"
-        :block-text="t2.blockText"
+        :content-overlay="t2.overlay"
+        :block-title="t2.blockTitle"
         :show-page-nav="true"
         @prev="goPrev"
         @next="goNext"
       >
         <div class="t2">
-          <img class="t2__overlay" :src="t2.overlay" alt="" aria-hidden="true" />
           <img class="t2__left-text" :src="t2.leftText" alt="" />
           <div class="t2__left-imgs">
             <img v-for="(src, i) in t2.imgs" :key="i" :src="src" alt="" />
@@ -106,16 +106,6 @@ const t2 = {
 .t1 {
   position: absolute;
   inset: 0;
-
-  &__overlay {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: fill;
-    pointer-events: none;
-    @include fx.enter-fade-in($duration: 0.6s, $delay: 0.4s);
-  }
 
   &__left-top {
     position: absolute;
@@ -150,16 +140,6 @@ const t2 = {
   position: absolute;
   inset: 0;
 
-  &__overlay {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: fill;
-    pointer-events: none;
-    @include fx.enter-fade-in($duration: 0.6s, $delay: 0.4s);
-  }
-
   &__left-text {
     position: absolute;
     top: 2%;
@@ -190,17 +170,31 @@ const t2 = {
         grid-row: 1;
       }
 
-      &:nth-child(n+2) {
+      &:nth-child(n + 2) {
         grid-row: 2;
       }
 
-      &:nth-child(2)  { grid-column: 1; }
-      &:nth-child(3)  { grid-column: 2; }
-      &:nth-child(4)  { grid-column: 3; }
-      &:nth-child(5)  { grid-column: 4; }
-      &:nth-child(6)  { grid-column: 5; }
-      &:nth-child(7)  { grid-column: 6; }
-      &:nth-child(8)  { grid-column: 7; }
+      &:nth-child(2) {
+        grid-column: 1;
+      }
+      &:nth-child(3) {
+        grid-column: 2;
+      }
+      &:nth-child(4) {
+        grid-column: 3;
+      }
+      &:nth-child(5) {
+        grid-column: 4;
+      }
+      &:nth-child(6) {
+        grid-column: 5;
+      }
+      &:nth-child(7) {
+        grid-column: 6;
+      }
+      &:nth-child(8) {
+        grid-column: 7;
+      }
     }
   }
 

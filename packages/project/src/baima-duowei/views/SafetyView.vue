@@ -3,11 +3,11 @@ import { resolvePkgUrl } from '@shared/utils/url'
 import SecondaryPage from '../components/SecondaryPage.vue'
 import ContentArea from '../components/ContentArea.vue'
 
-const headerBg = resolvePkgUrl('safety/header-bg.png')
+const headerBg = resolvePkgUrl('shared/header-bg.png')
 const headerTitle = resolvePkgUrl('safety/header-title.png')
-const blockBg = resolvePkgUrl('shared/block-title-bg.png')
-const blockText = resolvePkgUrl('safety/block-title-text.png')
 const contentBg = resolvePkgUrl('shared/content-bg.png')
+const contentOverlay = resolvePkgUrl('safety/content-overlay.png')
+const blockTitle = resolvePkgUrl('safety/block-title.png')
 const contentBottom = resolvePkgUrl('safety/content-bottom-title.png')
 const leftItems = [1, 2, 3].map((n) => resolvePkgUrl(`safety/left-${n}.png`))
 const rightItems = [1, 2, 3, 4, 5, 6].map((n) => resolvePkgUrl(`safety/right-${n}.png`))
@@ -17,8 +17,8 @@ const rightItems = [1, 2, 3, 4, 5, 6].map((n) => resolvePkgUrl(`safety/right-${n
   <SecondaryPage :bg-overlay="headerBg" :title-src="headerTitle" title-alt="安全成效">
     <ContentArea
       :content-bg="contentBg"
-      :block-bg="blockBg"
-      :block-text="blockText"
+      :content-overlay="contentOverlay"
+      :block-title="blockTitle"
       :bottom="contentBottom"
     >
       <div class="safety__body-left">

@@ -5,26 +5,31 @@ import { resolvePkgUrl } from '@shared/utils/url'
 
 /**
  * 二级页面内容区容器。
- * 封装：内容背景、顶部标题块、底部标语（可选）、首页导航按钮。
  *
- * Props:
- *   contentBg   内容区背景图
- *   blockBg     顶部标题块背景
- *   blockText   顶部标题文字图
- *   bottom      底部标语图（可选，不传则不显示）
+ * 层级（从底到顶）：contentBg(z0) → contentOverlay(z0) → main/slot(z1) → blockTitle/footer(z2)
+ * slot 内容可超出 main 区域，超出部分自动滑入标题和底栏下方。
  *
- * Slots:
- *   default     中间内容区（自由布局）
+ * @slot default 中间内容区（自由布局，支持溢出）
  */
 const props = defineProps<{
+  /** 内容区底层背景图 */
   contentBg: string
-  blockBg: string
-  blockText: string
+  /** 内容区上层装饰覆盖图（可选，与 contentBg 同尺寸，叠在其上） */
+  contentOverlay?: string
+  /** 顶部标题块图片（背景+文字合一） */
+  blockTitle: string
+  /** 底部标语图（可选，不传则不显示） */
   bottom?: string
+  /** 是否显示上一页/下一页导航按钮 */
   showPageNav?: boolean
 }>()
 
-const emit = defineEmits<{ prev: []; next: [] }>()
+const emit = defineEmits<{
+  /** 点击上一页 */
+  prev: []
+  /** 点击下一页 */
+  next: []
+}>()
 
 const router = useRouter()
 
@@ -51,11 +56,17 @@ function goHome() {
     <!-- 背景图 -->
     <img class="content-area__bg" :src="props.contentBg" alt="" aria-hidden="true" />
 
-    <!-- 顶部标题块 -->
-    <div class="content-area__block-title">
-      <img class="content-area__block-bg" :src="props.blockBg" alt="" aria-hidden="true" />
-      <img class="content-area__block-text" :src="props.blockText" alt="" />
-    </div>
+    <!-- 内容区上层覆盖（可选） -->
+    <img
+      v-if="props.contentOverlay"
+      class="content-area__overlay"
+      :src="props.contentOverlay"
+      alt=""
+      aria-hidden="true"
+    />
+
+    <!-- 顶部标题块（背景+文字合一） -->
+    <img class="content-area__block-title" :src="props.blockTitle" alt="" />
 
     <!-- 中间内容 slot -->
     <div class="content-area__main">
@@ -174,28 +185,26 @@ function goHome() {
   }
 }
 
+/* 内容区上层覆盖 */
+.content-area__overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  z-index: 0;
+  pointer-events: none;
+}
+
 /* 顶部标题块 */
 .content-area__block-title {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   flex-shrink: 0;
+  display: block;
   width: 58%;
-
-  .content-area__block-bg {
-    display: block;
-    width: 100%;
-    height: auto;
-  }
-
-  .content-area__block-text {
-    position: absolute;
-    top: 24%;
-    left: 9%;
-    display: block;
-    width: 55%;
-    height: auto;
-    @include fx.enter-fade-in($duration: 0.8s, $delay: 0.5s);
-  }
+  height: auto;
+  @include fx.enter-fade-in($duration: 0.8s, $delay: 0.5s);
 }
 
 /* 中间内容区 */
@@ -209,7 +218,7 @@ function goHome() {
 .content-area__footer {
   position: relative;
   flex-shrink: 0;
-  z-index: 1;
+  z-index: 2;
   display: flex;
   align-items: flex-end;
   justify-content: flex-end;
