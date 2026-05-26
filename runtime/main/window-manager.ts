@@ -1,4 +1,4 @@
-import { BrowserWindow, screen, type Display } from 'electron'
+import { app, BrowserWindow, screen, type Display } from 'electron'
 import path from 'node:path'
 import { logger } from './logger'
 import type { DisplayConfig } from '@shared/types'
@@ -24,7 +24,8 @@ export class WindowManager {
   constructor(
     private pkg: LoadedPackage,
     private deviceId: string,
-    private getWs: () => WsClient | null
+    private getWs: () => WsClient | null,
+    private windowTitle?: string
   ) {}
 
   /**
@@ -100,6 +101,7 @@ export class WindowManager {
     const isDev = !!process.env['ELECTRON_RENDERER_URL']
 
     const win = new BrowserWindow({
+      title: this.windowTitle || app.name,
       x: display.bounds.x,
       y: display.bounds.y,
       width: display.bounds.width,
@@ -121,6 +123,8 @@ export class WindowManager {
         additionalArguments: [`--exhi-display-id=${cfg.id}`]
       }
     })
+
+    win.on('page-title-updated', (e) => e.preventDefault())
 
     win.once('ready-to-show', () => {
       win.show()

@@ -1,3 +1,5 @@
+import fs from 'node:fs'
+import path from 'node:path'
 import { app, BrowserWindow } from 'electron'
 import { initLogger, logger } from './logger'
 import {
@@ -31,6 +33,17 @@ const APP_VERSION = app.getVersion()
 /**
  * 主进程入口。
  */
+
+// 读取打包时写入的中文显示名，用于窗口标题
+let displayName = ''
+if (app.isPackaged) {
+  try {
+    const f = path.join(process.resourcesPath, 'product-name.txt')
+    displayName = fs.readFileSync(f, 'utf-8').trim()
+  } catch {
+    /* noop */
+  }
+}
 
 initLogger()
 applySecurity()
@@ -99,7 +112,7 @@ app.whenReady().then(async () => {
     }
 
     const mainBus = new MainBus()
-    const winManager = new WindowManager(pkg, deviceId, () => wsClient)
+    const winManager = new WindowManager(pkg, deviceId, () => wsClient, displayName || undefined)
     const ipcBus = new IpcBus(pkg, winManager, deviceId, mainBus, () => wsClient)
     ipcBus.register()
 

@@ -45,9 +45,9 @@ const APP_IDS = {
   'baima-duowei': 'com.exhi.baima.duowei'
 }
 const PRODUCT_NAMES = {
-  'baima-milestone': 'Exhi Baima Milestone',
-  'baima-yushui-leaders': 'Exhi Baima Yushui',
-  'baima-duowei': 'Exhi Baima Duowei'
+  'baima-milestone': '智慧展厅·白马·里程碑',
+  'baima-yushui-leaders': '智慧展厅·白马·渝水',
+  'baima-duowei': '智慧展厅·白马·多维筑安'
 }
 const appId = APP_IDS[seed] ?? `com.exhi.${seed}`
 const productName = PRODUCT_NAMES[seed] ?? 'Exhi Client'
@@ -88,6 +88,7 @@ export default {
     const resourcesDir = context.appOutDir + '/resources'
     await fs.mkdir(resourcesDir, { recursive: true })
     await fs.writeFile(path.join(resourcesDir, 'default-project.txt'), seed, 'utf-8')
+    await fs.writeFile(path.join(resourcesDir, 'product-name.txt'), productName, 'utf-8')
   },
 
   win: {
