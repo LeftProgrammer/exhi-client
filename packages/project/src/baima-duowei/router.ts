@@ -3,18 +3,13 @@ import HomeView from './views/HomeView.vue'
 import SafetyView from './views/SafetyView.vue'
 import TechView from './views/TechView.vue'
 import StandardView from './views/StandardView.vue'
-import PlaceholderView from './views/PlaceholderView.vue'
+import ActivityView from './views/ActivityView.vue'
 
 const routes: RouteRecordRaw[] = [
   { path: '/', name: 'home', component: HomeView },
   { path: '/safety', name: 'safety', component: SafetyView },
   { path: '/tech', name: 'tech', component: TechView },
-  {
-    path: '/activity',
-    name: 'activity',
-    component: PlaceholderView,
-    props: { title: '安全活动' }
-  },
+  { path: '/activity', name: 'activity', component: ActivityView },
   { path: '/standard', name: 'standard', component: StandardView },
   { path: '/:pathMatch(.*)*', redirect: '/' }
 ]

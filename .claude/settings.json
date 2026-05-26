@@ -57,7 +57,8 @@
     "additionalDirectories": [
       "e:\\project\\baima\\exhi-client\\packages\\project\\contents\\milestone",
       "e:\\project\\baima\\exhi-client\\packages\\project\\deploy\\baima-yushui-leaders\\contents\\yushui\\slices",
-      "e:\\project\\baima\\exhi-client\\packages\\project\\deploy\\baima-yushui-leaders\\contents\\leader\\slices"
+      "e:\\project\\baima\\exhi-client\\packages\\project\\deploy\\baima-yushui-leaders\\contents\\leader\\slices",
+      "E:\\project\\baima\\exhi-client\\packages\\project\\src\\baima-duowei\\多维筑安-安全活动4_slices"
     ]
   }
 }
