@@ -14,3 +14,6 @@ logs
 *.tsbuildinfo
 # 原始切图目录（含中文文件名，不提交）
 packages/project/src/**/*_slices/
+
+# Electron dev/build 中间产物
+resources/
