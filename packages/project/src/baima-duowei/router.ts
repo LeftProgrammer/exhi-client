@@ -2,6 +2,7 @@ import { createRouter, createMemoryHistory, type RouteRecordRaw } from 'vue-rout
 import HomeView from './views/HomeView.vue'
 import SafetyView from './views/SafetyView.vue'
 import TechView from './views/TechView.vue'
+import StandardView from './views/StandardView.vue'
 import PlaceholderView from './views/PlaceholderView.vue'
 
 const routes: RouteRecordRaw[] = [
@@ -14,12 +15,7 @@ const routes: RouteRecordRaw[] = [
     component: PlaceholderView,
     props: { title: '安全活动' }
   },
-  {
-    path: '/standard',
-    name: 'standard',
-    component: PlaceholderView,
-    props: { title: '标准化建设' }
-  },
+  { path: '/standard', name: 'standard', component: StandardView },
   { path: '/:pathMatch(.*)*', redirect: '/' }
 ]
 
