@@ -34,10 +34,11 @@ Windows 设置 → 系统 → 显示器 → 标识 → 给每块屏命名（如 
 
 把对应展区的安装包拷到目标机器，双击安装：
 
-| 展区            | 安装包文件名                              | 程序名               |
-| --------------- | ----------------------------------------- | -------------------- |
-| 里程碑滑轨      | `exhi-baima-milestone-x.x.x-x64.exe`      | Exhi Baima Milestone |
-| 渝水+领导触摸屏 | `exhi-baima-yushui-leaders-x.x.x-x64.exe` | Exhi Baima Yushui    |
+| 安装包文件名 | exe 文件名 | 快捷方式 / 任务管理器 |
+| --- | --- | --- |
+| `exhi-<展区ID>-x.x.x-x64.exe` | `exhi-<展区ID>.exe` | 智慧展厅·白马·<展区> |
+
+展区 ID 参见 `electron-builder.config.mjs` 中的 `PROJECTS` 配置（如 `baima-milestone`、`baima-yushui-leaders`、`baima-duowei`）。
 
 或者用免安装版：把 `build/<projectId>/win-unpacked/` 整个目录拷过去，直接运行其中的 `.exe`。
 
@@ -80,7 +81,7 @@ Windows 设置 → 系统 → 显示器 → 标识 → 给每块屏命名（如 
 设置 → 帐户 → 家庭和其他用户 → 设置一台 Kiosk
 
 - 创建一个本地账户 `exhi`
-- 应用：选择对应展区的程序（如"Exhi Baima Milestone"）
+- 应用：选择对应展区的程序（如"智慧展厅·白马·里程碑"）
 - 重启后，登录 `exhi` 账户自动全屏启动客户端，按 Win+L 也无法切走
 
 ### 方法 B：Shell Launcher（Windows 10/11 IoT/Enterprise）
@@ -88,7 +89,7 @@ Windows 设置 → 系统 → 显示器 → 标识 → 给每块屏命名（如 
 PowerShell（管理员）：
 
 ```powershell
-$path = "${env:ProgramFiles}\Exhi Baima Milestone\Exhi Baima Milestone.exe"  # 按实际展区程序名替换
+$path = "${env:ProgramFiles}\智慧展厅·白马·里程碑\exhi-baima-milestone.exe"  # 按实际展区替换
 $user = "exhi"
 $config = @"
 <?xml version="1.0" encoding="utf-8" ?>
@@ -121,8 +122,8 @@ Win+R → `shell:startup` → 把客户端快捷方式拖进去。
 
 ```powershell
 # 管理员 PowerShell
-cd "C:\Program Files\Exhi Baima Milestone\guardian"  # 按实际展区程序名替换
-.\install-task.ps1 -ClientExe "C:\Program Files\Exhi Baima Milestone\Exhi Baima Milestone.exe"
+cd "C:\Program Files\智慧展厅·白马·里程碑\guardian"  # 按实际展区替换
+.\install-task.ps1 -ClientExe "C:\Program Files\智慧展厅·白马·里程碑\exhi-baima-milestone.exe"
 
 # 立刻启动
 Start-ScheduledTask -TaskName ExhiClientGuardian

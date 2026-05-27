@@ -77,9 +77,7 @@ npm run dev          # 同时服务 baima-yushui-leaders 和 baima-milestone
 **终端 2**（Electron 客户端，加载指定展区配置）：
 
 ```bash
-npm run dev:yushui      # 渝水新景 + 领导关怀
-# 或
-npm run dev:milestone   # 里程碑滑轨
+npm run dev:<展区>      # 如 dev:yushui / dev:milestone / dev:duowei
 ```
 
 Electron 的 `exhi-pkg://` 协议会把内容请求代理到终端 1 的 5174 server，获得 HMR 体验。
@@ -94,7 +92,7 @@ Electron 的 `exhi-pkg://` 协议会把内容请求代理到终端 1 的 5174 se
 npm run hub     # WS 监听 18080，HTTP 控制台 18081
 ```
 
-然后用 `dev:test` / `dev:yushui` 等脚本（已内置 `EXHI_HUB_URL=ws://localhost:18080`）启动客户端，再从第三个终端发指令：
+然后用 `dev:test` / `dev:<展区>` 等脚本（已内置 `EXHI_HUB_URL=ws://localhost:18080`）启动客户端，再从第三个终端发指令：
 
 ```bash
 # 切场景
@@ -122,8 +120,7 @@ npm run hub:send -- cmd.reload
 | 命令                                | 说明                                              |
 | ----------------------------------- | ------------------------------------------------- |
 | `npm run dev:test`                  | Electron + 框架测试包（test-pkg，无需构建）       |
-| `npm run dev:yushui`                | Electron + 白马渝水新景展区                       |
-| `npm run dev:milestone`             | Electron + 白马里程碑滑轨展区                     |
+| `npm run dev:<展区>`                | Electron + 指定展区（如 dev:yushui / dev:milestone / dev:duowei） |
 | `npm run dev:online`                | Electron（无 EXHI_DEV_PACKAGE，需已安装包或有槽） |
 | `npm run hub`                       | 启动 Mock Hub                                     |
 | `npm run hub:send -- <cmd> --k=v`   | 向客户端发指令                                    |
@@ -135,10 +132,9 @@ npm run hub:send -- cmd.reload
 
 | 命令                                     | 说明                                                           |
 | ---------------------------------------- | -------------------------------------------------------------- |
-| `npm run dist:yushui`                    | 完整打包渝水展区 exe（pkg-assemble + 编译 + electron-builder） |
-| `npm run dist:milestone`                 | 完整打包里程碑展区 exe                                         |
-| `npm run dist:yushui -- --skip-assemble` | 跳过 Vite build（已有 dist/）直接打 exe                        |
-| `npm run dist:yushui -- --dir`           | 只打免安装目录，不生成 NSIS                                    |
+| `npm run dist:<展区>`                    | 完整打包指定展区 exe（pkg-assemble + 编译 + electron-builder） |
+| `npm run dist:<展区> -- --skip-assemble` | 跳过 Vite build（已有 dist/）直接打 exe                        |
+| `npm run dist:<展区> -- --dir`           | 只打免安装目录，不生成 NSIS                                    |
 | `npm run pkg:assemble`                   | 单独运行 pkg-assemble（组装所有项目包）                        |
 | `npm run pkg:verify <path>`              | 校验本地包 SHA256 完整性                                       |
 | `npm run build`                          | 仅编译 electron-vite（runtime out/）                           |
@@ -281,7 +277,7 @@ npm run pkg:assemble -- --project=baima-yushui-leaders --out=build/baima-yushui-
 或用完整打包命令（跳过 exe 步骤）：
 
 ```bash
-npm run dist:yushui -- --dir
+npm run dist:<展区> -- --dir
 ```
 
 输出：
@@ -305,7 +301,7 @@ npm run dev:content build/baima-yushui-leaders/packages
 
 ### 3. 通过 hub 推送
 
-终端 1: `npm run hub` · 终端 2: `npm run dev:yushui` · 终端 3:
+终端 1: `npm run hub` · 终端 2: `npm run dev:<展区>` · 终端 3:
 
 ```bash
 # 立即同步切换（会重启客户端）
@@ -342,7 +338,7 @@ npm run pkg:verify build/baima-yushui-leaders/packages/baima-yushui-leaders
 ### 准备发布频道
 
 ```bash
-npm run dist:yushui                                   # 先打包（生成 latest.yml）
+npm run dist:<展区>                                    # 先打包（生成 latest.yml）
 npm run release -- --channel=stable --out=build/ota  # 整理 OTA 目录
 npm run dev:content -- --root=build/ota --port=18090  # 启动 OTA 服务器
 ```

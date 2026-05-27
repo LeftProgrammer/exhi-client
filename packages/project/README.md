@@ -1,6 +1,6 @@
 # packages/project · 白马项目工程源码
 
-白马展厅客户端的 Vue 3 内容工程。包含两个展区的展示页面，通过 Vite 多页面构建，最终由 `dist-cli` 组装成可部署包交付给 Runtime 加载。
+白马展厅客户端的 Vue 3 内容工程。包含多个展区的展示页面，通过 Vite 多页面构建，最终由 `dist-cli` 组装成可部署包交付给 Runtime 加载。
 
 ---
 
@@ -10,6 +10,7 @@
 | ---------------------- | --------------------------- | ----------------------------- |
 | `baima-yushui-leaders` | `src/baima-yushui-leaders/` | 渝水新景 + 领导关怀（触摸屏） |
 | `baima-milestone`      | `src/baima-milestone/`      | 白马里程碑滑轨屏              |
+| `baima-duowei`         | `src/baima-duowei/`         | 多维筑安（智慧技术/标准化/安全活动） |
 
 每个展区在 `deploy/` 下有对应的部署配置（manifest / scenes / displays / bindings）。
 
@@ -21,23 +22,15 @@
 packages/project/
 ├── src/
 │   ├── shared/                    # 各展区共享组件、动效、工具
-│   ├── baima-yushui-leaders/      # 渝水+领导展区 Vue 应用
-│   │   ├── index.html
-│   │   ├── main.ts
-│   │   ├── App.vue
-│   │   └── views/
-│   └── baima-milestone/           # 里程碑展区 Vue 应用
-│       ├── index.html
-│       ├── main.ts
-│       └── ...
+│   ├── baima-<展区ID>/            # 各展区 Vue 应用（每个含 index.html + main.ts + App.vue）
+│   └── ...
 ├── deploy/
-│   ├── baima-yushui-leaders/      # 展区部署配置
+│   ├── <展区ID>/                  # 各展区部署配置
 │   │   ├── manifest.json          # projectId、版本、runtimeRange
 │   │   ├── scenes.json            # 场景定义
 │   │   ├── displays.json          # 屏幕 / 分辨率 / fitPolicy
 │   │   └── bindings.json          # 指令绑定 + macro
-│   └── baima-milestone/
-│       └── ...（同上）
+│   └── ...
 ├── contents/                      # 静态素材（图片 / 视频 / 字体等，按展区分目录）
 │   ├── home/
 │   ├── yushui/
@@ -56,10 +49,11 @@ packages/project/
 
 | 别名                 | 指向                         |
 | -------------------- | ---------------------------- |
-| `@shared/*`          | `src/shared/*`               |
-| `@baima-yushui/*`    | `src/baima-yushui-leaders/*` |
-| `@baima-milestone/*` | `src/baima-milestone/*`      |
-| `@assets/*`          | `contents/*`                 |
+| `@shared/*`            | `src/shared/*`             |
+| `@baima-<展区ID>/*`   | `src/baima-<展区ID>/*`     |
+| `@assets/*`            | `contents/*`               |
+
+具体别名参见 `vite.config.ts` 和 `tsconfig.json` 中的 paths 配置。
 
 ---
 
@@ -67,21 +61,19 @@ packages/project/
 
 需要两个终端：
 
-**终端 1** — 启动 Vite dev server（5174 端口，同时服务两个展区）：
+**终端 1** — 启动 Vite dev server（5174 端口，同时服务所有展区）：
 
 ```bash
 cd packages/project
-npm run dev        # 浏览器自动打开 /baima-yushui-leaders/
-# 或
-npm run dev:milestone  # 浏览器打开 /baima-milestone/
+npm run dev              # 浏览器打开默认展区
+npm run dev:<展区>       # 浏览器打开指定展区
 ```
 
 **终端 2** — 从根目录启动 Electron，加载对应展区：
 
 ```bash
 # 在项目根目录
-npm run dev:yushui      # 加载渝水+领导展区
-npm run dev:milestone   # 加载里程碑展区
+npm run dev:<展区>      # 如 dev:yushui / dev:milestone / dev:duowei
 ```
 
 Electron 通过 `exhi-pkg://` 协议将内容请求代理到终端 1 的 5174 server，修改 Vue 组件后 Electron 窗口自动热更新。
@@ -97,21 +89,20 @@ Electron 通过 `exhi-pkg://` 协议将内容请求代理到终端 1 的 5174 se
 ```bash
 cd packages/project
 npm run build
-# 产物：dist/baima-yushui-leaders/  dist/baima-milestone/  dist/assets/
+# 产物：dist/<展区ID>/  dist/assets/
 ```
 
 ### 打包成可部署 exe（从根目录）
 
 ```bash
-npm run dist:yushui      # 渝水展区完整打包
-npm run dist:milestone   # 里程碑展区完整打包
+npm run dist:<展区>      # 如 dist:yushui / dist:milestone / dist:duowei
 ```
 
 打包流程：
 
 1. `pkg-assemble`：Vite build → 合并 `dist/` + `deploy/<id>/` + `contents/` → `build/<id>/packages/<id>/`
 2. `electron-vite build`：编译 Runtime
-3. `electron-builder`：打包 NSIS 安装包 → `build/<id>/智慧展厅客户端-<id>-1.0.0-x64.exe`
+3. `electron-builder`：打包 NSIS 安装包 → `build/<id>/exhi-<id>-x.x.x-x64.exe`
 
 ### 加速重打（已有 dist/）
 

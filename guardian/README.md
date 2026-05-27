@@ -23,7 +23,7 @@
 
 ```powershell
 # 用打包后的 EXE 路径
-$env:EXHI_CLIENT_EXE = "E:\path\to\Exhi Baima Milestone.exe"
+$env:EXHI_CLIENT_EXE = "E:\path\to\exhi-baima-milestone.exe"
 node guardian/guardian.mjs
 ```
 
@@ -41,7 +41,7 @@ node guardian/guardian.mjs
 
 ```powershell
 cd guardian
-.\install-task.ps1 -ClientExe "C:\Program Files\Exhi Baima Milestone\Exhi Baima Milestone.exe"
+.\install-task.ps1 -ClientExe "C:\Program Files\智慧展厅·白马·里程碑\exhi-baima-milestone.exe"
 
 # 立即启动
 Start-ScheduledTask -TaskName ExhiClientGuardian
