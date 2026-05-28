@@ -60,9 +60,16 @@ function serveDeployContents(): Plugin {
       server.middlewares.use((req, res, next) => {
         const url = (req.url ?? '/').split('?')[0]
         if (!ASSET_RE.test(url)) return next()
+
+        const referer = req.headers.referer ?? ''
+        const preferredPkg = MPA_ENTRIES.find((e) => referer.includes(`/${e}/`)) ?? ''
+
         const pkgs = fs.readdirSync(DEPLOY_DIR, { withFileTypes: true })
-        for (const pkg of pkgs) {
-          if (!pkg.isDirectory()) continue
+        const sorted = pkgs
+          .filter((d) => d.isDirectory())
+          .sort((a, b) => (a.name === preferredPkg ? -1 : b.name === preferredPkg ? 1 : 0))
+
+        for (const pkg of sorted) {
           const file = path.join(DEPLOY_DIR, pkg.name, 'contents', url)
           if (fs.existsSync(file)) {
             const ext = path.extname(file).toLowerCase()
