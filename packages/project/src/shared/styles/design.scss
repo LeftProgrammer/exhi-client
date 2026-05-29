@@ -1,0 +1,45 @@
+// shared/styles/design.scss
+// 展厅客户端 官方自适应方案（支持：横屏 + 竖屏）
+//
+// 当前项目设计基准（以 displays.json 为准）：
+//   横屏：3840×2160  |  竖屏：2160×3840
+//
+// 使用：width: w(1022);  height: h(1371);
+// 公式：设计图标注值 / designBase × 实际屏幕分辨率
+//
+// --design-w / --design-h 由项目入口 main.ts 注入，与 displays.json 对齐。
+// 展厅应用运行时由 exhibitBridge 覆盖。
+// =======================================
+
+/**
+ * 宽度自适应函数
+ * 使用：width: w(200px);
+ */
+@function w($px) {
+  @return calc(#{$px} / var(--design-w) * 100vw);
+}
+/**
+ * 高度自适应函数
+ * 使用：height: h(100px);
+ */
+@function h($px) {
+  @return calc(#{$px} / var(--design-h) * 100vh);
+}
+/**
+ * 字体大小统一用 w() 保证等比
+ */
+@function f($px) {
+  @return w($px);
+}
+/**
+ * 间距统一用 w() 保证等比
+ */
+@function m($px) {
+  @return w($px);
+}
+/**
+ * 圆角统一用 w() 保证等比
+ */
+@function r($px) {
+  @return w($px);
+}

@@ -128,7 +128,7 @@ const s4 = {
 </template>
 
 <style scoped lang="scss">
-@use '@shared/styles/transitions' as fx;
+/* @use '@shared/styles/transitions' as fx; */
 
 .page-fade-enter-active,
 .page-fade-leave-active {

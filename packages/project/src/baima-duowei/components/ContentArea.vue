@@ -153,8 +153,6 @@ function goHome() {
 </template>
 
 <style scoped lang="scss">
-@use '@shared/styles/transitions' as fx;
-
 @keyframes btn-spin {
   from {
     transform: rotate(0deg);

@@ -90,11 +90,12 @@ function onUp() {
 </template>
 
 <style scoped lang="scss">
-@use '@shared/styles/tokens' as t;
-@use '@shared/styles/transitions' as fx;
+// @use '@shared/styles/tokens' as t;
+// @use '@shared/styles/design' as d;
+// @use '@shared/styles/transitions' as fx;
 
-$card-w: 38vh;
-$card-h: 52.5vh;
+$card-w: d.w(1022);
+$card-h: d.h(1371);
 
 .entry-card {
   position: relative;

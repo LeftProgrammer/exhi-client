@@ -3,7 +3,7 @@
     {
       "id": "main",
       "match": { "primary": true },
-      "designBase": { "width": 1920, "height": 1080 },
+      "designBase": { "width": 3840, "height": 2160 },
       "defaultScene": "app"
     }
   ]

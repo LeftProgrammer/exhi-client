@@ -303,7 +303,7 @@ const t9 = {
 </template>
 
 <style scoped lang="scss">
-@use '@shared/styles/transitions' as fx;
+/* @use '@shared/styles/transitions' as fx; */
 
 /* 页切换淡入淡出 */
 .page-fade-enter-active,

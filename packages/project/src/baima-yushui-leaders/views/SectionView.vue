@@ -45,28 +45,28 @@ const tabAssets = computed<Record<string, string>>(() =>
   )
 )
 
-const bgVideoUrl = resolvePkgUrl('home/bg.mp4')
+const bgVideoUrl = resolvePkgUrl('shared/bg.mp4')
 
 const bannerFrameUrl = computed(() => {
   if (props.sectionId === 'leaders') return resolvePkgUrl('leader/header-bg.png')
-  return resolvePkgUrl('yushui/banner-frame.png')
+  return resolvePkgUrl('yushui/header-bg.png')
 })
 
 const bannerTitleUrl = computed(() => {
-  if (props.sectionId === 'leaders') return resolvePkgUrl('leader/header.png')
-  return resolvePkgUrl('yushui/banner-title.png')
+  if (props.sectionId === 'leaders') return resolvePkgUrl('leader/header-title.png')
+  return resolvePkgUrl('yushui/header-title.png')
 })
 
 const footerFrameUrl = resolvePkgUrl('yushui/footer-frame.png')
 
 const btnBgUrl = computed(() => resolvePkgUrl(`${slicesDir.value}/btn-bg.png`))
-const btnBgActiveUrl = resolvePkgUrl('yushui/btn-bg-active.png')
+const btnBgActiveUrl = resolvePkgUrl('shared/btn-bg-active.png')
 const btnPrevUrl = computed(() => resolvePkgUrl(`${slicesDir.value}/btn-left.png`))
-const btnPrevActiveUrl = resolvePkgUrl('yushui/btn-left-active.png')
+const btnPrevActiveUrl = resolvePkgUrl('shared/btn-left-active.png')
 const btnNextUrl = computed(() => resolvePkgUrl(`${slicesDir.value}/btn-right.png`))
-const btnNextActiveUrl = resolvePkgUrl('yushui/btn-right-active.png')
+const btnNextActiveUrl = resolvePkgUrl('shared/btn-right-active.png')
 const btnHomeUrl = computed(() => resolvePkgUrl(`${slicesDir.value}/btn-home.png`))
-const btnHomeActiveUrl = resolvePkgUrl('yushui/btn-home-active.png')
+const btnHomeActiveUrl = resolvePkgUrl('shared/btn-home-active.png')
 
 const stageImageUrl = computed(() => {
   if (currentEntry.value.image) return resolvePkgUrl(currentEntry.value.image)
@@ -306,33 +306,33 @@ watch(
           </div>
         </footer>
       </div>
-
-      <!-- 右侧分类菜单：错峰从右滑入，选中态高亮 -->
-      <nav class="menu" aria-label="分类">
-        <div
-          v-for="(cat, i) in section.categories"
-          :key="cat.id"
-          class="menu__slot"
-          :style="{ '--enter-delay': `${0.4 + i * 0.2}s` }"
-        >
-          <button
-            class="menu__item"
-            :class="{ 'menu__item--active': cat.id === currentCategory.id }"
-            :aria-label="cat.title"
-            :aria-pressed="cat.id === currentCategory.id"
-            @click="selectCategory(cat.id)"
-          >
-            <img class="menu__img" :src="tabAssets[cat.id]" :alt="cat.title" />
-          </button>
-        </div>
-      </nav>
     </section>
+
+    <!-- 右侧分类菜单：贴 section-view 右侧边框，偏下排列 -->
+    <nav class="menu" aria-label="分类">
+      <div
+        v-for="(cat, i) in section.categories"
+        :key="cat.id"
+        class="menu__slot"
+        :style="{ '--enter-delay': `${0.4 + i * 0.2}s` }"
+      >
+        <button
+          class="menu__item"
+          :class="{ 'menu__item--active': cat.id === currentCategory.id }"
+          :aria-label="cat.title"
+          :aria-pressed="cat.id === currentCategory.id"
+          @click="selectCategory(cat.id)"
+        >
+          <img class="menu__img" :src="tabAssets[cat.id]" :alt="cat.title" />
+        </button>
+      </div>
+    </nav>
   </main>
 </template>
 
 <style scoped lang="scss">
-@use '@shared/styles/tokens' as t;
-@use '@shared/styles/transitions' as fx;
+/* @use '@shared/styles/tokens' as t;
+@use '@shared/styles/transitions' as fx; */
 
 /* 根容器：absolute 层叠布局，banner 浮于顶部不占流 */
 .section-view {
@@ -365,6 +365,7 @@ watch(
   top: 0;
   left: 0;
   right: 0;
+  height: d.h(185); /* 2 倍图，设计图标注高度 185px */
   z-index: 4;
   pointer-events: none;
 }
@@ -372,7 +373,7 @@ watch(
 .banner__frame {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
   object-fit: contain;
   pointer-events: none;
   user-select: none;
@@ -386,13 +387,14 @@ watch(
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  height: 100%;
   z-index: 1;
   pointer-events: none;
 }
 
 .banner__title {
   display: block;
-  height: 5.5vh;
+  height: 100%; /* 继承 .banner 的 d.h(185) */
   width: auto;
   pointer-events: none;
   user-select: none;
@@ -407,10 +409,10 @@ watch(
 */
 .content-frame {
   position: absolute;
-  top: 8vh;
-  left: 6vh;
-  right: 6vh;
-  bottom: 3vh;
+  top: d.h(164);
+  left: d.w(245);
+  right: d.w(245);
+  bottom: d.h(119);
   z-index: 2;
   display: flex;
   flex-direction: column;
@@ -427,18 +429,18 @@ watch(
 
 /* 外框 A：横向更宽纵向更矮 → 露左右边 */
 .content-frame__outer--a {
-  top: 1.6vh;
-  bottom: 1.6vh;
-  left: -1.8vh;
-  right: -1.8vh;
+  top: d.h(51);
+  left: d.w(-55);
+  right: d.w(-55);
+  bottom: d.h(50);
 }
 
 /* 外框 B：横向更窄纵向更高 → 露上下边 */
 .content-frame__outer--b {
-  top: -1.6vh;
-  bottom: -1.6vh;
-  left: 1.8vh;
-  right: 1.8vh;
+  top: d.h(-53);
+  left: d.w(29);
+  right: d.w(29);
+  bottom: d.h(-54);
 }
 
 /* 内框：蓝黑填充，盖住两外框交叉角 */
@@ -517,16 +519,16 @@ watch(
   margin: 0;
 }
 
-/* 右侧分类菜单：绝对定位向 frame 右外侧溢出 */
+/* 右侧分类菜单：贴 section-view 右侧边框，偏下排列，固定间距 */
 .menu {
   position: absolute;
-  top: 50%;
-  right: -3vw;
-  transform: translateY(-50%);
+  bottom: d.h(580);
+  right: 0;
+  transform: none;
   z-index: 3;
   display: flex;
   flex-direction: column;
-  gap: 3vh;
+  gap: d.h(46);
   align-items: flex-start;
 }
 
@@ -568,8 +570,8 @@ watch(
 
 .menu__img {
   display: block;
-  height: 8vh;
-  width: auto;
+  width: d.w(496);
+  height: d.h(284);
   pointer-events: none;
   user-select: none;
   -webkit-user-drag: none;
@@ -586,8 +588,8 @@ watch(
   align-items: center;
   justify-content: space-between;
   gap: 2vw;
-  padding: 1.5vh 2vw 1.5vh 3vh;
-  min-height: 7vh;
+  padding: 0 4vw;
+  height: d.h(200);
   background-repeat: no-repeat;
   background-size: 100% 100%;
   background-position: center;
@@ -623,7 +625,6 @@ watch(
   flex: 0 0 auto;
   display: flex;
   align-items: center;
-  gap: 1.2vw;
 }
 
 /*
@@ -632,8 +633,8 @@ watch(
 */
 .footer__btn {
   position: relative;
-  width: 7vh;
-  height: 7vh;
+  width: d.w(265);
+  aspect-ratio: 1; /* 正方形：高度跟随宽度，避免 vw/vh 比例不一致导致变形 */
   background: transparent;
   border: 0;
   padding: 0;

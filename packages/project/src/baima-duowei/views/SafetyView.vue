@@ -32,7 +32,7 @@ const rightItems = [1, 2, 3, 4, 5, 6].map((n) => resolvePkgUrl(`safety/right-${n
 </template>
 
 <style scoped lang="scss">
-@use '@shared/styles/transitions' as fx;
+/* @use '@shared/styles/transitions' as fx; */
 
 .safety__body-left {
   position: absolute;

@@ -10,7 +10,7 @@ import type { WsClient } from './ws-client'
 /**
  * 多屏窗口管理 + 每窗口看门狗。
  *
- * 匹配规则优先级：label > primary > bounds > size > index。
+ * 匹配规则优先级：label > primary > size > bounds > index。
  * 未匹配的物理屏不创建窗口；未匹配的逻辑 display 会记录警告。
  *
  * 每个 display 创建独立 BrowserWindow（独立渲染进程）。
@@ -68,11 +68,15 @@ export class WindowManager {
     return created
   }
 
-  /** 物理屏匹配 */
+  /* 物理屏匹配，优先级：label > primary > size > bounds > index > 首个可用 */
   private matchDisplay(cfg: DisplayConfig, displays: Display[], used: Set<number>): Display | null {
     const available = displays.filter((d) => !used.has(d.id))
     const { match } = cfg
 
+    if (match.label) {
+      const hit = available.find((d) => d.label === match.label)
+      if (hit) return hit
+    }
     if (match.primary) {
       const primary = screen.getPrimaryDisplay()
       if (available.find((d) => d.id === primary.id)) return primary

@@ -72,7 +72,7 @@ const isVideo = computed(() => !!props.entry.video)
 </template>
 
 <style scoped lang="scss">
-@use '@shared/styles/tokens' as t;
+// @use '@shared/styles/tokens' as t;
 
 .viewer {
   width: 100%;

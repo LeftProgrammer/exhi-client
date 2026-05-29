@@ -20,7 +20,6 @@ export const useDeviceStore = defineStore('device', {
   },
   getters: {
     displayId: (s) => s.boot?.displayId ?? '',
-    designBase: (s) => s.boot?.display.designBase ?? { width: 1920, height: 1080 },
-    fitPolicy: (s) => s.boot?.display.fitPolicy ?? 'scale'
+    designBase: (s) => s.boot?.display.designBase ?? { width: 1920, height: 1080 }
   }
 })

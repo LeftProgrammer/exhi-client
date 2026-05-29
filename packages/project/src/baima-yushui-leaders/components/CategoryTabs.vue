@@ -28,7 +28,7 @@ defineEmits<{ (e: 'select', id: string): void }>()
 </template>
 
 <style scoped lang="scss">
-@use '@shared/styles/tokens' as t;
+// @use '@shared/styles/tokens' as t;
 
 .tabs {
   list-style: none;

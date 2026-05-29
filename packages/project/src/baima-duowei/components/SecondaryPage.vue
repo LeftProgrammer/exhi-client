@@ -71,7 +71,7 @@ const props = withDefaults(
 </template>
 
 <style scoped lang="scss">
-@use '@shared/styles/transitions' as fx;
+// @use '@shared/styles/transitions' as fx;
 
 .sec-page {
   position: relative;
@@ -119,8 +119,12 @@ const props = withDefaults(
 }
 
 @keyframes sec-overlay-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* 顶部标题区 */

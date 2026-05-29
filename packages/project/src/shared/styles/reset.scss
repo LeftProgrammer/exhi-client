@@ -1,7 +1,10 @@
 // ===== 触摸屏/展厅展示通用 reset =====
 // 所有屏的入口 main.ts 第一行 import 这个文件
 
-@use 'tokens' as t;
+// @use 'tokens' as t;
+
+// design-w / design-h 由项目入口 main.ts 注入，与 displays.json 保持一致
+// 不设置 :root 默认值，避免横屏/竖屏项目之间的隐式冲突
 
 * {
   box-sizing: border-box;

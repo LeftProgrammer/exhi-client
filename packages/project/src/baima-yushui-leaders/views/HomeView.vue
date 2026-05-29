@@ -3,9 +3,9 @@ import EntryCard from '@baima-yushui/components/EntryCard.vue'
 import { usePageLeave } from '@baima-yushui/composables/usePageLeave'
 import { resolvePkgUrl } from '@shared/utils/url'
 
-const bgVideoUrl = resolvePkgUrl('home/bg.mp4')
+const bgVideoUrl = resolvePkgUrl('shared/bg.mp4')
 const headerBgUrl = resolvePkgUrl('home/header-bg.png')
-const headerTextUrl = resolvePkgUrl('home/header.png')
+const headerTextUrl = resolvePkgUrl('home/header-title.png')
 const cardBgYushui = resolvePkgUrl('home/card-bg-yushui.png')
 const cardBgLeaders = resolvePkgUrl('home/card-bg-leaders.png')
 
@@ -75,8 +75,8 @@ function enterSection(sectionId: 'yushui' | 'leaders') {
 </template>
 
 <style scoped lang="scss">
-@use '@shared/styles/tokens' as t;
-@use '@shared/styles/transitions' as fx;
+// @use '@shared/styles/tokens' as t;
+// @use '@shared/styles/transitions' as fx;
 
 .home {
   position: relative;

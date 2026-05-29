@@ -89,6 +89,17 @@ export default defineConfig(({ command }) => ({
   root: resolve(__dirname, 'src'),
   base: './',
   publicDir: false,
+  css: {
+    preprocessorOptions: {
+      scss: {
+        additionalData: `
+          @use "@shared/styles/tokens" as t;
+          @use "@shared/styles/design" as d;
+          @use '@shared/styles/transitions' as fx;
+        `
+      }
+    }
+  },
   plugins: [vue(), ...(command === 'serve' ? [mpaTrailingSlash(), serveDeployContents()] : [])],
   server: {
     port: DEV_PORT,

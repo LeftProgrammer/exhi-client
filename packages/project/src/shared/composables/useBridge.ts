@@ -19,6 +19,7 @@ export interface BridgeInfo {
   displayId: string
   runtimeVersion: string
   packageInfo?: { projectId: string; version: string }
+  designBase?: { width: number; height: number }
 }
 
 interface ExhibitBridgeApi {
@@ -67,13 +68,20 @@ export function useBridge(): UseBridgeReturn {
 
   onMounted(async () => {
     if (!window.exhibitBridge) {
-      // dev 模式直接刷新浏览器 / bridge.js 未注入：留 null
-      console.warn('[useBridge] window.exhibitBridge 未就绪')
+      // dev 模式 / 浏览器直接访问：bridge.js 未注入。
+      // 不覆盖 CSS 变量，让 reset.scss 的 :root 默认值自然生效。
+      console.warn('[useBridge] window.exhibitBridge 未就绪，使用 reset.scss 默认值')
       return
     }
     try {
       info.value = await window.exhibitBridge.getInfo()
       ready.value = true
+      // 将 designBase 注入为 CSS 变量，供 design.scss 的 h()/w() 使用
+      if (info.value?.designBase) {
+        const { width, height } = info.value.designBase
+        document.documentElement.style.setProperty('--design-w', String(width))
+        document.documentElement.style.setProperty('--design-h', String(height))
+      }
     } catch (e) {
       console.error('[useBridge] getInfo 失败', e)
     }

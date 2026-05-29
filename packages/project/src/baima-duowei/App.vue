@@ -25,7 +25,7 @@ on('app:home', () => router.push({ name: 'home' }))
 </template>
 
 <style lang="scss">
-@use '@shared/styles/tokens' as t;
+// @use '@shared/styles/tokens' as t;
 
 * {
   box-sizing: border-box;

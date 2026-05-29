@@ -7,7 +7,7 @@ import SlideShow from './components/SlideShow.vue'
 </script>
 
 <style lang="scss">
-@use '@shared/styles/tokens' as t;
+// @use '@shared/styles/tokens' as t;
 
 html,
 body,

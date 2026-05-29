@@ -17,11 +17,11 @@ const router = useRouter()
 const { on } = useBridge()
 
 // TODO: 20 秒无交互回首页
-useIdleReset(() => {
-  if (router.currentRoute.value.name !== 'home') {
-    router.push({ name: 'home' })
-  }
-}, 20_000)
+// useIdleReset(() => {
+//   if (router.currentRoute.value.name !== 'home') {
+//     router.push({ name: 'home' })
+//   }
+// }, 20_000)
 
 // 监听中控自定义事件（exhibitBridge.emit 由 main 进程或其他屏触发）
 on('app:home', () => router.push({ name: 'home' }))
@@ -71,7 +71,7 @@ function viewKey(route: RouteLocationNormalizedLoaded): string {
 </template>
 
 <style lang="scss">
-@use '@shared/styles/tokens' as t;
+// @use '@shared/styles/tokens' as t;
 
 /* ===== 全局页面切换 =====
  * 旧页跟新页同时存在 → 旧页用 absolute 脱离文档流（不挤压新页）→

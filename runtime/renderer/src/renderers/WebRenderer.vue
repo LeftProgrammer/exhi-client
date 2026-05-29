@@ -52,7 +52,8 @@ function handleMessage(e: MessageEvent) {
             deviceId: device.boot.deviceId,
             displayId: device.boot.displayId,
             runtimeVersion: device.boot.runtimeVersion,
-            packageInfo: device.boot.packageInfo
+            packageInfo: device.boot.packageInfo,
+            designBase: device.boot.display.designBase
           }
         : null
       postToIframe({ _exhi: 'info', info })
