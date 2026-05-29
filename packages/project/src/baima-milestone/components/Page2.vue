@@ -1,8 +1,8 @@
 <template>
   <PageLayout ref="layoutRef" :bg="url('bg.png')">
     <template #header>
-      <img ref="topBarRef" class="header-bar" :src="url('top-bar.png')" alt="" />
-      <img ref="titleRef" class="header-title" :src="url('page2/title.png')" alt="" />
+      <img ref="topBarRef" class="header-bg" :src="url('header-bg.png')" alt="" />
+      <img ref="titleRef" class="header-title" :src="url('page2/header-title.png')" alt="" />
     </template>
     <div
       v-for="(_, i) in ENTRY_COUNT"
@@ -27,6 +27,7 @@ import { ref } from 'vue'
 import gsap from 'gsap'
 import { resolvePkgUrl } from '@shared/utils/url'
 import { playEnterSequence } from '@baima-milestone/effects/gsapPresets'
+import { SCROLL_ARM_AT } from '@baima-milestone/data/slides'
 import PageLayout from './PageLayout.vue'
 
 const url = resolvePkgUrl
@@ -68,9 +69,12 @@ function play() {
   tl = playEnterSequence(headers, rows)
   tl.to(highlights, { opacity: 1, duration: 0.4, ease: 'power2.out', stagger: 0.06 }, '>')
   tl.call(() => {
-    layoutRef.value?.scheduleAutoScroll()
     scanActive.value = true
   })
+  // 用「绝对时刻」安排自动滚动：从入场开始固定 SCROLL_ARM_AT 秒后触发，
+  // 与行数/数据量解耦——首屏可见的前几行此时已入场完，后续行随滚动再补入即可。
+  // 这样无论多少条数据，滚动启动时刻恒定，不会数据越多等越久。
+  tl.call(() => layoutRef.value?.scheduleAutoScroll(), undefined, SCROLL_ARM_AT)
 }
 
 function reset() {
@@ -120,7 +124,7 @@ defineExpose({ play, reset })
   }
 }
 
-.header-bar {
+.header-bg {
   width: 100%;
   display: block;
   opacity: 0;
@@ -128,10 +132,9 @@ defineExpose({ play, reset })
 
 .header-title {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 70%;
+  top: 0;
+  left: 0;
+  width: 100%;
   opacity: 0;
 }
 

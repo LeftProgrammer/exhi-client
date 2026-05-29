@@ -1,8 +1,8 @@
 <template>
   <PageLayout ref="layoutRef" :bg="url('bg.png')">
     <template #header>
-      <img ref="topBarRef" class="header-bar" :src="url('top-bar.png')" alt="" />
-      <img ref="titleRef" class="header-title" :src="url('page3/title.png')" alt="" />
+      <img ref="topBarRef" class="header-bg" :src="url('header-bg.png')" alt="" />
+      <img ref="titleRef" class="header-title" :src="url('page3/header-title.png')" alt="" />
     </template>
     <img
       v-for="(_, i) in ENTRY_COUNT"
@@ -61,7 +61,7 @@ defineExpose({ play, reset })
 </script>
 
 <style lang="scss" scoped>
-.header-bar {
+.header-bg {
   width: 100%;
   display: block;
   opacity: 0;
@@ -69,10 +69,9 @@ defineExpose({ play, reset })
 
 .header-title {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 70%;
+  top: 0;
+  left: 0;
+  width: 100%;
   opacity: 0;
 }
 
