@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import EntryCard from '@baima-yushui/components/EntryCard.vue'
-import { usePageLeave } from '@baima-yushui/composables/usePageLeave'
+import { usePageLeave } from '@shared/composables/usePageLeave'
 import { resolvePkgUrl } from '@shared/utils/url'
 
 const bgVideoUrl = resolvePkgUrl('shared/bg.mp4')

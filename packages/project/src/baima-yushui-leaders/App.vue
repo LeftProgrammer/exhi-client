@@ -2,7 +2,7 @@
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
 import { useRouter } from 'vue-router'
 import { useBridge } from '@shared/composables/useBridge'
-import { useIdleReset } from '@baima-yushui/composables/useIdleReset'
+import { useIdleReset } from '@shared/composables/useIdleReset'
 
 /**
  * 应用根。

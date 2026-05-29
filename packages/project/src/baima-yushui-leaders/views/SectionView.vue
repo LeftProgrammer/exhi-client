@@ -3,7 +3,13 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { getSection, type Category, type SectionId } from '@baima-yushui/data/sections'
 import { resolvePkgUrl } from '@shared/utils/url'
-import { useCanvasTransition } from '@baima-yushui/composables/useCanvasTransition'
+import { useViewTransition } from '@shared/composables/useViewTransition'
+import {
+  blurDissolveOut,
+  slidePushOut,
+  vortexRevealIn,
+  slideInFromRight
+} from '@shared/effects/gsapPresets'
 
 const props = defineProps<{
   sectionId: string
@@ -74,7 +80,10 @@ const stageImageUrl = computed(() => {
 })
 
 const transitionType = ref<'category' | 'entry'>('category')
-const { onLeave, onEnter } = useCanvasTransition(transitionType)
+const { onLeave, onEnter } = useViewTransition(transitionType, {
+  category: { enter: vortexRevealIn, leave: blurDissolveOut },
+  entry: { enter: slideInFromRight, leave: slidePushOut }
+})
 
 /* 自动轮播：同分类内逐张推进，到末尾跳下一分类首张，循环 */
 const AUTOPLAY_INTERVAL = 6000
