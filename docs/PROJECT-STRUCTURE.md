@@ -96,8 +96,7 @@ npm run dist:<screen>    # 如 dist:yushui（pkg-assemble + 编译 + electron-bu
       "id": "touch-new",
       "match": { "size": "1080x1920" },
       "designBase": { "width": 1080, "height": 1920 },
-      "defaultScene": "new-home",
-      "fitPolicy": "scale"
+      "defaultScene": "new-home"
     }
   ]
 }

@@ -28,7 +28,7 @@ packages/project/
 │   ├── <展区ID>/                  # 各展区部署配置
 │   │   ├── manifest.json          # projectId、版本、runtimeRange
 │   │   ├── scenes.json            # 场景定义
-│   │   ├── displays.json          # 屏幕 / 分辨率 / fitPolicy
+│   │   ├── displays.json          # 屏幕匹配 / 分辨率 / 默认场景
 │   │   └── bindings.json          # 指令绑定 + macro
 │   └── ...
 ├── contents/                      # 静态素材（图片 / 视频 / 字体等，按展区分目录）

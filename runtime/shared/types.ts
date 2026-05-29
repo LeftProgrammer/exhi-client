@@ -39,14 +39,11 @@ export interface DesignBase {
   height: number
 }
 
-export type FitPolicy = 'scale' | 'fill' | 'none'
-
 export interface DisplayConfig {
   id: string
   match: DisplayMatch
   designBase: DesignBase
   defaultScene: string
-  fitPolicy?: FitPolicy
 }
 
 export interface DisplaysConfig {

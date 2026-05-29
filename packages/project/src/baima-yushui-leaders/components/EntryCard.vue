@@ -34,7 +34,7 @@ interface Props {
   shineDirection?: 'lr' | 'rl'
 }
 const props = withDefaults(defineProps<Props>(), {
-  noDot: false,
+  noDot: true,
   direction: 'cw',
   dotInset: () => ({}),
   dotColor: '#00e5d4',
