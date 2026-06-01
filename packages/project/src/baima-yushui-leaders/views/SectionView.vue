@@ -4,6 +4,8 @@ import { useRouter } from 'vue-router'
 import { getSection, type Category, type SectionId } from '@baima-yushui/data/sections'
 import { resolvePkgUrl } from '@shared/utils/url'
 import { useViewTransition } from '@shared/composables/useViewTransition'
+import { useAutoplay } from '@baima-yushui/composables/useAutoplay'
+import StageFooter from '@baima-yushui/components/StageFooter.vue'
 import {
   blurDissolveOut,
   slidePushOut,
@@ -85,10 +87,6 @@ const { onLeave, onEnter } = useViewTransition(transitionType, {
   entry: { enter: slideInFromRight, leave: slidePushOut }
 })
 
-/* 自动轮播：同分类内逐张推进，到末尾跳下一分类首张，循环 */
-const AUTOPLAY_INTERVAL = 6000
-let autoplayTimer: number | null = null
-
 function selectCategory(id: string) {
   if (id === currentCategory.value.id) return
   transitionType.value = 'category'
@@ -124,52 +122,36 @@ function home() {
   router.push({ name: 'home' })
 }
 
-function autoplayStep() {
-  const cats = section.value.categories
-  const curCatIdx = cats.findIndex((c) => c.id === currentCategory.value.id)
-  const len = total.value
-  const isLastEntry = props.entryIndex >= len - 1
-
-  if (!isLastEntry) {
-    transitionType.value = 'entry'
-    router.replace({
-      name: 'section',
-      params: {
-        sectionId: props.sectionId,
-        categoryId: currentCategory.value.id,
-        entryIndex: props.entryIndex + 1
-      }
-    })
-  } else {
-    const nextCat = cats[(curCatIdx + 1) % cats.length]
-    transitionType.value = 'category'
-    router.replace({
-      name: 'section',
-      params: { sectionId: props.sectionId, categoryId: nextCat.id, entryIndex: 0 }
-    })
-  }
-}
-
-function startAutoplay() {
-  stopAutoplay()
-  autoplayTimer = window.setInterval(autoplayStep, AUTOPLAY_INTERVAL)
-}
-
-function stopAutoplay() {
-  if (autoplayTimer != null) {
-    window.clearInterval(autoplayTimer)
-    autoplayTimer = null
-  }
-}
-
-// 路由参数变化 → 重置计时器，保证最后一次切换后 6s 再走下一步
-watch(
+/* 自动轮播：同分类内逐张推进，到末尾跳下一分类首张，循环 */
+useAutoplay(
   () => [props.categoryId, props.entryIndex] as const,
-  () => startAutoplay()
-)
+  () => {
+    const cats = section.value.categories
+    const curCatIdx = cats.findIndex((c) => c.id === currentCategory.value.id)
+    const len = total.value
+    const isLastEntry = props.entryIndex >= len - 1
 
-onMounted(() => startAutoplay())
-onBeforeUnmount(() => stopAutoplay())
+    if (!isLastEntry) {
+      transitionType.value = 'entry'
+      router.replace({
+        name: 'section',
+        params: {
+          sectionId: props.sectionId,
+          categoryId: currentCategory.value.id,
+          entryIndex: props.entryIndex + 1
+        }
+      })
+    } else {
+      const nextCat = cats[(curCatIdx + 1) % cats.length]
+      transitionType.value = 'category'
+      router.replace({
+        name: 'section',
+        params: { sectionId: props.sectionId, categoryId: nextCat.id, entryIndex: 0 }
+      })
+    }
+  },
+  6000
+)
 
 // 兜底：categoryId 不存在时回退到第一个分类
 watch(
@@ -210,7 +192,7 @@ watch(
     <header class="banner">
       <img class="banner__frame" :src="bannerFrameUrl" alt="" aria-hidden="true" />
       <div class="banner__title-wrap">
-        <img class="banner__title" :src="bannerTitleUrl" :alt="section.banner" />
+        <img class="banner__title" :src="bannerTitleUrl" :alt="section.tagline" />
       </div>
     </header>
 
@@ -234,86 +216,31 @@ watch(
                 :alt="currentEntry.title"
               />
               <div v-else class="canvas__placeholder">
-                <span class="canvas__placeholder-icon">📷</span>
                 <p class="canvas__placeholder-title">{{ currentEntry.title }}</p>
-                <p class="canvas__placeholder-hint">
-                  {{ currentEntry.placeholder ?? '资源待补充' }}
-                </p>
+                <p class="canvas__placeholder-hint">资源待补充</p>
               </div>
             </div>
           </Transition>
         </div>
 
         <!-- 底部操作栏：标题文字 + 翻页/首页按钮 -->
-        <footer class="footer" :style="{ backgroundImage: `url(${footerFrameUrl})` }">
-          <span :key="currentEntry.id" class="footer__caption">
-            {{ currentEntry.caption ?? currentEntry.title }}
-          </span>
-
-          <!-- 圆形按钮：底图旋转 + 图标居中，hover 切换 active 态 -->
-          <div class="footer__btns">
-            <button
-              class="footer__btn"
-              :class="{ 'footer__btn--disabled': !canPrev }"
-              :disabled="!canPrev"
-              aria-label="上一页"
-              @click="prev"
-            >
-              <img class="footer__btn-bg" :src="btnBgUrl" alt="" aria-hidden="true" />
-              <img
-                class="footer__btn-bg footer__btn-bg--active"
-                :src="btnBgActiveUrl"
-                alt=""
-                aria-hidden="true"
-              />
-              <img class="footer__btn-icon" :src="btnPrevUrl" alt="" aria-hidden="true" />
-              <img
-                class="footer__btn-icon footer__btn-icon--active"
-                :src="btnPrevActiveUrl"
-                alt=""
-                aria-hidden="true"
-              />
-            </button>
-            <button
-              class="footer__btn"
-              :class="{ 'footer__btn--disabled': !canNext }"
-              :disabled="!canNext"
-              aria-label="下一页"
-              @click="next"
-            >
-              <img class="footer__btn-bg" :src="btnBgUrl" alt="" aria-hidden="true" />
-              <img
-                class="footer__btn-bg footer__btn-bg--active"
-                :src="btnBgActiveUrl"
-                alt=""
-                aria-hidden="true"
-              />
-              <img class="footer__btn-icon" :src="btnNextUrl" alt="" aria-hidden="true" />
-              <img
-                class="footer__btn-icon footer__btn-icon--active"
-                :src="btnNextActiveUrl"
-                alt=""
-                aria-hidden="true"
-              />
-            </button>
-            <button class="footer__btn" aria-label="返回首页" @click="home">
-              <img class="footer__btn-bg" :src="btnBgUrl" alt="" aria-hidden="true" />
-              <img
-                class="footer__btn-bg footer__btn-bg--active"
-                :src="btnBgActiveUrl"
-                alt=""
-                aria-hidden="true"
-              />
-              <img class="footer__btn-icon" :src="btnHomeUrl" alt="" aria-hidden="true" />
-              <img
-                class="footer__btn-icon footer__btn-icon--active"
-                :src="btnHomeActiveUrl"
-                alt=""
-                aria-hidden="true"
-              />
-            </button>
-          </div>
-        </footer>
+        <StageFooter
+          :frame-url="footerFrameUrl"
+          :btn-bg-url="btnBgUrl"
+          :btn-bg-active-url="btnBgActiveUrl"
+          :btn-prev-url="btnPrevUrl"
+          :btn-prev-active-url="btnPrevActiveUrl"
+          :btn-next-url="btnNextUrl"
+          :btn-next-active-url="btnNextActiveUrl"
+          :btn-home-url="btnHomeUrl"
+          :btn-home-active-url="btnHomeActiveUrl"
+          :can-prev="canPrev"
+          :can-next="canNext"
+          :caption="currentEntry.caption ?? currentEntry.title"
+          @prev="prev"
+          @next="next"
+          @home="home"
+        />
       </div>
     </section>
 
@@ -584,149 +511,5 @@ watch(
   pointer-events: none;
   user-select: none;
   -webkit-user-drag: none;
-}
-
-/* 底部操作栏：贴内框底边，浮于画布之上 */
-.footer {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 2vw;
-  padding: 0 4vw;
-  height: d.h(200);
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
-  background-position: center;
-  @include fx.enter-fade-up($duration: 0.7s, $delay: 0.6s);
-}
-
-/* 标题文字：切换时从左淡入 */
-.footer__caption {
-  flex: 1 1 auto;
-  min-width: 0;
-  font-size: t.$fs-h3;
-  color: t.$color-text-primary;
-  letter-spacing: 0.1em;
-  text-shadow: 0 0 8px rgba(0, 229, 212, 0.5);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  animation: caption-fade-in 0.5s ease-out both;
-}
-
-@keyframes caption-fade-in {
-  from {
-    opacity: 0;
-    transform: translateX(-12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.footer__btns {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-}
-
-/*
-  圆形按钮：4 层叠加（底图 normal/active + 图标 normal/active）
-  底图持续旋转，hover 时切换到 active 层（用 opacity 平滑过渡）
-*/
-.footer__btn {
-  position: relative;
-  width: d.w(265);
-  aspect-ratio: 1; /* 正方形：高度跟随宽度，避免 vw/vh 比例不一致导致变形 */
-  background: transparent;
-  border: 0;
-  padding: 0;
-  cursor: pointer;
-  outline: none;
-  -webkit-tap-highlight-color: transparent;
-  transition:
-    transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
-    filter 0.25s t.$ease-base;
-
-  &:hover:not(:disabled) {
-    transform: scale(1.18) translateY(-3px);
-    filter: drop-shadow(0 0 10px rgba(0, 229, 212, 0.75))
-      drop-shadow(0 4px 12px rgba(0, 229, 212, 0.35));
-  }
-
-  &:active:not(:disabled) {
-    transform: scale(0.94);
-    filter: drop-shadow(0 0 6px rgba(0, 229, 212, 0.5));
-    transition-duration: 0.1s;
-  }
-
-  &--disabled,
-  &:disabled {
-    cursor: not-allowed;
-    filter: grayscale(0.7) brightness(0.55);
-    opacity: 0.5;
-  }
-}
-
-.footer__btn-bg,
-.footer__btn-icon {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  user-select: none;
-  -webkit-user-drag: none;
-  transition: opacity t.$dur-base t.$ease-base;
-}
-
-/* 底图：normal 慢转 10s，active 加速转 2s */
-.footer__btn-bg {
-  z-index: 1;
-  animation: footer-btn-spin 10s linear infinite;
-}
-.footer__btn-bg--active {
-  z-index: 2;
-  opacity: 0;
-  animation: footer-btn-spin 2s linear infinite;
-}
-
-.footer__btn-icon {
-  z-index: 3;
-}
-.footer__btn-icon--active {
-  z-index: 4;
-  opacity: 0;
-}
-
-/* hover：底图 + 图标同时切换到 active 态 */
-.footer__btn:hover:not(:disabled) {
-  .footer__btn-bg {
-    opacity: 0;
-  }
-  .footer__btn-bg--active {
-    opacity: 1;
-  }
-  .footer__btn-icon {
-    opacity: 0;
-  }
-  .footer__btn-icon--active {
-    opacity: 1;
-  }
-}
-
-@keyframes footer-btn-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
 }
 </style>

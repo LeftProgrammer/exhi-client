@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { resolvePkgUrl } from '@shared/utils/url'
-import SecondaryPage from '../components/SecondaryPage.vue'
+import PageLayout from '../components/PageLayout.vue'
 
 const router = useRouter()
 
@@ -22,7 +22,7 @@ function goTo(name: string) {
 </script>
 
 <template>
-  <SecondaryPage :bg-video="bgVideo" :bg-overlay="headerBg" :title-src="headerTitle" title-alt="多维筑安">
+  <PageLayout :bg-video="bgVideo" :bg-overlay="headerBg" :title-src="headerTitle" title-alt="多维筑安">
     <nav class="home__nav">
       <div
         v-for="(btn, i) in buttons"
@@ -35,7 +35,7 @@ function goTo(name: string) {
         </button>
       </div>
     </nav>
-  </SecondaryPage>
+  </PageLayout>
 </template>
 
 <style scoped lang="scss">

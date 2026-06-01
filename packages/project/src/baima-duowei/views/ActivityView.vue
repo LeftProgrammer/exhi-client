@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { resolvePkgUrl } from '@shared/utils/url'
-import SecondaryPage from '../components/SecondaryPage.vue'
+import PageLayout from '../components/PageLayout.vue'
 import ContentArea from '../components/ContentArea.vue'
 
 const TOTAL = 6
@@ -73,7 +73,7 @@ const a6 = {
 </script>
 
 <template>
-  <SecondaryPage :bg-overlay="headerBg" :title-src="headerTitle" title-alt="安全活动">
+  <PageLayout :bg-overlay="headerBg" :title-src="headerTitle" title-alt="安全活动">
     <Transition name="page-fade" mode="out-in">
       <!-- ── Activity 1：安全生产月启动仪式 ── -->
       <ContentArea
@@ -189,7 +189,7 @@ const a6 = {
         </div>
       </ContentArea>
     </Transition>
-  </SecondaryPage>
+  </PageLayout>
 </template>
 
 <style scoped lang="scss">

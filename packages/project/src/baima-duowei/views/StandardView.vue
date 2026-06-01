@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { resolvePkgUrl } from '@shared/utils/url'
-import SecondaryPage from '../components/SecondaryPage.vue'
+import PageLayout from '../components/PageLayout.vue'
 import ContentArea from '../components/ContentArea.vue'
 
 const TOTAL = 4
@@ -51,7 +51,7 @@ const s4 = {
 </script>
 
 <template>
-  <SecondaryPage :bg-overlay="headerBg" :title-src="headerTitle" title-alt="标准化建设">
+  <PageLayout :bg-overlay="headerBg" :title-src="headerTitle" title-alt="标准化建设">
     <Transition name="page-fade" mode="out-in">
       <!-- ── Standard 1：施工标准化 ── -->
       <ContentArea
@@ -124,7 +124,7 @@ const s4 = {
         </div>
       </ContentArea>
     </Transition>
-  </SecondaryPage>
+  </PageLayout>
 </template>
 
 <style scoped lang="scss">

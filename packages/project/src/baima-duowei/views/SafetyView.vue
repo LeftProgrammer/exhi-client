@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { resolvePkgUrl } from '@shared/utils/url'
-import SecondaryPage from '../components/SecondaryPage.vue'
+import PageLayout from '../components/PageLayout.vue'
 import ContentArea from '../components/ContentArea.vue'
 
 const headerBg = resolvePkgUrl('shared/header-bg.png')
@@ -14,7 +14,7 @@ const rightItems = [1, 2, 3, 4, 5, 6].map((n) => resolvePkgUrl(`safety/right-${n
 </script>
 
 <template>
-  <SecondaryPage :bg-overlay="headerBg" :title-src="headerTitle" title-alt="安全成效">
+  <PageLayout :bg-overlay="headerBg" :title-src="headerTitle" title-alt="安全成效">
     <ContentArea
       :content-bg="contentBg"
       :content-overlay="contentOverlay"
@@ -28,7 +28,7 @@ const rightItems = [1, 2, 3, 4, 5, 6].map((n) => resolvePkgUrl(`safety/right-${n
         <img v-for="(src, i) in rightItems" :key="i" :src="src" alt="" />
       </div>
     </ContentArea>
-  </SecondaryPage>
+  </PageLayout>
 </template>
 
 <style scoped lang="scss">
