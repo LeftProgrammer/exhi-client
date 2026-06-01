@@ -22,7 +22,12 @@ function goTo(name: string) {
 </script>
 
 <template>
-  <PageLayout :bg-video="bgVideo" :bg-overlay="headerBg" :title-src="headerTitle" title-alt="多维筑安">
+  <PageLayout
+    :bg-video="bgVideo"
+    :bg-overlay="headerBg"
+    :title-src="headerTitle"
+    title-alt="多维筑安"
+  >
     <nav class="home__nav">
       <div
         v-for="(btn, i) in buttons"
@@ -41,12 +46,12 @@ function goTo(name: string) {
 <style scoped lang="scss">
 .home__nav {
   position: absolute;
-  left: 56%;
-  top: 12%;
+  left: 52%;
+  top: d.h(350);
   z-index: 4;
   display: flex;
   flex-direction: column;
-  gap: 2vh;
+  gap: d.h(24);
 }
 
 /* 外层：阶梯偏移 + 入场动画 */
@@ -66,8 +71,8 @@ function goTo(name: string) {
 
   img {
     display: block;
-    width: 24vw;
-    height: auto;
+    width: d.w(1114);
+    height: d.h(390);
   }
 
   &:hover {

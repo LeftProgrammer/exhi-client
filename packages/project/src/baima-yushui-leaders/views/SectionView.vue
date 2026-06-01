@@ -285,7 +285,7 @@ watch(
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: fill;
   z-index: 0;
   pointer-events: none;
   user-select: none;

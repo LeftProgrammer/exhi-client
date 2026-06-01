@@ -18,10 +18,10 @@ const props = defineProps<{
   contentOverlay?: string
   /** 顶部标题块图片（背景+文字合一） */
   blockTitle: string
-  /** 底部标语图（可选，不传则不显示） */
-  bottom?: string
   /** 是否显示上一页/下一页导航按钮 */
   showPageNav?: boolean
+  /** 中间内容区边距（默认 title 下方全铺满） */
+  mainInset?: { top?: string; left?: string; right?: string; bottom?: string }
 }>()
 
 const emit = defineEmits<{
@@ -52,33 +52,29 @@ function goHome() {
 </script>
 
 <template>
-  <div class="content-area">
-    <!-- 背景图 -->
-    <img class="content-area__bg" :src="props.contentBg" alt="" aria-hidden="true" />
+  <div class="content-area__wrapper">
+    <!-- 背景层 -->
+    <div class="content-area">
+      <img class="content-area__bg" :src="props.contentBg" alt="" aria-hidden="true" />
+      <img
+        v-if="props.contentOverlay"
+        class="content-area__overlay"
+        :src="props.contentOverlay"
+        alt=""
+        aria-hidden="true"
+      />
+    </div>
 
-    <!-- 内容区上层覆盖（可选） -->
-    <img
-      v-if="props.contentOverlay"
-      class="content-area__overlay"
-      :src="props.contentOverlay"
-      alt=""
-      aria-hidden="true"
-    />
-
-    <!-- 顶部标题块（背景+文字合一） -->
+    <!-- 顶部标题块（基于 sec-page__body 定位） -->
     <img class="content-area__block-title" :src="props.blockTitle" alt="" />
 
-    <!-- 中间内容 slot -->
+    <!-- 中间内容区：不设定位样式，slot 内容直接基于 sec-page__body 定位 -->
     <div class="content-area__main">
       <slot />
     </div>
 
-    <!-- 底部 footer：标语（可选）+ 导航按钮 -->
+    <!-- 底部 footer：导航按钮（基于 sec-page__body 定位） -->
     <div class="content-area__footer">
-      <div v-if="props.bottom" class="content-area__bottom">
-        <img :src="props.bottom" alt="" />
-      </div>
-
       <nav class="content-area__nav">
         <!-- 上一页 -->
         <button
@@ -162,16 +158,18 @@ function goHome() {
   }
 }
 
+.content-area__wrapper {
+  position: static;
+  width: 100%;
+  height: 100%;
+}
+
 .content-area {
   position: absolute;
-  top: 3%;
-  left: 4%;
-  right: 4%;
-  bottom: 3%;
-  display: flex;
-  flex-direction: column;
-  padding: 5vh 5vw 3vh;
-  gap: 2vh;
+  top: d.h(290);
+  left: d.w(191);
+  right: d.w(191);
+  bottom: d.h(96);
 
   &__bg {
     position: absolute;
@@ -194,48 +192,28 @@ function goHome() {
   pointer-events: none;
 }
 
-/* 顶部标题块 */
+/* 顶部标题块（基于 sec-page__body 绝对定位） */
 .content-area__block-title {
-  position: relative;
+  position: absolute;
+  top: d.h(452);
+  left: d.w(343);
   z-index: 2;
-  flex-shrink: 0;
   display: block;
-  width: 58%;
-  height: auto;
+  width: auto;
+  height: d.h(305);
   @include fx.enter-fade-in($duration: 0.8s, $delay: 0.5s);
-}
-
-/* 中间内容区 */
-.content-area__main {
-  position: relative;
-  z-index: 1;
-  flex: 1;
 }
 
 /* 底部区 */
 .content-area__footer {
-  position: relative;
-  flex-shrink: 0;
+  position: absolute;
+  left: d.w(343);
+  right: d.w(343);
+  bottom: d.h(159);
   z-index: 2;
   display: flex;
   align-items: flex-end;
   justify-content: flex-end;
-}
-
-.content-area__bottom {
-  position: absolute;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: center;
-  pointer-events: none;
-
-  img {
-    display: block;
-    width: 30vw;
-    height: auto;
-    @include fx.enter-fade-in($duration: 0.8s, $delay: 1.3s);
-  }
 }
 
 /* 导航按钮 */
@@ -247,8 +225,8 @@ function goHome() {
 
 .content-area__nav-btn {
   position: relative;
-  width: 6vw;
-  height: 6vw;
+  width: d.w(171);
+  height: d.h(171);
   background: none;
   border: none;
   padding: 0;

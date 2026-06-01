@@ -1,21 +1,13 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import { resolvePkgUrl } from '@shared/utils/url'
+import { usePageFlip } from '@baima-duowei/composables/usePageFlip'
 import PageLayout from '../components/PageLayout.vue'
 import ContentArea from '../components/ContentArea.vue'
 
-const TOTAL = 9
-const page = ref(0)
-
-function goPrev() {
-  if (page.value > 0) page.value--
-}
-function goNext() {
-  if (page.value < TOTAL - 1) page.value++
-}
+const { page, prev: goPrev, next: goNext } = usePageFlip(9)
 
 const headerBg = resolvePkgUrl('shared/header-bg.png')
-const headerTitle = resolvePkgUrl('tech/tech1/header-title.png')
+const headerTitle = resolvePkgUrl('tech/header-title.png')
 
 // 公共
 const contentBg = resolvePkgUrl('shared/content-bg.png')
@@ -130,9 +122,9 @@ const t9 = {
         @next="goNext"
       >
         <div class="t1">
-          <img class="t1__left-top" :src="t1.leftTop" alt="" />
-          <img class="t1__left-bottom" :src="t1.leftBottom" alt="" />
-          <img class="t1__right-text" :src="t1.rightText" alt="" />
+          <div class="t1__left-top"><img :src="t1.leftTop" alt="" /></div>
+          <div class="t1__left-bottom"><img :src="t1.leftBottom" alt="" /></div>
+          <div class="t1__right-text"><img :src="t1.rightText" alt="" /></div>
         </div>
       </ContentArea>
 
@@ -148,9 +140,9 @@ const t9 = {
         @next="goNext"
       >
         <div class="t2">
-          <img class="t2__left-text" :src="t2.leftText" alt="" />
-          <img class="t2__left-img" :src="t2.leftImg" alt="" />
-          <img class="t2__right-img" :src="t2.rightImg" alt="" />
+          <div class="t2__left-text"><img :src="t2.leftText" alt="" /></div>
+          <div class="t2__left-img"><img :src="t2.leftImg" alt="" /></div>
+          <div class="t2__right-img"><img :src="t2.rightImg" alt="" /></div>
         </div>
       </ContentArea>
 
@@ -166,18 +158,18 @@ const t9 = {
       >
         <div class="t3">
           <!-- 上半：左文字 + 箭头 + 右图 -->
-          <img class="t3__top-left-text" :src="t3.topLeftText" alt="" />
-          <img class="t3__top-arrow" :src="t3.topArrow" alt="" />
-          <img class="t3__top-right-img" :src="t3.topRightImg" alt="" />
+          <div class="t3__top-left-text"><img :src="t3.topLeftText" alt="" /></div>
+          <div class="t3__top-arrow"><img :src="t3.topArrow" alt="" /></div>
+          <div class="t3__top-right-img"><img :src="t3.topRightImg" alt="" /></div>
           <!-- 下左卡片：薄层岩体深台阶预裂爆破施工 -->
-          <img class="t3__bl-title" :src="t3.bottomLeftTitle" alt="" />
-          <img class="t3__bl-text" :src="t3.bottomLeftText" alt="" />
-          <img class="t3__bl-img1" :src="t3.bottomLeftImg1" alt="" />
-          <img class="t3__bl-img2" :src="t3.bottomLeftImg2" alt="" />
+          <div class="t3__bl-title"><img :src="t3.bottomLeftTitle" alt="" /></div>
+          <div class="t3__bl-text"><img :src="t3.bottomLeftText" alt="" /></div>
+          <div class="t3__bl-img1"><img :src="t3.bottomLeftImg1" alt="" /></div>
+          <div class="t3__bl-img2"><img :src="t3.bottomLeftImg2" alt="" /></div>
           <!-- 下右卡片：边坡支护 -->
-          <img class="t3__br-title" :src="t3.bottomRightTitle" alt="" />
-          <img class="t3__br-text" :src="t3.bottomRightText" alt="" />
-          <img class="t3__br-img" :src="t3.bottomRightImg" alt="" />
+          <div class="t3__br-title"><img :src="t3.bottomRightTitle" alt="" /></div>
+          <div class="t3__br-text"><img :src="t3.bottomRightText" alt="" /></div>
+          <div class="t3__br-img"><img :src="t3.bottomRightImg" alt="" /></div>
         </div>
       </ContentArea>
 
@@ -193,14 +185,14 @@ const t9 = {
       >
         <div class="t4">
           <!-- 上方全宽文字 -->
-          <img class="t4__top-text" :src="t4.topText" alt="" />
+          <div class="t4__top-text"><img :src="t4.topText" alt="" /></div>
           <!-- 下左图片 -->
-          <img class="t4__bl-img" :src="t4.bottomLeftImg" alt="" />
+          <div class="t4__bl-img"><img :src="t4.bottomLeftImg" alt="" /></div>
           <!-- 下右两组 -->
-          <img class="t4__br-title1" :src="t4.bottomRightTitle1" alt="" />
-          <img class="t4__br-text1" :src="t4.bottomRightText1" alt="" />
-          <img class="t4__br-title2" :src="t4.bottomRightTitle2" alt="" />
-          <img class="t4__br-text2" :src="t4.bottomRightText2" alt="" />
+          <div class="t4__br-title1"><img :src="t4.bottomRightTitle1" alt="" /></div>
+          <div class="t4__br-text1"><img :src="t4.bottomRightText1" alt="" /></div>
+          <div class="t4__br-title2"><img :src="t4.bottomRightTitle2" alt="" /></div>
+          <div class="t4__br-text2"><img :src="t4.bottomRightText2" alt="" /></div>
         </div>
       </ContentArea>
 
@@ -216,12 +208,12 @@ const t9 = {
         @next="goNext"
       >
         <div class="t5">
-          <img class="t5__left-title" :src="t5.leftTitle" alt="" />
-          <img class="t5__left-img" :src="t5.leftImg" alt="" />
-          <img class="t5__left-text" :src="t5.leftText" alt="" />
-          <img class="t5__right-title" :src="t5.rightTitle" alt="" />
-          <img class="t5__right-img" :src="t5.rightImg" alt="" />
-          <img class="t5__right-text" :src="t5.rightText" alt="" />
+          <div class="t5__left-title"><img :src="t5.leftTitle" alt="" /></div>
+          <div class="t5__left-img"><img :src="t5.leftImg" alt="" /></div>
+          <div class="t5__left-text"><img :src="t5.leftText" alt="" /></div>
+          <div class="t5__right-title"><img :src="t5.rightTitle" alt="" /></div>
+          <div class="t5__right-img"><img :src="t5.rightImg" alt="" /></div>
+          <div class="t5__right-text"><img :src="t5.rightText" alt="" /></div>
         </div>
       </ContentArea>
 
@@ -237,9 +229,9 @@ const t9 = {
         @next="goNext"
       >
         <div class="t6">
-          <img class="t6__top-text" :src="t6.topText" alt="" />
-          <img class="t6__bl-img" :src="t6.bottomLeftImg" alt="" />
-          <img class="t6__br-img" :src="t6.bottomRightImg" alt="" />
+          <div class="t6__top-text"><img :src="t6.topText" alt="" /></div>
+          <div class="t6__bl-img"><img :src="t6.bottomLeftImg" alt="" /></div>
+          <div class="t6__br-img"><img :src="t6.bottomRightImg" alt="" /></div>
         </div>
       </ContentArea>
 
@@ -254,12 +246,12 @@ const t9 = {
         @next="goNext"
       >
         <div class="t7">
-          <img class="t7__left-title" :src="t7.leftTitle" alt="" />
-          <img class="t7__left-text" :src="t7.leftText" alt="" />
-          <img class="t7__left-img" :src="t7.leftImg" alt="" />
-          <img class="t7__right-title" :src="t7.rightTitle" alt="" />
-          <img class="t7__right-text" :src="t7.rightText" alt="" />
-          <img class="t7__right-img" :src="t7.rightImg" alt="" />
+          <div class="t7__left-title"><img :src="t7.leftTitle" alt="" /></div>
+          <div class="t7__left-text"><img :src="t7.leftText" alt="" /></div>
+          <div class="t7__left-img"><img :src="t7.leftImg" alt="" /></div>
+          <div class="t7__right-title"><img :src="t7.rightTitle" alt="" /></div>
+          <div class="t7__right-text"><img :src="t7.rightText" alt="" /></div>
+          <div class="t7__right-img"><img :src="t7.rightImg" alt="" /></div>
         </div>
       </ContentArea>
 
@@ -275,9 +267,9 @@ const t9 = {
         @next="goNext"
       >
         <div class="t8">
-          <img class="t8__top-text" :src="t8.topText" alt="" />
-          <img class="t8__bl-img" :src="t8.bottomLeftImg" alt="" />
-          <img class="t8__br-img" :src="t8.bottomRightImg" alt="" />
+          <div class="t8__top-text"><img :src="t8.topText" alt="" /></div>
+          <div class="t8__bl-img"><img :src="t8.bottomLeftImg" alt="" /></div>
+          <div class="t8__br-img"><img :src="t8.bottomRightImg" alt="" /></div>
         </div>
       </ContentArea>
 
@@ -293,9 +285,9 @@ const t9 = {
         @next="goNext"
       >
         <div class="t9">
-          <img class="t9__top-text" :src="t9.topText" alt="" />
-          <img class="t9__bl-img" :src="t9.bottomLeftImg" alt="" />
-          <img class="t9__br-img" :src="t9.bottomRightImg" alt="" />
+          <div class="t9__top-text"><img :src="t9.topText" alt="" /></div>
+          <div class="t9__bl-img"><img :src="t9.bottomLeftImg" alt="" /></div>
+          <div class="t9__br-img"><img :src="t9.bottomRightImg" alt="" /></div>
         </div>
       </ContentArea>
     </Transition>
@@ -322,29 +314,47 @@ const t9 = {
 
   &__left-top {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 68%;
-    height: auto;
+    top: d.h(712);
+    right: d.w(1290);
+    bottom: d.h(355);
+    left: d.w(325);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.6s);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__left-bottom {
     position: absolute;
-    bottom: -22%;
-    left: 0;
-    width: 68%;
-    height: auto;
+    top: d.h(1802);
+    right: d.w(1290);
+    bottom: d.h(211);
+    left: d.w(325);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.9s);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__right-text {
     position: absolute;
-    top: 5%;
-    right: 0;
-    width: 28%;
-    height: auto;
+    top: d.h(809);
+    right: d.w(356);
+    bottom: d.h(563);
+    left: d.w(2592);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.8s);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 }
 
@@ -355,29 +365,47 @@ const t9 = {
 
   &__left-text {
     position: absolute;
-    top: 2%;
-    left: 0;
-    width: 64%;
-    height: auto;
+    top: d.h(811);
+    right: d.w(1401);
+    bottom: d.h(927);
+    left: d.w(358);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.6s);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__left-img {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 64%;
-    height: auto;
+    top: d.h(1312);
+    right: d.w(1343);
+    bottom: d.h(396);
+    left: d.w(358);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.9s);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__right-img {
     position: absolute;
-    top: 0;
-    right: 0;
-    width: 34%;
-    height: 100%;
+    top: d.h(860);
+    right: d.w(355);
+    bottom: d.h(396);
+    left: d.w(2517);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.7s);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 }
 
@@ -389,96 +417,146 @@ const t9 = {
   /* 上半区域 */
   &__top-left-text {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 62%;
-    height: auto;
+    top: d.h(743);
+    right: d.w(1346);
+    bottom: d.h(1175);
+    left: d.w(358);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.6s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__top-arrow {
     position: absolute;
-    top: 6%;
-    left: 64%;
-    width: 8%;
-    height: auto;
+    top: d.h(708);
+    right: d.w(1072);
+    bottom: d.h(1210);
+    left: d.w(2533);
     @include fx.enter-fade-in($duration: 0.5s, $delay: 0.8s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__top-right-img {
     position: absolute;
-    top: 0;
-    right: 0;
-    width: 24%;
-    height: auto;
+    top: d.h(659);
+    right: d.w(448);
+    bottom: d.h(1174);
+    left: d.w(2797);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.7s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   /* 下左卡片：薄层岩体深台阶预裂爆破施工 */
   &__bl-title {
     position: absolute;
-    top: 42%;
-    left: 0;
-    width: 48%;
-    height: auto;
+    top: d.h(1039);
+    right: d.w(1559);
+    bottom: d.h(395);
+    left: d.w(368);
     @include fx.enter-fade-in($duration: 0.6s, $delay: 0.8s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__bl-text {
     position: absolute;
-    top: 52%;
-    left: 0;
-    width: 24%;
-    height: auto;
+    top: d.h(1189);
+    right: d.w(2646);
+    bottom: d.h(434);
+    left: d.w(451);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.9s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   /* 两张图角叠加：img1 在上，img2 左上角叠在 img1 右下角 */
   &__bl-img1 {
     position: absolute;
-    top: 52%;
-    left: 25%;
-    width: 16%;
-    height: auto;
+    top: d.h(1184);
+    right: d.w(1814);
+    bottom: d.h(606);
+    left: d.w(1284);
     z-index: 1;
     @include fx.enter-fade-in($duration: 0.7s, $delay: 1s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__bl-img2 {
     position: absolute;
-    bottom: 0;
-    left: 32%;
-    width: 16%;
-    height: auto;
+    top: d.h(1414);
+    right: d.w(1617);
+    bottom: d.h(395);
+    left: d.w(1557);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 1.1s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   /* 下右卡片：边坡支护 */
   &__br-title {
     position: absolute;
-    top: 42%;
-    left: 52%;
-    width: 48%;
-    height: auto;
+    top: d.h(1038);
+    right: d.w(357);
+    bottom: d.h(395);
+    left: d.w(2380);
     @include fx.enter-fade-in($duration: 0.6s, $delay: 0.8s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__br-text {
     position: absolute;
-    top: 52%;
-    left: 52%;
-    width: 24%;
-    height: auto;
+    top: d.h(1186);
+    right: d.w(822);
+    bottom: d.h(437);
+    left: d.w(2450);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.9s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__br-img {
     position: absolute;
-    top: 52%;
-    right: 0;
-    width: 20%;
-    height: auto;
+    top: d.h(1154);
+    right: d.w(421);
+    bottom: d.h(437);
+    left: d.w(3073);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 1s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 }
 
@@ -489,56 +567,86 @@ const t9 = {
 
   &__top-text {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: auto;
+    top: d.h(744);
+    right: d.w(366);
+    bottom: d.h(1266);
+    left: d.w(361);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.6s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__bl-img {
     position: absolute;
-    top: 26%;
-    left: 0;
-    width: 38%;
-    height: auto;
+    top: d.h(948);
+    right: d.w(2118);
+    bottom: d.h(399);
+    left: d.w(365);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.8s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__br-title1 {
     position: absolute;
-    top: 26%;
-    left: 40%;
-    width: 36%;
-    height: auto;
+    top: d.h(952);
+    right: d.w(1220);
+    bottom: d.h(1108);
+    left: d.w(1766);
     @include fx.enter-fade-in($duration: 0.6s, $delay: 0.7s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__br-text1 {
     position: absolute;
-    top: 34%;
-    left: 40%;
-    width: 60%;
-    height: auto;
+    top: d.h(1077);
+    right: d.w(357);
+    bottom: d.h(869);
+    left: d.w(1798);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.8s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__br-title2 {
     position: absolute;
-    top: 60%;
-    left: 40%;
-    width: 36%;
-    height: auto;
+    top: d.h(1322);
+    right: d.w(1220);
+    bottom: d.h(738);
+    left: d.w(1766);
     @include fx.enter-fade-in($duration: 0.6s, $delay: 0.9s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__br-text2 {
     position: absolute;
-    top: 68%;
-    left: 40%;
-    width: 60%;
-    height: auto;
+    top: d.h(1447);
+    right: d.w(368);
+    bottom: d.h(422);
+    left: d.w(1797);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 1s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 }
 
@@ -549,56 +657,86 @@ const t9 = {
 
   &__left-title {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 48%;
-    height: auto;
+    top: d.h(675);
+    right: d.w(2297);
+    bottom: d.h(1385);
+    left: d.w(689);
     @include fx.enter-fade-in($duration: 0.6s, $delay: 0.6s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__left-img {
     position: absolute;
-    top: 12%;
-    left: 0;
-    width: 48%;
-    height: auto;
+    top: d.h(801);
+    right: d.w(2160);
+    bottom: d.h(753);
+    left: d.w(552);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.8s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__left-text {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 48%;
-    height: auto;
+    top: d.h(1465);
+    right: d.w(2046);
+    bottom: d.h(460);
+    left: d.w(439);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 1s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__right-title {
     position: absolute;
-    top: 0;
-    right: 0;
-    width: 48%;
-    height: auto;
+    top: d.h(676);
+    right: d.w(684);
+    bottom: d.h(1384);
+    left: d.w(2302);
     @include fx.enter-fade-in($duration: 0.6s, $delay: 0.7s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__right-img {
     position: absolute;
-    top: 12%;
-    right: 0;
-    width: 48%;
-    height: auto;
+    top: d.h(801);
+    right: d.w(548);
+    bottom: d.h(753);
+    left: d.w(2165);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.9s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__right-text {
     position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 48%;
-    height: auto;
+    top: d.h(1465);
+    right: d.w(437);
+    bottom: d.h(457);
+    left: d.w(2052);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 1.1s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 }
 
@@ -609,29 +747,44 @@ const t9 = {
 
   &__top-text {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: auto;
+    top: d.h(750);
+    right: d.w(360);
+    bottom: d.h(1168);
+    left: d.w(358);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.6s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__bl-img {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 46%;
-    height: auto;
+    top: d.h(1084);
+    right: d.w(2257);
+    bottom: d.h(398);
+    left: d.w(427);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.8s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__br-img {
     position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 50%;
-    height: auto;
+    top: d.h(958);
+    right: d.w(421);
+    bottom: d.h(258);
+    left: d.w(1737);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.9s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 }
 
@@ -642,56 +795,86 @@ const t9 = {
 
   &__left-title {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 48%;
-    height: auto;
+    top: d.h(753);
+    right: d.w(2363);
+    bottom: d.h(1307);
+    left: d.w(729);
     @include fx.enter-fade-in($duration: 0.6s, $delay: 0.6s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__left-text {
     position: absolute;
-    top: 12%;
-    left: 0;
-    width: 30%;
-    height: auto;
+    top: d.h(999);
+    right: d.w(2010);
+    bottom: d.h(539);
+    left: d.w(453);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.8s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__left-img {
     position: absolute;
-    top: 12%;
-    left: 30%;
-    width: 18%;
-    height: auto;
+    top: d.h(998);
+    right: d.w(2029);
+    bottom: d.h(705);
+    left: d.w(1257);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.9s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__right-title {
     position: absolute;
-    top: 0;
-    right: 0;
-    width: 48%;
-    height: auto;
+    top: d.h(753);
+    right: d.w(673);
+    bottom: d.h(1307);
+    left: d.w(2313);
     @include fx.enter-fade-in($duration: 0.6s, $delay: 0.7s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__right-text {
     position: absolute;
-    top: 12%;
-    right: 0;
-    width: 48%;
-    height: auto;
+    top: d.h(981);
+    right: d.w(527);
+    bottom: d.h(966);
+    left: d.w(2205);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.9s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__right-img {
     position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 30%;
-    height: auto;
+    top: d.h(1107);
+    right: d.w(523);
+    bottom: d.h(490);
+    left: d.w(2246);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 1s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 }
 
@@ -702,29 +885,44 @@ const t9 = {
 
   &__top-text {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: auto;
+    top: d.h(780);
+    right: d.w(726);
+    bottom: d.h(1138);
+    left: d.w(737);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.6s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__bl-img {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 48%;
-    height: auto;
+    top: d.h(1107);
+    right: d.w(2048);
+    bottom: d.h(397);
+    left: d.w(729);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.8s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__br-img {
     position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 48%;
-    height: auto;
+    top: d.h(1107);
+    right: d.w(728);
+    bottom: d.h(397);
+    left: d.w(1834);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.9s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 }
 
@@ -735,29 +933,44 @@ const t9 = {
 
   &__top-text {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 72%;
-    height: auto;
+    top: d.h(772);
+    right: d.w(1298);
+    bottom: d.h(1150);
+    left: d.w(382);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.6s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__bl-img {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 38%;
-    height: auto;
+    top: d.h(1154);
+    right: d.w(2498);
+    bottom: d.h(400);
+    left: d.w(359);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.8s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__br-img {
     position: absolute;
-    bottom: 0;
-    left: 40%;
-    width: 38%;
-    height: auto;
+    top: d.h(1154);
+    right: d.w(1278);
+    bottom: d.h(400);
+    left: d.w(1381);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.9s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 }
 </style>

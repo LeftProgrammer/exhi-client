@@ -89,7 +89,7 @@ const props = withDefaults(
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: fill;
   z-index: 0;
   pointer-events: none;
   will-change: transform;
@@ -112,7 +112,7 @@ const props = withDefaults(
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: fill;
   z-index: 2;
   pointer-events: none;
   animation: sec-overlay-in 0.5s ease both;
@@ -141,9 +141,8 @@ const props = withDefaults(
 
 .sec-page__title {
   display: block;
-  height: auto;
-  max-height: 9vh;
-  width: auto;
+  width: d.w(889);
+  height: d.h(230);
   @include fx.enter-fade-in($duration: 0.9s, $delay: 0.2s);
 }
 
@@ -158,9 +157,12 @@ const props = withDefaults(
 
 /* 内容区：剩余高度 */
 .sec-page__body {
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   z-index: 3;
-  flex: 1;
   overflow: hidden;
 }
 </style>

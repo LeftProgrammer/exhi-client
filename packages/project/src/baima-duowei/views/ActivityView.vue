@@ -1,18 +1,13 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch, onBeforeUnmount } from 'vue'
 import { resolvePkgUrl } from '@shared/utils/url'
+import { usePageFlip } from '@baima-duowei/composables/usePageFlip'
 import PageLayout from '../components/PageLayout.vue'
 import ContentArea from '../components/ContentArea.vue'
 
-const TOTAL = 6
-const page = ref(0)
+const { page, prev: goPrev, next: goNext } = usePageFlip(6)
 
-function goPrev() {
-  if (page.value > 0) page.value--
-}
-function goNext() {
-  if (page.value < TOTAL - 1) page.value++
-}
+const activeIndex = ref(0)
 
 const headerBg = resolvePkgUrl('shared/header-bg.png')
 const headerTitle = resolvePkgUrl('activity/header-title.png')
@@ -49,6 +44,7 @@ const a3 = {
 const a4 = {
   blockTitle: resolvePkgUrl('activity/activity4/block-title.png'),
   overlay: resolvePkgUrl('activity/activity4/content-overlay.png'),
+  leftTitle: resolvePkgUrl('activity/activity4/left-title.png'),
   leftText: resolvePkgUrl('activity/activity4/left-text.png'),
   rightImg: resolvePkgUrl('activity/activity4/right-img.png')
 }
@@ -66,10 +62,35 @@ const a6 = {
   blockTitle: resolvePkgUrl('activity/activity6/block-title.png'),
   overlay: resolvePkgUrl('activity/activity6/content-overlay.png'),
   subTitle: resolvePkgUrl('activity/activity6/sub-title.png'),
-  leftImg: resolvePkgUrl('activity/activity6/left-img.png'),
+  leftImgs: [1, 2, 3, 4, 5].map((n) => resolvePkgUrl(`activity/activity6/left-img-${n}.png`)),
   rightText: resolvePkgUrl('activity/activity6/right-text.png'),
-  rightLines: [1, 2, 3, 4, 5].map((n) => resolvePkgUrl(`activity/activity6/right-line${n}.png`))
+  rightLines: [1, 2, 3, 4, 5].map((n) => resolvePkgUrl(`activity/activity6/right-line-${n}.png`))
 }
+
+// a6 自动轮播
+let a6Timer: ReturnType<typeof setInterval> | null = null
+const startA6AutoPlay = () => {
+  stopA6AutoPlay()
+  a6Timer = setInterval(() => {
+    activeIndex.value = (activeIndex.value + 1) % a6.rightLines.length
+  }, 3000)
+}
+const stopA6AutoPlay = () => {
+  if (a6Timer) {
+    clearInterval(a6Timer)
+    a6Timer = null
+  }
+}
+
+watch(page, (p) => {
+  if (p === 5) startA6AutoPlay()
+  else {
+    stopA6AutoPlay()
+    activeIndex.value = 0
+  }
+})
+
+onBeforeUnmount(stopA6AutoPlay)
 </script>
 
 <template>
@@ -87,11 +108,11 @@ const a6 = {
         @next="goNext"
       >
         <div class="a1">
-          <img class="a1__left-title" :src="a1.leftTitle" alt="" />
-          <img class="a1__left-text" :src="a1.leftText" alt="" />
-          <img class="a1__right-img1" :src="a1.rightImg1" alt="" />
-          <img class="a1__right-img2" :src="a1.rightImg2" alt="" />
-          <img class="a1__right-img3" :src="a1.rightImg3" alt="" />
+          <div class="a1__left-title"><img :src="a1.leftTitle" alt="" /></div>
+          <div class="a1__left-text"><img :src="a1.leftText" alt="" /></div>
+          <div class="a1__right-img1"><img :src="a1.rightImg1" alt="" /></div>
+          <div class="a1__right-img2"><img :src="a1.rightImg2" alt="" /></div>
+          <div class="a1__right-img3"><img :src="a1.rightImg3" alt="" /></div>
         </div>
       </ContentArea>
 
@@ -106,9 +127,9 @@ const a6 = {
         @next="goNext"
       >
         <div class="a2">
-          <img class="a2__sub-title" :src="a2.subTitle" alt="" />
-          <img class="a2__text-img" :src="a2.textImg" alt="" />
-          <img class="a2__bottom-img" :src="a2.bottomImg" alt="" />
+          <div class="a2__sub-title"><img :src="a2.subTitle" alt="" /></div>
+          <div class="a2__text-img"><img :src="a2.textImg" alt="" /></div>
+          <div class="a2__bottom-img"><img :src="a2.bottomImg" alt="" /></div>
         </div>
       </ContentArea>
 
@@ -123,9 +144,9 @@ const a6 = {
         @next="goNext"
       >
         <div class="a3">
-          <img class="a3__sub-title" :src="a3.subTitle" alt="" />
-          <img class="a3__left-text" :src="a3.leftText" alt="" />
-          <img class="a3__right-img" :src="a3.rightImg" alt="" />
+          <div class="a3__sub-title"><img :src="a3.subTitle" alt="" /></div>
+          <div class="a3__left-text"><img :src="a3.leftText" alt="" /></div>
+          <div class="a3__right-img"><img :src="a3.rightImg" alt="" /></div>
         </div>
       </ContentArea>
 
@@ -141,8 +162,9 @@ const a6 = {
         @next="goNext"
       >
         <div class="a4">
-          <img class="a4__left-text" :src="a4.leftText" alt="" />
-          <img class="a4__right-img" :src="a4.rightImg" alt="" />
+          <div class="a4__left-title"><img :src="a4.leftTitle" alt="" /></div>
+          <div class="a4__left-text"><img :src="a4.leftText" alt="" /></div>
+          <div class="a4__right-img"><img :src="a4.rightImg" alt="" /></div>
         </div>
       </ContentArea>
 
@@ -157,9 +179,9 @@ const a6 = {
         @next="goNext"
       >
         <div class="a5">
-          <img class="a5__left-img" :src="a5.leftImg" alt="" />
-          <img class="a5__right-title" :src="a5.rightTitle" alt="" />
-          <img class="a5__right-text" :src="a5.rightText" alt="" />
+          <div class="a5__left-img"><img :src="a5.leftImg" alt="" /></div>
+          <div class="a5__right-title"><img :src="a5.rightTitle" alt="" /></div>
+          <div class="a5__right-text"><img :src="a5.rightText" alt="" /></div>
         </div>
       </ContentArea>
 
@@ -174,18 +196,22 @@ const a6 = {
         @prev="goPrev"
         @next="goNext"
       >
-        <div class="a6">
-          <img class="a6__sub-title" :src="a6.subTitle" alt="" />
-          <img class="a6__left-img" :src="a6.leftImg" alt="" />
-          <img class="a6__right-text" :src="a6.rightText" alt="" />
-          <img
+        <div
+          class="a6"
+          @mouseenter="stopA6AutoPlay"
+          @mouseleave="startA6AutoPlay"
+        >
+          <div class="a6__sub-title"><img :src="a6.subTitle" alt="" /></div>
+          <div class="a6__left-img"><img :src="a6.leftImgs[activeIndex]" alt="" /></div>
+          <div class="a6__right-text"><img :src="a6.rightText" alt="" /></div>
+          <div
             v-for="(src, i) in a6.rightLines"
             :key="i"
-            class="a6__right-line"
-            :style="{ top: `${38 + i * 10}%` }"
-            :src="src"
-            alt=""
-          />
+            :class="['a6__right-line', `a6__right-line--${i + 1}`, { 'is-active': activeIndex === i }]"
+            @mouseenter="activeIndex = i"
+          >
+            <img :src="src" alt="" />
+          </div>
         </div>
       </ContentArea>
     </Transition>
@@ -211,47 +237,72 @@ const a6 = {
 
   &__left-title {
     position: absolute;
-    top: 16%;
-    left: 0;
-    width: 48%;
-    height: auto;
+    top: d.h(997);
+    right: d.w(2066);
+    bottom: d.h(1071);
+    left: d.w(689);
     @include fx.enter-fade-in($duration: 0.6s, $delay: 0.6s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__left-text {
     position: absolute;
-    top: 30%;
-    left: 0;
-    width: 55%;
-    height: auto;
+    top: d.h(1147);
+    right: d.w(1759);
+    bottom: d.h(587);
+    left: d.w(381);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.8s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__right-img1 {
     position: absolute;
-    top: 0;
-    right: 0;
-    width: 38%;
-    height: auto;
+    top: d.h(711);
+    right: d.w(871);
+    bottom: d.h(1063);
+    left: d.w(2217);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.7s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__right-img2 {
     position: absolute;
-    top: 35%;
-    right: 0;
-    width: 38%;
-    height: auto;
+    top: d.h(1013);
+    right: d.w(619);
+    bottom: d.h(761);
+    left: d.w(2469);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.9s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__right-img3 {
     position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 38%;
-    height: auto;
+    top: d.h(1316);
+    right: d.w(355);
+    bottom: d.h(459);
+    left: d.w(2733);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 1s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 }
 
@@ -262,30 +313,44 @@ const a6 = {
 
   &__sub-title {
     position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 40%;
-    height: auto;
+    top: d.h(754);
+    right: d.w(1136);
+    bottom: d.h(1314);
+    left: d.w(1148);
     @include fx.enter-fade-in($duration: 0.6s, $delay: 0.6s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__text-img {
     position: absolute;
-    top: 10%;
-    left: 0;
-    width: 100%;
-    height: auto;
+    top: d.h(901);
+    right: d.w(358);
+    bottom: d.h(1017);
+    left: d.w(368);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.8s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__bottom-img {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: auto;
+    top: d.h(1225);
+    right: d.w(356);
+    bottom: d.h(369);
+    left: d.w(356);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 1s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 }
 
@@ -296,29 +361,44 @@ const a6 = {
 
   &__sub-title {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 48%;
-    height: auto;
+    top: d.h(854);
+    right: d.w(2054);
+    bottom: d.h(1214);
+    left: d.w(843);
     @include fx.enter-fade-in($duration: 0.6s, $delay: 0.6s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__left-text {
     position: absolute;
-    top: 14%;
-    left: 0;
-    width: 52%;
-    height: auto;
+    top: d.h(1000);
+    right: d.w(1670);
+    bottom: d.h(550);
+    left: d.w(458);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.8s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__right-img {
     position: absolute;
-    top: 0;
-    right: 0;
-    width: 40%;
-    height: auto;
+    top: d.h(576);
+    right: d.w(214);
+    bottom: d.h(258);
+    left: d.w(2154);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.7s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 }
 
@@ -327,22 +407,46 @@ const a6 = {
   position: absolute;
   inset: 0;
 
+  &__left-title {
+    position: absolute;
+    top: d.h(778);
+    right: d.w(2244);
+    bottom: d.h(1290);
+    left: d.w(653);
+    @include fx.enter-fade-in($duration: 0.6s, $delay: 0.6s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  }
+
   &__left-text {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 52%;
-    height: auto;
+    top: d.h(941);
+    right: d.w(1985);
+    bottom: d.h(521);
+    left: d.w(412);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.6s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__right-img {
     position: absolute;
-    top: 8%;
-    right: 0;
-    width: 40%;
-    height: auto;
+    top: d.h(124);
+    right: d.w(295);
+    bottom: d.h(544);
+    left: d.w(1890);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.8s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 }
 
@@ -353,29 +457,44 @@ const a6 = {
 
   &__left-img {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 42%;
-    height: auto;
+    top: d.h(802);
+    right: d.w(2284);
+    bottom: d.h(358);
+    left: d.w(319);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.6s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__right-title {
     position: absolute;
-    top: 0;
-    right: 0;
-    width: 50%;
-    height: auto;
+    top: d.h(898);
+    right: d.w(821);
+    bottom: d.h(1170);
+    left: d.w(2076);
     @include fx.enter-fade-in($duration: 0.6s, $delay: 0.7s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__right-text {
     position: absolute;
-    top: 14%;
-    right: 0;
-    width: 50%;
-    height: auto;
+    top: d.h(1055);
+    right: d.w(479);
+    bottom: d.h(678);
+    left: d.w(1695);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.9s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 }
 
@@ -386,37 +505,93 @@ const a6 = {
 
   &__sub-title {
     position: absolute;
-    top: 0;
-    left: 42%;
-    width: 20%;
-    height: auto;
+    top: d.h(797);
+    right: d.w(1192);
+    bottom: d.h(1271);
+    left: d.w(1705);
     @include fx.enter-fade-in($duration: 0.6s, $delay: 0.6s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__left-img {
     position: absolute;
-    top: 8%;
-    left: 0;
-    width: 40%;
-    height: auto;
+    top: d.h(838);
+    right: d.w(2170);
+    bottom: d.h(370);
+    left: d.w(320);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.7s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__right-text {
     position: absolute;
-    top: 8%;
-    right: 0;
-    width: 52%;
-    height: auto;
+    top: d.h(947);
+    right: d.w(404);
+    bottom: d.h(515);
+    left: d.w(1785);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.8s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   &__right-line {
     position: absolute;
-    left: 42%;
-    width: 58%;
-    height: auto;
+    cursor: pointer;
     @include fx.enter-fade-in($duration: 0.5s, $delay: 0.9s);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    &.is-active img {
+      opacity: 1;
+    }
+
+    &--1 {
+      top: d.h(1025);
+      right: d.w(1679);
+      bottom: d.h(1052);
+      left: d.w(1670);
+    }
+    &--2 {
+      top: d.h(1115);
+      right: d.w(879);
+      bottom: d.h(962);
+      left: d.w(1670);
+    }
+    &--3 {
+      top: d.h(1207);
+      right: d.w(479);
+      bottom: d.h(869);
+      left: d.w(1670);
+    }
+    &--4 {
+      top: d.h(1301);
+      right: d.w(365);
+      bottom: d.h(776);
+      left: d.w(1670);
+    }
+    &--5 {
+      top: d.h(1393);
+      right: d.w(1679);
+      bottom: d.h(684);
+      left: d.w(1670);
+    }
   }
 }
 </style>
