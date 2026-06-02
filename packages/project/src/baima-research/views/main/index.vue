@@ -3,12 +3,13 @@ import { ref, computed } from 'vue'
 import { resolvePkgUrl } from '@shared/utils/url'
 import { useIdleReset } from '@shared/composables/useIdleReset'
 import { useScreenSync } from '../../composables/useScreenSync'
-import { POINTS, MENU_POINTS, getPoint, type PointStatus } from '../../data/points'
+import { POINTS, MENU_POINTS, getPoint, type PointStatus, type Layout } from '../../data/points'
 
 const { syncPoint, syncIdle } = useScreenSync()
 
 const bgImage = resolvePkgUrl('common/main-bg.png')
-const topText = resolvePkgUrl('common/main-text.png')
+const topText = resolvePkgUrl('common/top-text.png')
+const iconSample = resolvePkgUrl('buttons/icon-sample.png')
 
 const activeId = ref<string | null>(null)
 const activePoint = computed(() => getPoint(activeId.value))
@@ -32,11 +33,24 @@ function menuBtn(id: string, active: boolean) {
 function markerName(id: string) {
   return resolvePkgUrl(`buttons/${id}-name.png`)
 }
-function markerHalo(status: PointStatus) {
-  return resolvePkgUrl(`buttons/${status === 'done' ? 'orange' : 'blue'}-base.png`)
+function markerBtn(status: PointStatus) {
+  return resolvePkgUrl(`buttons/${status}.png`)
 }
-function markerIcon(status: PointStatus) {
-  return resolvePkgUrl(`buttons/${status === 'done' ? 'orange' : 'blue'}-dots.png`)
+
+function toDesignStyle(layout: Layout) {
+  return {
+    top: `calc(${layout.top} / var(--design-h) * 100vh)`,
+    left: `calc(${layout.left} / var(--design-w) * 100vw)`,
+    width: `calc(${layout.width} / var(--design-w) * 100vw)`,
+    height: `calc(${layout.height} / var(--design-h) * 100vh)`
+  }
+}
+
+function markerStyle(p: (typeof POINTS)[0]) {
+  return {
+    top: `calc(${p.map.top} / var(--design-h) * 100vh)`,
+    left: `calc(${p.map.left} / var(--design-w) * 100vw)`
+  }
 }
 
 function selectPoint(id: string) {
@@ -71,33 +85,48 @@ useIdleReset(() => {
           v-for="p in POINTS"
           :key="p.id"
           class="home__marker"
-          :style="{ top: p.map.top + '%', left: p.map.left + '%' }"
+          :style="markerStyle(p)"
           @click="selectPoint(p.id)"
         >
-          <img class="home__marker-name" :src="markerName(p.id)" :alt="p.name" />
-          <span class="home__marker-pin">
-            <img class="home__marker-halo" :src="markerHalo(p.status)" alt="" />
-            <img class="home__marker-icon" :src="markerIcon(p.status)" alt="" />
-          </span>
+          <img class="home__marker-name" :src="markerName(p.id)" :alt="p.id" />
+          <img class="home__marker-btn" :src="markerBtn(p.status)" alt="" />
         </button>
       </div>
     </transition>
 
     <!-- 选中点位详情：区域放大图 + 民生痛点 + 科研项目 -->
     <transition name="fade">
-      <div v-if="detail" class="home__detail">
-        <img class="home__detail-zoom" :src="detail.zoom" alt="" />
-        <img class="home__detail-minsheng" :src="detail.minsheng" alt="民生痛点" />
-        <img class="home__detail-project" :src="detail.project" alt="科研项目" />
+      <div v-if="detail && activePoint?.detail" class="home__detail">
+        <img
+          class="home__detail-zoom"
+          :src="detail.zoom"
+          :style="toDesignStyle(activePoint.detail.zoom)"
+          alt=""
+        />
+        <img
+          class="home__detail-minsheng"
+          :src="detail.minsheng"
+          :style="toDesignStyle(activePoint.detail.minsheng)"
+          alt="民生痛点"
+        />
+        <img
+          class="home__detail-project"
+          :src="detail.project"
+          :style="toDesignStyle(activePoint.detail.project)"
+          alt="科研项目"
+        />
       </div>
     </transition>
 
     <!-- 选中无内容点位时的占位提示 -->
     <transition name="fade">
       <div v-if="activePoint && !activePoint.hasContent" class="home__placeholder">
-        「{{ activePoint.name }}」内容建设中
+        「{{ activePoint.id }}」内容建设中
       </div>
     </transition>
+
+    <!-- 左下角常驻 icon（待机时显示，选中点位后隐藏） -->
+    <img v-if="isStandby" class="home__icon-sample" :src="iconSample" alt="" />
 
     <!-- 右侧导航菜单（图片按钮，常驻） -->
     <nav class="home__menu">
@@ -107,9 +136,9 @@ useIdleReset(() => {
         class="home__menu-item"
         @click="selectPoint(p.id)"
       >
-        <img :src="menuBtn(p.id, activeId === p.id)" :alt="p.name" />
+        <img :src="menuBtn(p.id, activeId === p.id)" :alt="p.id" />
       </button>
-      <button class="home__menu-item home__menu-home" @click="backToStandby">
+      <button class="home__menu-item" @click="backToStandby">
         <img :src="menuBtn('home', isStandby)" alt="首页" />
       </button>
     </nav>
@@ -129,16 +158,16 @@ useIdleReset(() => {
     inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: fill;
     z-index: 0;
   }
 
   &__top-text {
     position: absolute;
-    top: d.h(70);
-    left: d.w(80);
-    width: d.w(1500);
-    height: auto;
+    top: d.h(107);
+    left: d.w(213);
+    width: d.w(2999);
+    height: d.h(441);
     z-index: 6;
     pointer-events: none;
   }
@@ -151,7 +180,7 @@ useIdleReset(() => {
 
   &__marker {
     position: absolute;
-    transform: translate(-50%, -100%);
+    width: d.w(227);
     background: none;
     border: none;
     padding: 0;
@@ -162,40 +191,21 @@ useIdleReset(() => {
     transition: transform 0.2s ease;
 
     &-name {
-      width: auto;
-      height: d.h(46);
+      width: 100%;
+      height: d.h(61);
       object-fit: contain;
-      margin-bottom: d.h(4);
+      margin-bottom: d.h(21);
       filter: drop-shadow(0 d.h(2) d.h(6) rgba(0, 0, 0, 0.6));
     }
 
-    &-pin {
-      position: relative;
-      width: d.w(200);
-      height: d.h(200);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    &-halo {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
+    &-btn {
+      width: d.w(253);
+      height: d.h(253);
       object-fit: contain;
-    }
-
-    &-icon {
-      position: relative;
-      width: auto;
-      height: d.h(96);
-      object-fit: contain;
-      z-index: 1;
     }
 
     &:hover {
-      transform: translate(-50%, -100%) scale(1.08);
+      transform: scale(1.08);
     }
   }
 
@@ -205,31 +215,10 @@ useIdleReset(() => {
     z-index: 8;
     pointer-events: none;
 
-    &-zoom {
-      position: absolute;
-      top: 50%;
-      left: d.w(60);
-      transform: translateY(-50%);
-      width: d.w(900);
-      height: auto;
-      object-fit: contain;
-    }
-
-    &-minsheng {
-      position: absolute;
-      top: d.h(180);
-      left: d.w(560);
-      width: d.w(1100);
-      height: auto;
-      object-fit: contain;
-    }
-
+    &-zoom,
+    &-minsheng,
     &-project {
       position: absolute;
-      bottom: d.h(120);
-      left: d.w(80);
-      width: d.w(1200);
-      height: auto;
       object-fit: contain;
     }
   }
@@ -248,15 +237,24 @@ useIdleReset(() => {
     font-size: d.h(48);
   }
 
+  &__icon-sample {
+    position: absolute;
+    left: d.w(213);
+    top: d.h(1645);
+    width: d.w(606);
+    height: d.h(201);
+    z-index: 20;
+    pointer-events: none;
+  }
+
   &__menu {
     position: absolute;
-    top: 50%;
-    right: d.w(50);
-    transform: translateY(-50%);
+    bottom: d.h(302);
+    right: d.w(196);
     z-index: 20;
     display: flex;
     flex-direction: column;
-    gap: d.h(18);
+    gap: d.h(49);
   }
 
   &__menu-item {
@@ -269,17 +267,13 @@ useIdleReset(() => {
 
     img {
       display: block;
-      width: d.w(280);
-      height: auto;
+      width: d.w(287);
+      height: d.h(80);
     }
 
     &:hover {
       transform: scale(1.04);
     }
-  }
-
-  &__menu-home {
-    margin-top: d.h(24);
   }
 }
 

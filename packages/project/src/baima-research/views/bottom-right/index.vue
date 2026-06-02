@@ -45,7 +45,7 @@ function asset(name: string) {
     </transition>
 
     <transition name="fade">
-      <div v-if="point && !hasContent" class="br__placeholder">「{{ point.name }}」内容建设中</div>
+      <div v-if="point && !hasContent" class="br__placeholder">「{{ point.id }}」内容建设中</div>
     </transition>
   </main>
 </template>
@@ -63,17 +63,16 @@ function asset(name: string) {
     inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: fill;
     z-index: 0;
   }
 
   &__text {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: d.w(1500);
-    height: auto;
+    top: d.h(49);
+    left: d.w(456);
+    width: d.w(2543);
+    height: d.h(1464);
     z-index: 5;
   }
 

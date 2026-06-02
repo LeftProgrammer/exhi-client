@@ -7,80 +7,94 @@
  * 素材约定（contents/ 下）：
  *  - 标记图标：buttons/<id>.png（常态）、buttons/<id>-active.png（选中）
  *  - 地点名：  buttons/<id>-name.png
+ *  - 状态按钮：buttons/done.png、buttons/ongoing.png
  *  - 点位内容：points/<id>/<screen>/...
  */
 /** 工程状态：done=已完成（橙色水滴）、ongoing=进行中（蓝色菱形） */
 export type PointStatus = 'done' | 'ongoing'
 
+export interface Layout {
+  top: number
+  left: number
+  width: number
+  height: number
+}
+
 export interface ResearchPoint {
-  /** 英文 id，用于素材路径与同步消息 */
+  /** 英文 id，用于素材路径、同步消息与 labels/ 图片文件名 */
   id: string
-  /** 中文名 */
-  name: string
   /** 是否已有完整内容素材 */
   hasContent: boolean
   /** 工程状态（决定地图标记颜色） */
   status: PointStatus
-  /** 地图标记位置（占比 %，相对 3840x2160 全景图，锚点为水滴尖部） */
+  /** 头部文字图片位置（设计稿原始像素，相对 3840×2160） */
   map: { top: number; left: number }
+  /** 主屏详情三张子图的位置与大小（设计稿原始像素） */
+  detail?: {
+    zoom: Layout
+    minsheng: Layout
+    project: Layout
+  }
 }
 
 export const POINTS: ResearchPoint[] = [
   {
     id: 'baima-bridge',
-    name: '白马大桥',
     hasContent: true,
     status: 'done',
-    map: { top: 40, left: 7 }
+    map: { top: 757, left: 138 },
+    detail: {
+      zoom: { top: 688, left: 0, width: 505, height: 515 },
+      minsheng: { top: 167, left: 519, width: 1295, height: 950 },
+      project: { top: 1495, left: 154, width: 1453, height: 375 }
+    }
   },
   {
     id: 'excavation',
-    name: '绿色开挖料',
     hasContent: false,
     status: 'done',
-    map: { top: 33, left: 25 }
+    map: { top: 634, left: 891 }
   },
   {
     id: 'slope',
-    name: '高边坡建模',
-    hasContent: false,
+    hasContent: true,
     status: 'ongoing',
-    map: { top: 30, left: 34 }
+    map: { top: 634, left: 1255 },
+    detail: {
+      zoom: { top: 688, left: 0, width: 505, height: 515 },
+      minsheng: { top: 167, left: 519, width: 1295, height: 950 },
+      project: { top: 1495, left: 154, width: 1453, height: 375 }
+    }
   },
   {
     id: 'navigation',
-    name: '急弯通航',
     hasContent: false,
     status: 'ongoing',
-    map: { top: 50, left: 39 }
+    map: { top: 1019, left: 1497 }
   },
   {
     id: 'concrete',
-    name: '抗冲磨混凝土',
     hasContent: false,
-    status: 'done',
-    map: { top: 27, left: 48 }
+    status: 'ongoing',
+    map: { top: 572, left: 1933 }
   },
   {
     id: 'coating',
-    name: '聚脲涂层',
     hasContent: false,
     status: 'ongoing',
-    map: { top: 22, left: 60 }
+    map: { top: 439, left: 2220 }
   },
   {
     id: 'turbine',
-    name: '水轮机',
     hasContent: false,
     status: 'ongoing',
-    map: { top: 43, left: 73 }
+    map: { top: 915, left: 2814 }
   },
   {
     id: 'blasting',
-    name: '旧桥爆破',
     hasContent: false,
     status: 'done',
-    map: { top: 86, left: 62 }
+    map: { top: 1877, left: 2381 }
   }
 ]
 
