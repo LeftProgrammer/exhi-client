@@ -1,88 +1,57 @@
 <script setup lang="ts">
-import { ref, computed, onBeforeUnmount } from 'vue'
+import { ref, computed } from 'vue'
 import { resolvePkgUrl } from '@shared/utils/url'
 import { useIdleReset } from '@shared/composables/useIdleReset'
 import { useScreenSync } from '../../composables/useScreenSync'
-import type { DetailPhase } from '../../composables/useScreenSync'
+import { POINTS, MENU_POINTS, getPoint, type PointStatus } from '../../data/points'
 
-const { syncPoint, syncPhase, syncIdle } = useScreenSync()
+const { syncPoint, syncIdle } = useScreenSync()
 
-const bgImage = resolvePkgUrl('baima-research/map-bg.png')
-const headerTitle = resolvePkgUrl('baima-research/header-title.png')
+const bgImage = resolvePkgUrl('common/main-bg.png')
+const topText = resolvePkgUrl('common/main-text.png')
 
-const points = ref([
-  { id: 'p01', label: '工程一', top: 35, left: 20 },
-  { id: 'p02', label: '工程二', top: 28, left: 38 },
-  { id: 'p03', label: '工程三', top: 45, left: 50 },
-  { id: 'p04', label: '工程四', top: 22, left: 65 },
-  { id: 'p05', label: '工程五', top: 55, left: 30 },
-  { id: 'p06', label: '工程六', top: 60, left: 55 },
-  { id: 'p07', label: '工程七', top: 40, left: 75 },
-  { id: 'p08', label: '工程八', top: 70, left: 42 },
-  { id: 'p09', label: '工程九', top: 15, left: 45 },
-  { id: 'p10', label: '工程十', top: 50, left: 85 },
-  { id: 'p11', label: '工程十一', top: 32, left: 15 },
-  { id: 'p12', label: '工程十二', top: 75, left: 68 }
-])
+const activeId = ref<string | null>(null)
+const activePoint = computed(() => getPoint(activeId.value))
+const isStandby = computed(() => activeId.value === null)
 
-const activePoint = ref<string | null>(null)
-const detailVisible = ref(false)
-const currentPhase = ref<DetailPhase>('difficulty')
-const hintVisible = ref(false)
-let hintTimer: ReturnType<typeof setTimeout> | null = null
-
-const phases: DetailPhase[] = ['difficulty', 'core', 'patent', 'honor']
-const phaseLabels: Record<DetailPhase, string> = {
-  difficulty: '科研难点',
-  core: '核心科研',
-  patent: '专利技术',
-  honor: '荣誉效益'
-}
-
-const pointLabel = computed(() => points.value.find((p) => p.id === activePoint.value)?.label ?? '')
-
-const mediaSrc = computed(() =>
-  resolvePkgUrl(`baima-research/${activePoint.value}/${currentPhase.value}.png`)
-)
-
-const textSrc = computed(() =>
-  resolvePkgUrl(`baima-research/${activePoint.value}/${currentPhase.value}-text.png`)
-)
-
-function onPointClick(id: string) {
-  activePoint.value = id
-  currentPhase.value = 'difficulty'
-  detailVisible.value = true
-  syncPoint(id)
-}
-
-function closeDetail() {
-  detailVisible.value = false
-  activePoint.value = null
-  syncIdle()
-}
-
-function switchPhase(p: DetailPhase) {
-  currentPhase.value = p
-  syncPhase(p)
-}
-
-useIdleReset(() => {
-  if (detailVisible.value) {
-    closeDetail()
+// 选中点位的主屏详情素材（仅 hasContent 点位）
+const detail = computed(() => {
+  if (!activePoint.value?.hasContent) return null
+  const base = `points/${activeId.value}/main`
+  return {
+    zoom: resolvePkgUrl(`${base}/zoom.png`),
+    minsheng: resolvePkgUrl(`${base}/minsheng.png`),
+    project: resolvePkgUrl(`${base}/project.png`)
   }
 })
 
-function showHint() {
-  hintVisible.value = true
-  if (hintTimer) clearTimeout(hintTimer)
-  hintTimer = setTimeout(() => {
-    hintVisible.value = false
-  }, 3000)
+// ── 素材路径 ──
+function menuBtn(id: string, active: boolean) {
+  return resolvePkgUrl(`buttons/${id}${active ? '-active' : ''}.png`)
+}
+function markerName(id: string) {
+  return resolvePkgUrl(`buttons/${id}-name.png`)
+}
+function markerHalo(status: PointStatus) {
+  return resolvePkgUrl(`buttons/${status === 'done' ? 'orange' : 'blue'}-base.png`)
+}
+function markerIcon(status: PointStatus) {
+  return resolvePkgUrl(`buttons/${status === 'done' ? 'orange' : 'blue'}-dots.png`)
 }
 
-onBeforeUnmount(() => {
-  if (hintTimer) clearTimeout(hintTimer)
+function selectPoint(id: string) {
+  if (activeId.value === id) return
+  activeId.value = id
+  syncPoint(id)
+}
+
+function backToStandby() {
+  activeId.value = null
+  syncIdle()
+}
+
+useIdleReset(() => {
+  if (!isStandby.value) backToStandby()
 })
 </script>
 
@@ -90,66 +59,60 @@ onBeforeUnmount(() => {
   <main class="home">
     <img class="home__bg" :src="bgImage" alt="" />
 
-    <header class="home__header">
-      <img :src="headerTitle" alt="科研创新" />
-    </header>
-
-    <div class="home__map">
-      <button
-        v-for="point in points"
-        :key="point.id"
-        class="home__point"
-        :class="{ 'is-active': activePoint === point.id }"
-        :style="{ top: point.top + '%', left: point.left + '%' }"
-        @click="onPointClick(point.id)"
-      >
-        <span class="home__point-label">{{ point.label }}</span>
-        <span class="home__point-ring" />
-        <span class="home__point-dot" />
-      </button>
-    </div>
-
-    <button class="home__hint-btn" @click="showHint">操作指引</button>
-
+    <!-- 顶部说明文字（仅待机展示） -->
     <transition name="fade">
-      <div v-if="hintVisible" class="home__hint-modal" @click="hintVisible = false">
-        <div class="home__hint-content">
-          <img :src="headerTitle" alt="" />
-          <p>点击地图上的工程点位，查看该工程的科研内容。</p>
-        </div>
+      <img v-if="isStandby" class="home__top-text" :src="topText" alt="" />
+    </transition>
+
+    <!-- 地图标记点位：仅待机展示，选中后隐藏全部 -->
+    <transition name="fade">
+      <div v-if="isStandby" class="home__markers">
+        <button
+          v-for="p in POINTS"
+          :key="p.id"
+          class="home__marker"
+          :style="{ top: p.map.top + '%', left: p.map.left + '%' }"
+          @click="selectPoint(p.id)"
+        >
+          <img class="home__marker-name" :src="markerName(p.id)" :alt="p.name" />
+          <span class="home__marker-pin">
+            <img class="home__marker-halo" :src="markerHalo(p.status)" alt="" />
+            <img class="home__marker-icon" :src="markerIcon(p.status)" alt="" />
+          </span>
+        </button>
       </div>
     </transition>
 
-    <!-- 详情 overlay -->
-    <transition name="slide-right">
-      <div v-if="detailVisible" class="home__detail">
-        <header class="home__detail-header">
-          <button class="home__detail-back" @click="closeDetail">返回</button>
-          <h1 class="home__detail-title">{{ pointLabel }}</h1>
-        </header>
-
-        <nav class="home__detail-tabs">
-          <button
-            v-for="p in phases"
-            :key="p"
-            class="home__detail-tab"
-            :class="{ 'is-active': currentPhase === p }"
-            @click="switchPhase(p)"
-          >
-            {{ phaseLabels[p] }}
-          </button>
-        </nav>
-
-        <div class="home__detail-content">
-          <div class="home__detail-media">
-            <img :src="mediaSrc" alt="" />
-          </div>
-          <div class="home__detail-text">
-            <img :src="textSrc" alt="" />
-          </div>
-        </div>
+    <!-- 选中点位详情：区域放大图 + 民生痛点 + 科研项目 -->
+    <transition name="fade">
+      <div v-if="detail" class="home__detail">
+        <img class="home__detail-zoom" :src="detail.zoom" alt="" />
+        <img class="home__detail-minsheng" :src="detail.minsheng" alt="民生痛点" />
+        <img class="home__detail-project" :src="detail.project" alt="科研项目" />
       </div>
     </transition>
+
+    <!-- 选中无内容点位时的占位提示 -->
+    <transition name="fade">
+      <div v-if="activePoint && !activePoint.hasContent" class="home__placeholder">
+        「{{ activePoint.name }}」内容建设中
+      </div>
+    </transition>
+
+    <!-- 右侧导航菜单（图片按钮，常驻） -->
+    <nav class="home__menu">
+      <button
+        v-for="p in MENU_POINTS"
+        :key="p.id"
+        class="home__menu-item"
+        @click="selectPoint(p.id)"
+      >
+        <img :src="menuBtn(p.id, activeId === p.id)" :alt="p.name" />
+      </button>
+      <button class="home__menu-item home__menu-home" @click="backToStandby">
+        <img :src="menuBtn('home', isStandby)" alt="首页" />
+      </button>
+    </nav>
   </main>
 </template>
 
@@ -167,259 +130,166 @@ onBeforeUnmount(() => {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    z-index: 0;
   }
 
-  &__header {
+  &__top-text {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 10;
+    top: d.h(70);
+    left: d.w(80);
+    width: d.w(1500);
+    height: auto;
+    z-index: 6;
+    pointer-events: none;
+  }
+
+  &__markers {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+  }
+
+  &__marker {
+    position: absolute;
+    transform: translate(-50%, -100%);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
     display: flex;
-    justify-content: center;
-    padding-top: d.h(60);
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.2s ease;
+
+    &-name {
+      width: auto;
+      height: d.h(46);
+      object-fit: contain;
+      margin-bottom: d.h(4);
+      filter: drop-shadow(0 d.h(2) d.h(6) rgba(0, 0, 0, 0.6));
+    }
+
+    &-pin {
+      position: relative;
+      width: d.w(200);
+      height: d.h(200);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    &-halo {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    &-icon {
+      position: relative;
+      width: auto;
+      height: d.h(96);
+      object-fit: contain;
+      z-index: 1;
+    }
+
+    &:hover {
+      transform: translate(-50%, -100%) scale(1.08);
+    }
+  }
+
+  &__detail {
+    position: absolute;
+    inset: 0;
+    z-index: 8;
     pointer-events: none;
 
-    img {
+    &-zoom {
+      position: absolute;
+      top: 50%;
+      left: d.w(60);
+      transform: translateY(-50%);
+      width: d.w(900);
+      height: auto;
+      object-fit: contain;
+    }
+
+    &-minsheng {
+      position: absolute;
+      top: d.h(180);
+      left: d.w(560);
+      width: d.w(1100);
+      height: auto;
+      object-fit: contain;
+    }
+
+    &-project {
+      position: absolute;
+      bottom: d.h(120);
+      left: d.w(80);
       width: d.w(1200);
       height: auto;
       object-fit: contain;
     }
   }
 
-  &__map {
+  &__placeholder {
     position: absolute;
-    inset: 0;
-    z-index: 5;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 8;
+    padding: d.h(40) d.w(80);
+    background: rgba(2, 6, 23, 0.8);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    border-radius: d.w(12);
+    color: #00d4ff;
+    font-size: d.h(48);
   }
 
-  &__point {
+  &__menu {
     position: absolute;
-    width: d.w(120);
-    height: d.h(120);
+    top: 50%;
+    right: d.w(50);
+    transform: translateY(-50%);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    gap: d.h(18);
+  }
+
+  &__menu-item {
     background: none;
     border: none;
+    padding: 0;
     cursor: pointer;
-    transform: translate(-50%, -50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
-    &-dot {
-      width: d.w(24);
-      height: d.h(24);
-      border-radius: 50%;
-      background: #00d4ff;
-      box-shadow: 0 0 d.w(20) rgba(0, 212, 255, 0.6);
-      transition: transform 0.3s ease;
-    }
-
-    &-ring {
-      position: absolute;
-      width: d.w(80);
-      height: d.h(80);
-      border-radius: 50%;
-      border: 2px solid rgba(0, 212, 255, 0.4);
-      animation: point-pulse 2s ease-out infinite;
-    }
-
-    &-label {
-      position: absolute;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      white-space: nowrap;
-      color: #fff;
-      font-size: d.h(28);
-      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
-      margin-bottom: d.h(12);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    &:hover .home__point-label,
-    &.is-active .home__point-label {
-      opacity: 1;
-    }
-
-    &:hover .home__point-dot,
-    &.is-active .home__point-dot {
-      transform: scale(1.5);
-    }
-  }
-
-  &__hint-btn {
-    position: absolute;
-    bottom: d.h(60);
-    right: d.w(60);
-    z-index: 20;
-    padding: d.h(16) d.w(40);
-    background: rgba(0, 212, 255, 0.15);
-    border: 1px solid rgba(0, 212, 255, 0.4);
-    border-radius: d.w(8);
-    color: #00d4ff;
-    font-size: d.h(28);
-    cursor: pointer;
-    backdrop-filter: blur(8px);
-  }
-
-  &__detail {
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: d.w(1400);
-    z-index: 50;
-    background: rgba(2, 6, 23, 0.95);
-    backdrop-filter: blur(12px);
-    border-left: 1px solid rgba(0, 212, 255, 0.2);
-    display: flex;
-    flex-direction: column;
-
-    &-header {
-      display: flex;
-      align-items: center;
-      padding: d.h(40) d.w(60);
-      gap: d.w(40);
-      flex-shrink: 0;
-    }
-
-    &-back {
-      padding: d.h(12) d.w(32);
-      background: rgba(0, 212, 255, 0.15);
-      border: 1px solid rgba(0, 212, 255, 0.4);
-      border-radius: d.w(8);
-      color: #00d4ff;
-      font-size: d.h(28);
-      cursor: pointer;
-    }
-
-    &-title {
-      color: #fff;
-      font-size: d.h(48);
-      font-weight: 600;
-    }
-
-    &-tabs {
-      display: flex;
-      padding: 0 d.w(60);
-      gap: d.w(20);
-      flex-shrink: 0;
-    }
-
-    &-tab {
-      padding: d.h(16) d.w(32);
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: d.w(8);
-      color: rgba(255, 255, 255, 0.7);
-      font-size: d.h(28);
-      cursor: pointer;
-      transition: all 0.3s ease;
-
-      &.is-active {
-        background: rgba(0, 212, 255, 0.2);
-        border-color: rgba(0, 212, 255, 0.5);
-        color: #00d4ff;
-      }
-    }
-
-    &-content {
-      flex: 1;
-      display: flex;
-      gap: d.w(40);
-      padding: d.h(40) d.w(60) d.h(60);
-      min-height: 0;
-    }
-
-    &-media {
-      flex: 1.2;
-      border-radius: d.w(16);
-      overflow: hidden;
-      background: rgba(0, 0, 0, 0.3);
-
-      img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-      }
-    }
-
-    &-text {
-      flex: 0.8;
-      border-radius: d.w(16);
-      overflow: hidden;
-      background: rgba(0, 0, 0, 0.3);
-
-      img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-      }
-    }
-  }
-
-  &__hint-modal {
-    position: absolute;
-    inset: 0;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
-  }
-
-  &__hint-content {
-    background: rgba(5, 11, 26, 0.95);
-    border: 1px solid rgba(0, 212, 255, 0.3);
-    border-radius: d.w(16);
-    padding: d.h(60) d.w(80);
-    text-align: center;
+    display: block;
+    transition: transform 0.2s ease;
 
     img {
-      width: d.w(600);
+      display: block;
+      width: d.w(280);
       height: auto;
-      margin-bottom: d.h(40);
     }
 
-    p {
-      color: #fff;
-      font-size: d.h(36);
-      line-height: 1.6;
+    &:hover {
+      transform: scale(1.04);
     }
   }
-}
 
-@keyframes point-pulse {
-  0% {
-    transform: scale(1);
-    opacity: 0.8;
-  }
-  100% {
-    transform: scale(2);
-    opacity: 0;
+  &__menu-home {
+    margin-top: d.h(24);
   }
 }
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.3s ease;
+  transition: opacity 0.4s ease;
 }
 
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
-}
-
-.slide-right-enter-active,
-.slide-right-leave-active {
-  transition: transform 0.4s ease;
-}
-
-.slide-right-enter-from,
-.slide-right-leave-to {
-  transform: translateX(100%);
 }
 </style>

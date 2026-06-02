@@ -1,44 +1,79 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { resolvePkgUrl } from '@shared/utils/url'
-import { useScreenSync } from '../../composables/useScreenSync'
-import type { DetailPhase } from '../../composables/useScreenSync'
+import { useScreenSync, getDebugPoint } from '../../composables/useScreenSync'
+import { getPoint } from '../../data/points'
 
-const { onSyncPoint, onSyncPhase, onSyncIdle } = useScreenSync()
+const SCREEN = 'top-left'
+const { onSyncPoint, onSyncIdle } = useScreenSync()
 
-const pointId = ref<string | null>(null)
-const phase = ref<DetailPhase>('difficulty')
+// dev 调试：可通过 URL ?point=baima-bridge 直接预览选中态
+const activeId = ref<string | null>(getDebugPoint())
+onSyncPoint((id) => (activeId.value = id))
+onSyncIdle(() => (activeId.value = null))
 
-onSyncPoint((id) => { pointId.value = id })
-onSyncPhase((p) => { phase.value = p })
-onSyncIdle(() => { pointId.value = null })
+const point = computed(() => getPoint(activeId.value))
+const hasContent = computed(() => !!point.value?.hasContent)
 
-const bgImage = resolvePkgUrl('baima-research/top-left-bg.png')
-const titleImg = resolvePkgUrl('baima-research/top-left-title.png')
+const bg = resolvePkgUrl(`common/${SCREEN}-bg.png`)
+const text = resolvePkgUrl(`common/${SCREEN}-text.png`)
+
+function asset(name: string) {
+  return resolvePkgUrl(`points/${activeId.value}/${SCREEN}/${name}`)
+}
 </script>
 
 <template>
-  <main class="top-left">
-    <img class="top-left__bg" :src="bgImage" alt="" />
-    <img class="top-left__title" :src="titleImg" alt="科研难点总览" />
-    <div class="top-left__content">
-      <img
-        v-if="pointId"
-        :src="resolvePkgUrl(`baima-research/${pointId}/${phase}-overview.png`)"
-        alt=""
-      />
-      <div v-else class="top-left__empty">等待选择工程点位...</div>
-    </div>
+  <main class="tl">
+    <img class="tl__bg" :src="bg" alt="" />
+
+    <!-- 待机：说明文字 -->
+    <transition name="fade">
+      <img v-if="!activeId" class="tl__text" :src="text" alt="" />
+    </transition>
+
+    <!-- 选中点位：研究目标 / 技术路线 / 研究课题 -->
+    <transition name="fade">
+      <div v-if="hasContent" class="tl__content">
+        <div class="tl__col tl__col--left">
+          <section class="tl__block tl__block--goal">
+            <img class="tl__title" :src="asset('left-top-title.png')" alt="研究目标" />
+            <div class="tl__row">
+              <img :src="asset('left-top-1.png')" alt="" />
+              <img :src="asset('left-top-2.png')" alt="" />
+            </div>
+          </section>
+          <section class="tl__block tl__block--topic">
+            <img class="tl__title" :src="asset('left-bottom-title.png')" alt="研究课题" />
+            <img class="tl__fill" :src="asset('left-bottom.png')" alt="" />
+          </section>
+        </div>
+
+        <div class="tl__col tl__col--right">
+          <section class="tl__block">
+            <img class="tl__title" :src="asset('right-title.png')" alt="技术路线" />
+            <img class="tl__fill" :src="asset('right-top.png')" alt="" />
+          </section>
+          <section class="tl__block">
+            <img class="tl__fill" :src="asset('right-bottom.png')" alt="" />
+          </section>
+        </div>
+      </div>
+    </transition>
+
+    <transition name="fade">
+      <div v-if="point && !hasContent" class="tl__placeholder">「{{ point.name }}」内容建设中</div>
+    </transition>
   </main>
 </template>
 
 <style scoped lang="scss">
-.top-left {
+.tl {
   position: relative;
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  background: #020617;
+  background: #061024;
 
   &__bg {
     position: absolute;
@@ -46,39 +81,103 @@ const titleImg = resolvePkgUrl('baima-research/top-left-title.png')
     width: 100%;
     height: 100%;
     object-fit: cover;
+    z-index: 0;
   }
 
-  &__title {
+  &__text {
     position: absolute;
-    top: d.h(60);
+    top: 50%;
     left: 50%;
-    transform: translateX(-50%);
-    width: d.w(1600);
+    transform: translate(-50%, -50%);
+    width: d.w(2800);
     height: auto;
-    z-index: 10;
+    z-index: 5;
   }
 
   &__content {
     position: absolute;
-    top: d.h(220);
-    left: d.w(120);
-    right: d.w(120);
-    bottom: d.h(80);
-    z-index: 5;
+    inset: 0;
+    z-index: 6;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    gap: d.w(60);
+    padding: d.h(160) d.w(100) d.h(100);
+  }
+
+  &__col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: d.h(50);
+    min-width: 0;
+
+    &--left {
+      flex: 1.05;
+    }
+  }
+
+  &__block {
+    display: flex;
+    flex-direction: column;
+    gap: d.h(20);
+    min-height: 0;
+
+    &--goal {
+      flex: 0.9;
+    }
+    &--topic {
+      flex: 1.1;
+    }
+  }
+
+  &__title {
+    height: d.h(70);
+    width: auto;
+    object-fit: contain;
+    align-self: flex-start;
+  }
+
+  &__row {
+    display: flex;
+    gap: d.w(40);
+    flex: 1;
+    min-height: 0;
 
     img {
-      max-width: 100%;
-      max-height: 100%;
+      flex: 1;
+      min-width: 0;
       object-fit: contain;
     }
   }
 
-  &__empty {
-    color: rgba(255, 255, 255, 0.5);
-    font-size: d.h(48);
+  &__fill {
+    flex: 1;
+    width: 100%;
+    min-height: 0;
+    object-fit: contain;
+    object-position: left top;
   }
+
+  &__placeholder {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 8;
+    padding: d.h(40) d.w(80);
+    background: rgba(2, 6, 23, 0.8);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    border-radius: d.w(12);
+    color: #00d4ff;
+    font-size: d.h(56);
+  }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.4s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
