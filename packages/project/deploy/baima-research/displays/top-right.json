@@ -1,0 +1,10 @@
+{
+  "displays": [
+    {
+      "id": "top-right",
+      "match": { "primary": true },
+      "designBase": { "width": 3840, "height": 2160 },
+      "defaultScene": "app"
+    }
+  ]
+}

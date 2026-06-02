@@ -18,6 +18,7 @@
       "@shared/*": ["src/shared/*"],
       "@baima-yushui/*": ["src/baima-yushui-leaders/*"],
       "@baima-milestone/*": ["src/baima-milestone/*"],
+      "@baima-research/*": ["src/baima-research/*"],
       "@assets/*": ["contents/*"]
     },
     "types": ["vite/client"]

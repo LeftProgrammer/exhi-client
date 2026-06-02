@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite --open /baima-yushui-leaders/",
     "dev:milestone": "vite --open /baima-milestone/",
+    "dev:research": "vite --open /baima-research/",
     "build": "vite build",
     "typecheck": "vue-tsc --noEmit"
   },
