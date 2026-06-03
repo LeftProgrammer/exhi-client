@@ -39,15 +39,13 @@ function asset(name: string) {
       </div>
     </transition>
 
-    <!-- 其他点位：工程效益 -->
+    <!-- slope：工程效益 -->
     <transition name="fade">
-      <div v-if="activeId === 'slope' && hasContent" class="tr__content tr__content--default">
-        <img class="tr__title" :src="asset('title.png')" alt="工程效益" />
-        <div class="tr__row">
-          <img :src="asset('content-1.png')" alt="" />
-          <img :src="asset('content-2.png')" alt="" />
-          <img :src="asset('content-3.png')" alt="" />
-        </div>
+      <div v-if="activeId === 'slope' && hasContent" class="tr__content tr__content--slope">
+        <img class="tr__slope tr-st-title" :src="asset('title.png')" alt="" />
+        <img class="tr__slope tr-st-1" :src="asset('content-1.png')" alt="" />
+        <img class="tr__slope tr-st-2" :src="asset('content-2.png')" alt="" />
+        <img class="tr__slope tr-st-3" :src="asset('content-3.png')" alt="" />
       </div>
     </transition>
 
@@ -112,6 +110,43 @@ function asset(name: string) {
         top: d.h(615);
         width: d.w(3263);
         height: d.h(1256);
+      }
+    }
+
+    &--slope {
+      display: block;
+
+      .tr__slope {
+        position: absolute;
+        object-fit: contain;
+      }
+
+      .tr-st-title {
+        left: d.w(261);
+        top: d.h(250);
+        height: d.h(80);
+        width: auto;
+      }
+
+      .tr-st-1 {
+        left: d.w(261);
+        top: d.h(634);
+        width: d.w(999);
+        height: d.h(1000);
+      }
+
+      .tr-st-2 {
+        left: d.w(1426);
+        top: d.h(634);
+        width: d.w(999);
+        height: d.h(1000);
+      }
+
+      .tr-st-3 {
+        left: d.w(2588);
+        top: d.h(634);
+        width: d.w(999);
+        height: d.h(1000);
       }
     }
   }

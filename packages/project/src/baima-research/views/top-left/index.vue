@@ -71,31 +71,17 @@ function asset(name: string) {
       </div>
     </transition>
 
-    <!-- 其他点位：研究目标 / 技术路线 / 研究课题 -->
+    <!-- slope：研究目标 / 技术路线 / 研究课题 -->
     <transition name="fade">
-      <div v-if="activeId === 'slope' && hasContent" class="tl__content tl__content--default">
-        <div class="tl__col tl__col--left">
-          <section class="tl__block tl__block--goal">
-            <img class="tl__title" :src="asset('left-top-title.png')" alt="研究目标" />
-            <div class="tl__row">
-              <img :src="asset('left-top-1.png')" alt="" />
-              <img :src="asset('left-top-2.png')" alt="" />
-            </div>
-          </section>
-          <section class="tl__block tl__block--topic">
-            <img class="tl__title" :src="asset('left-bottom-title.png')" alt="研究课题" />
-            <img class="tl__fill" :src="asset('left-bottom.png')" alt="" />
-          </section>
-        </div>
-        <div class="tl__col tl__col--right">
-          <section class="tl__block">
-            <img class="tl__title" :src="asset('right-title.png')" alt="技术路线" />
-            <img class="tl__fill" :src="asset('right-top.png')" alt="" />
-          </section>
-          <section class="tl__block">
-            <img class="tl__fill" :src="asset('right-bottom.png')" alt="" />
-          </section>
-        </div>
+      <div v-if="activeId === 'slope' && hasContent" class="tl__content tl__content--slope">
+        <img class="tl__slope sl-lt-title" :src="asset('left-top-title.png')" alt="" />
+        <img class="tl__slope sl-lt-1" :src="asset('left-top-1.png')" alt="" />
+        <img class="tl__slope sl-lt-2" :src="asset('left-top-2.png')" alt="" />
+        <img class="tl__slope sl-lb-title" :src="asset('left-bottom-title.png')" alt="" />
+        <img class="tl__slope sl-lb" :src="asset('left-bottom.png')" alt="" />
+        <img class="tl__slope sl-rt-title" :src="asset('right-title.png')" alt="" />
+        <img class="tl__slope sl-rt" :src="asset('right-top.png')" alt="" />
+        <img class="tl__slope sl-rb" :src="asset('right-bottom.png')" alt="" />
       </div>
     </transition>
 
@@ -234,6 +220,71 @@ function asset(name: string) {
         object-fit: contain;
         pointer-events: none;
         z-index: 3;
+      }
+    }
+
+    &--slope {
+      display: block;
+
+      .tl__slope {
+        position: absolute;
+        object-fit: contain;
+      }
+
+      .sl-lt-title {
+        left: d.w(224);
+        top: d.h(100);
+        width: d.w(1000);
+        height: d.h(50);
+      }
+
+      .sl-lt-1 {
+        left: d.w(224);
+        top: d.h(339);
+        width: d.w(1925);
+        height: d.h(290);
+      }
+
+      .sl-lt-2 {
+        left: d.w(224);
+        top: d.h(651);
+        width: d.w(1920);
+        height: d.h(290);
+      }
+
+      .sl-lb-title {
+        left: d.w(224);
+        top: d.h(800);
+        width: d.w(1000);
+        height: d.h(50);
+      }
+
+      .sl-lb {
+        left: d.w(224);
+        top: d.h(900);
+        width: d.w(1000);
+        height: d.h(500);
+      }
+
+      .sl-rt-title {
+        left: d.w(2425);
+        top: d.h(100);
+        width: d.w(1000);
+        height: d.h(50);
+      }
+
+      .sl-rt {
+        left: d.w(2425);
+        top: d.h(309);
+        width: d.w(1140);
+        height: d.h(678);
+      }
+
+      .sl-rb {
+        left: d.w(2734);
+        top: d.h(1237);
+        width: d.w(947);
+        height: d.h(680);
       }
     }
   }

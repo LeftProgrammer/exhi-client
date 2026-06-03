@@ -41,18 +41,16 @@ function asset(name: string) {
       </div>
     </transition>
 
-    <!-- 其他点位：核心创新点 -->
+    <!-- slope：核心创新点 -->
     <transition name="fade">
-      <div v-if="activeId === 'slope' && hasContent" class="bl__content bl__content--default">
-        <img class="bl__title" :src="asset('title.png')" alt="核心创新点" />
-        <div class="bl__grid">
-          <img :src="asset('left-1.png')" alt="" />
-          <img :src="asset('right-1.png')" alt="" />
-          <img :src="asset('left-2.png')" alt="" />
-          <img :src="asset('right-2.png')" alt="" />
-          <img :src="asset('left-3.png')" alt="" />
-          <img :src="asset('right-3.png')" alt="" />
-        </div>
+      <div v-if="activeId === 'slope' && hasContent" class="bl__content bl__content--slope">
+        <img class="bl__slope bl-st-title" :src="asset('title.png')" alt="" />
+        <img class="bl__slope bl-st-l1" :src="asset('left-1.png')" alt="" />
+        <img class="bl__slope bl-st-l2" :src="asset('left-2.png')" alt="" />
+        <img class="bl__slope bl-st-l3" :src="asset('left-3.png')" alt="" />
+        <img class="bl__slope bl-st-r1" :src="asset('right-1.png')" alt="" />
+        <img class="bl__slope bl-st-r2" :src="asset('right-2.png')" alt="" />
+        <img class="bl__slope bl-st-r3" :src="asset('right-3.png')" alt="" />
       </div>
     </transition>
 
@@ -131,6 +129,64 @@ function asset(name: string) {
         top: d.h(570);
         width: d.w(1219);
         height: d.h(1129);
+      }
+    }
+
+    &--slope {
+      display: block;
+
+      .bl__slope {
+        position: absolute;
+        object-fit: contain;
+      }
+
+      .bl-st-title {
+        left: d.w(258);
+        top: d.h(250);
+        height: d.h(80);
+        width: auto;
+      }
+
+      .bl-st-l1 {
+        left: d.w(258);
+        top: d.h(521);
+        width: d.w(1595);
+        height: d.h(413);
+      }
+
+      .bl-st-l2 {
+        left: d.w(258);
+        top: d.h(1039);
+        width: d.w(1595);
+        height: d.h(411);
+      }
+
+      .bl-st-l3 {
+        left: d.w(258);
+        top: d.h(1551);
+        width: d.w(1595);
+        height: d.h(413);
+      }
+
+      .bl-st-r1 {
+        left: d.w(1996);
+        top: d.h(521);
+        width: d.w(1595);
+        height: d.h(413);
+      }
+
+      .bl-st-r2 {
+        left: d.w(1996);
+        top: d.h(1039);
+        width: d.w(1595);
+        height: d.h(411);
+      }
+
+      .bl-st-r3 {
+        left: d.w(1996);
+        top: d.h(1551);
+        width: d.w(1595);
+        height: d.h(413);
       }
     }
   }

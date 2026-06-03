@@ -41,16 +41,14 @@ function asset(name: string) {
       </div>
     </transition>
 
-    <!-- 其他点位：科研成果 -->
+    <!-- slope：科研成果 -->
     <transition name="fade">
-      <div v-if="activeId === 'slope' && hasContent" class="br__content br__content--default">
-        <img class="br__title" :src="asset('title.png')" alt="科研成果" />
-        <div class="br__list">
-          <img :src="asset('content-1.png')" alt="" />
-          <img :src="asset('content-2.png')" alt="" />
-          <img :src="asset('content-3.png')" alt="" />
-          <img :src="asset('content-4.png')" alt="" />
-        </div>
+      <div v-if="activeId === 'slope' && hasContent" class="br__content br__content--slope">
+        <img class="br__slope br-st-title" :src="asset('title.png')" alt="" />
+        <img class="br__slope br-st-1" :src="asset('content-1.png')" alt="" />
+        <img class="br__slope br-st-2" :src="asset('content-2.png')" alt="" />
+        <img class="br__slope br-st-3" :src="asset('content-3.png')" alt="" />
+        <img class="br__slope br-st-4" :src="asset('content-4.png')" alt="" />
       </div>
     </transition>
 
@@ -129,6 +127,50 @@ function asset(name: string) {
         top: d.h(143);
         width: d.w(1886);
         height: d.h(1958);
+      }
+    }
+
+    &--slope {
+      display: block;
+
+      .br__slope {
+        position: absolute;
+        object-fit: contain;
+      }
+
+      .br-st-title {
+        left: d.w(567);
+        top: d.h(250);
+        height: d.h(80);
+        width: auto;
+      }
+
+      .br-st-1 {
+        left: d.w(567);
+        top: d.h(545);
+        width: d.w(2516);
+        height: d.h(270);
+      }
+
+      .br-st-2 {
+        left: d.w(0);
+        top: d.h(915);
+        width: d.w(2516);
+        height: d.h(266);
+      }
+
+      .br-st-3 {
+        left: d.w(455);
+        top: d.h(1286);
+        width: d.w(2432);
+        height: d.h(263);
+      }
+
+      .br-st-4 {
+        left: d.w(973);
+        top: d.h(1656);
+        width: d.w(2474);
+        height: d.h(263);
       }
     }
   }
