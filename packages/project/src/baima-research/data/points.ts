@@ -32,11 +32,13 @@ export interface ResearchPoint {
   /** 主屏详情三张子图的位置与大小（设计稿原始像素） */
   detail?: {
     zoom: Layout
-    desc: Layout
+    desc?: Layout
     project: Layout
-    /** 科研需求图（部分点位有，如高边坡建模） */
+    /** 科研需求图（部分点位有） */
     needs?: Layout
   }
+  /** 各屏幕的文件列表（如 bottom-left 的相册图片） */
+  images?: Record<string, string[][]>
 }
 
 export const POINTS: ResearchPoint[] = [
@@ -83,9 +85,21 @@ export const POINTS: ResearchPoint[] = [
   },
   {
     id: 'coating',
-    hasContent: false,
+    hasContent: true,
     status: 'ongoing',
-    map: { top: 439, left: 2220 }
+    map: { top: 439, left: 2220 },
+    detail: {
+      zoom: { top: 1200, left: 100, width: 800, height: 800 },
+      needs: { top: 150, left: 100, width: 1500, height: 1700 },
+      project: { top: 450, left: 1700, width: 1000, height: 1200 }
+    },
+    images: {
+      'bottom-left': [
+        ['files/file-1-1.png'],
+        ['files/file-2-1.png', 'files/file-2-2.png'],
+        ['files/file-3-1.png', 'files/file-3-2.png', 'files/file-3-3.png', 'files/file-3-4.png']
+      ]
+    }
   },
   {
     id: 'turbine',

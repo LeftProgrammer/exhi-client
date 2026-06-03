@@ -78,10 +78,27 @@ function asset(name: string) {
         <img class="tl__slope sl-lt-1" :src="asset('left-top-1.png')" alt="" />
         <img class="tl__slope sl-lt-2" :src="asset('left-top-2.png')" alt="" />
         <img class="tl__slope sl-lb-title" :src="asset('left-bottom-title.png')" alt="" />
-        <img class="tl__slope sl-lb" :src="asset('left-bottom.png')" alt="" />
+        <img class="tl__slope sl-lb-1" :src="asset('left-bottom-content-1.png')" alt="" />
+        <img class="tl__slope sl-lb-2" :src="asset('left-bottom-content-2.png')" alt="" />
+        <img class="tl__slope sl-lb-3" :src="asset('left-bottom-content-3.png')" alt="" />
+        <img class="tl__slope sl-lb-4" :src="asset('left-bottom-content-4.png')" alt="" />
         <img class="tl__slope sl-rt-title" :src="asset('right-title.png')" alt="" />
         <img class="tl__slope sl-rt" :src="asset('right-top.png')" alt="" />
         <img class="tl__slope sl-rb" :src="asset('right-bottom.png')" alt="" />
+      </div>
+    </transition>
+
+    <!-- coating：研究内容 + 技术路线 + 新装备创新点 -->
+    <transition name="fade">
+      <div v-if="activeId === 'coating' && hasContent" class="tl__content tl__content--coating">
+        <img class="tl__coating ct-top-title" :src="asset('top-title.png')" alt="" />
+        <img class="tl__coating ct-top-1" :src="asset('top-1.png')" alt="" />
+        <img class="tl__coating ct-top-2" :src="asset('top-2.png')" alt="" />
+        <img class="tl__coating ct-top-3" :src="asset('top-3.png')" alt="" />
+        <img class="tl__coating ct-bl-title" :src="asset('bottom-left-title.png')" alt="" />
+        <img class="tl__coating ct-bl-content" :src="asset('bottom-left-content.png')" alt="" />
+        <img class="tl__coating ct-br-title" :src="asset('bottom-right-title.png')" alt="" />
+        <img class="tl__coating ct-br-content" :src="asset('bottom-right-content.png')" alt="" />
       </div>
     </transition>
 
@@ -135,9 +152,9 @@ function asset(name: string) {
 
       .lt-title {
         left: d.w(171);
-        top: d.h(287);
-        width: d.w(1010);
-        height: d.h(91);
+        top: d.h(274);
+        width: d.w(1024);
+        height: d.h(96);
       }
 
       .lt-content {
@@ -149,16 +166,16 @@ function asset(name: string) {
 
       .lb-title {
         left: d.w(171);
-        top: d.h(1000);
+        top: d.h(1032);
         width: d.w(1010);
-        height: d.h(91);
+        height: d.h(96);
       }
 
       .lb-content {
         left: d.w(170);
-        top: d.h(1147);
+        top: d.h(1146);
         width: d.w(2073);
-        height: d.h(731);
+        height: d.h(733);
       }
 
       .rt-1 {
@@ -232,45 +249,66 @@ function asset(name: string) {
       }
 
       .sl-lt-title {
-        left: d.w(224);
-        top: d.h(100);
-        width: d.w(1000);
-        height: d.h(50);
+        left: d.w(171);
+        top: d.h(183);
+        width: d.w(1024);
+        height: d.h(96);
       }
 
       .sl-lt-1 {
-        left: d.w(224);
-        top: d.h(339);
-        width: d.w(1925);
-        height: d.h(290);
+        left: d.w(172);
+        top: d.h(329);
+        width: d.w(2154);
+        height: d.h(307);
       }
 
       .sl-lt-2 {
-        left: d.w(224);
-        top: d.h(651);
-        width: d.w(1920);
-        height: d.h(290);
+        left: d.w(172);
+        top: d.h(644);
+        width: d.w(2154);
+        height: d.h(306);
       }
 
       .sl-lb-title {
-        left: d.w(224);
-        top: d.h(800);
-        width: d.w(1000);
-        height: d.h(50);
+        left: d.w(171);
+        top: d.h(984);
+        width: d.w(1024);
+        height: d.h(96);
       }
 
-      .sl-lb {
-        left: d.w(224);
-        top: d.h(900);
-        width: d.w(1000);
-        height: d.h(500);
+      .sl-lb-1 {
+        left: d.w(135);
+        top: d.h(1108);
+        width: d.w(1258);
+        height: d.h(451);
+      }
+
+      .sl-lb-2 {
+        left: d.w(135);
+        top: d.h(1553);
+        width: d.w(1258);
+        height: d.h(453);
+      }
+
+      .sl-lb-3 {
+        left: d.w(1435);
+        top: d.h(1108);
+        width: d.w(1259);
+        height: d.h(451);
+      }
+
+      .sl-lb-4 {
+        left: d.w(1435);
+        top: d.h(1553);
+        width: d.w(1259);
+        height: d.h(453);
       }
 
       .sl-rt-title {
-        left: d.w(2425);
-        top: d.h(100);
-        width: d.w(1000);
-        height: d.h(50);
+        left: d.w(2420);
+        top: d.h(184);
+        width: d.w(1024);
+        height: d.h(96);
       }
 
       .sl-rt {
@@ -285,6 +323,71 @@ function asset(name: string) {
         top: d.h(1237);
         width: d.w(947);
         height: d.h(680);
+      }
+    }
+
+    &--coating {
+      display: block;
+
+      .tl__coating {
+        position: absolute;
+        object-fit: contain;
+      }
+
+      .ct-top-title {
+        left: d.w(171);
+        top: d.h(182);
+        width: d.w(1024);
+        height: d.h(96);
+      }
+
+      .ct-top-1 {
+        left: d.w(135);
+        top: d.h(380);
+        width: d.w(1144);
+        height: d.h(435);
+      }
+
+      .ct-top-2 {
+        left: d.w(1289);
+        top: d.h(380);
+        width: d.w(1152);
+        height: d.h(435);
+      }
+
+      .ct-top-3 {
+        left: d.w(2451);
+        top: d.h(380);
+        width: d.w(1152);
+        height: d.h(435);
+      }
+
+      .ct-bl-title {
+        left: d.w(171);
+        top: d.h(902);
+        width: d.w(1024);
+        height: d.h(96);
+      }
+
+      .ct-bl-content {
+        left: d.w(161);
+        top: d.h(1074);
+        width: d.w(1680);
+        height: d.h(867);
+      }
+
+      .ct-br-title {
+        left: d.w(1898);
+        top: d.h(903);
+        width: d.w(1024);
+        height: d.h(96);
+      }
+
+      .ct-br-content {
+        left: d.w(1915);
+        top: d.h(1074);
+        width: d.w(1695);
+        height: d.h(867);
       }
     }
   }

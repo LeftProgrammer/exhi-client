@@ -49,6 +49,14 @@ function asset(name: string) {
       </div>
     </transition>
 
+    <!-- coating：经济效益 -->
+    <transition name="fade">
+      <div v-if="activeId === 'coating' && hasContent" class="tr__content tr__content--coating">
+        <img class="tr__coating tr-ct-title" :src="asset('title.png')" alt="" />
+        <img class="tr__coating tr-ct-content" :src="asset('content.png')" alt="" />
+      </div>
+    </transition>
+
     <transition name="fade">
       <div v-if="point && !hasContent" class="tr__placeholder">「{{ point.id }}」内容建设中</div>
     </transition>
@@ -100,9 +108,9 @@ function asset(name: string) {
 
       .tr-title {
         left: d.w(307);
-        top: d.h(250);
+        top: d.h(237);
         width: d.w(1791);
-        height: d.h(162);
+        height: d.h(166);
       }
 
       .tr-content {
@@ -122,10 +130,10 @@ function asset(name: string) {
       }
 
       .tr-st-title {
-        left: d.w(261);
-        top: d.h(250);
-        height: d.h(80);
-        width: auto;
+        left: d.w(307);
+        top: d.h(237);
+        width: d.w(1791);
+        height: d.h(166);
       }
 
       .tr-st-1 {
@@ -147,6 +155,29 @@ function asset(name: string) {
         top: d.h(634);
         width: d.w(999);
         height: d.h(1000);
+      }
+    }
+
+    &--coating {
+      display: block;
+
+      .tr__coating {
+        position: absolute;
+        object-fit: contain;
+      }
+
+      .tr-ct-title {
+        left: d.w(308);
+        top: d.h(237);
+        width: d.w(1791);
+        height: d.h(166);
+      }
+
+      .tr-ct-content {
+        left: d.w(207);
+        top: d.h(604);
+        width: d.w(3494);
+        height: d.h(1259);
       }
     }
   }

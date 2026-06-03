@@ -52,6 +52,15 @@ function asset(name: string) {
       </div>
     </transition>
 
+    <!-- coating：科研成果 -->
+    <transition name="fade">
+      <div v-if="activeId === 'coating' && hasContent" class="br__content br__content--coating">
+        <img class="br__coating br-ct-title" :src="asset('title.png')" alt="" />
+        <img class="br__coating br-ct-files" :src="asset('files.png')" alt="" />
+        <img class="br__coating br-ct-desc" :src="asset('desc.png')" alt="" />
+      </div>
+    </transition>
+
     <transition name="fade">
       <div v-if="point && !hasContent" class="br__placeholder">「{{ point.id }}」内容建设中</div>
     </transition>
@@ -103,9 +112,9 @@ function asset(name: string) {
 
       .br-title {
         left: d.w(273);
-        top: d.h(224);
-        width: d.w(1598);
-        height: d.h(144);
+        top: d.h(212);
+        width: d.w(1624);
+        height: d.h(149);
       }
 
       .br-center {
@@ -139,10 +148,10 @@ function asset(name: string) {
       }
 
       .br-st-title {
-        left: d.w(567);
-        top: d.h(250);
-        height: d.h(80);
-        width: auto;
+        left: d.w(274);
+        top: d.h(210);
+        width: d.w(1624);
+        height: d.h(149);
       }
 
       .br-st-1 {
@@ -171,6 +180,36 @@ function asset(name: string) {
         top: d.h(1656);
         width: d.w(2474);
         height: d.h(263);
+      }
+    }
+
+    &--coating {
+      display: block;
+
+      .br__coating {
+        position: absolute;
+        object-fit: contain;
+      }
+
+      .br-ct-title {
+        left: d.w(274);
+        top: d.h(210);
+        width: d.w(1624);
+        height: d.h(149);
+      }
+
+      .br-ct-desc {
+        left: d.w(276);
+        top: d.h(524);
+        width: d.w(2313);
+        height: d.h(223);
+      }
+
+      .br-ct-files {
+        left: d.w(57);
+        top: d.h(577);
+        width: d.w(3700);
+        height: d.h(1583);
       }
     }
   }

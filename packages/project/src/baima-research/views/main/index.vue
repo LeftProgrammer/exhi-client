@@ -22,14 +22,15 @@ const visiblePoints = computed(() =>
 
 // 选中点位的主屏详情素材（仅 hasContent 点位）
 const detail = computed(() => {
-  if (!activePoint.value?.hasContent) return null
+  const p = activePoint.value
+  if (!p?.hasContent || !p.detail) return null
   const base = `points/${activeId.value}/main`
-  return {
-    zoom: resolvePkgUrl(`${base}/zoom.png`),
-    desc: resolvePkgUrl(`${base}/desc.png`),
-    project: resolvePkgUrl(`${base}/project.png`),
-    needs: resolvePkgUrl(`${base}/needs.png`)
-  }
+  const result: Record<string, string> = {}
+  if (p.detail.zoom) result.zoom = resolvePkgUrl(`${base}/zoom.png`)
+  if (p.detail.desc) result.desc = resolvePkgUrl(`${base}/desc.png`)
+  if (p.detail.project) result.project = resolvePkgUrl(`${base}/project.png`)
+  if (p.detail.needs) result.needs = resolvePkgUrl(`${base}/needs.png`)
+  return result
 })
 
 // ── 素材路径 ──
@@ -108,22 +109,25 @@ useIdleReset(() => {
       </div>
     </transition>
 
-    <!-- 选中点位详情：区域放大图 + 民生痛点 + 科研项目 -->
+    <!-- 选中点位详情：区域放大图 + 详情描述 + 科研项目 + 科研需求 -->
     <transition name="fade">
       <div v-if="detail && activePoint?.detail" class="home__detail">
         <img
+          v-if="activePoint.detail.zoom"
           class="home__detail-zoom"
           :src="detail.zoom"
           :style="toDesignStyle(activePoint.detail.zoom)"
           alt=""
         />
         <img
+          v-if="activePoint.detail.desc"
           class="home__detail-desc"
           :src="detail.desc"
           :style="toDesignStyle(activePoint.detail.desc)"
           alt="详情描述"
         />
         <img
+          v-if="activePoint.detail.project"
           class="home__detail-project"
           :src="detail.project"
           :style="toDesignStyle(activePoint.detail.project)"
