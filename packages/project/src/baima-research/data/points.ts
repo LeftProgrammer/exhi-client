@@ -23,8 +23,8 @@ export interface Layout {
 export interface ResearchPoint {
   /** 英文 id，用于素材路径、同步消息与 labels/ 图片文件名 */
   id: string
-  /** 是否已有完整内容素材 */
-  hasContent: boolean
+  /** 中文名（展示用） */
+  name: string
   /** 工程状态（决定地图标记颜色） */
   status: PointStatus
   /** 头部文字图片位置（设计稿原始像素，相对 3840×2160） */
@@ -36,6 +36,8 @@ export interface ResearchPoint {
     project: Layout
     /** 科研需求图（部分点位有） */
     needs?: Layout
+    /** 指线图（所有点位有） */
+    guide?: Layout
   }
   /** 各屏幕的文件列表（如 bottom-left 的相册图片） */
   images?: Record<string, string[][]>
@@ -44,7 +46,7 @@ export interface ResearchPoint {
 export const POINTS: ResearchPoint[] = [
   {
     id: 'baima-bridge',
-    hasContent: true,
+    name: '白马大桥',
     status: 'done',
     map: { top: 757, left: 138 },
     detail: {
@@ -55,43 +57,45 @@ export const POINTS: ResearchPoint[] = [
   },
   {
     id: 'excavation',
-    hasContent: false,
+    name: '绿色开挖料',
     status: 'done',
     map: { top: 634, left: 891 }
   },
   {
     id: 'slope',
-    hasContent: true,
+    name: '高边坡建模',
     status: 'ongoing',
     map: { top: 634, left: 1255 },
     detail: {
       zoom: { top: 565, left: 1109, width: 513, height: 514 },
       desc: { top: 946, left: 385, width: 962, height: 599 },
       project: { top: 239, left: 161, width: 1009, height: 359 },
-      needs: { top: 276, left: 1966, width: 995, height: 1341 }
+      needs: { top: 276, left: 1966, width: 995, height: 1341 },
+      guide: { top: 485, left: 1370, width: 566, height: 82 }
     }
   },
   {
     id: 'navigation',
-    hasContent: false,
+    name: '急弯通航',
     status: 'ongoing',
     map: { top: 1019, left: 1497 }
   },
   {
     id: 'concrete',
-    hasContent: false,
+    name: '抗冲磨混凝土',
     status: 'ongoing',
     map: { top: 572, left: 1933 }
   },
   {
     id: 'coating',
-    hasContent: true,
+    name: '聚脲涂层',
     status: 'ongoing',
     map: { top: 439, left: 2220 },
     detail: {
-      zoom: { top: 1200, left: 100, width: 800, height: 800 },
-      needs: { top: 150, left: 100, width: 1500, height: 1700 },
-      project: { top: 450, left: 1700, width: 1000, height: 1200 }
+      zoom: { top: 297, left: 2073, width: 514, height: 514 },
+      needs: { top: 333, left: 655, width: 1071, height: 1535 },
+      project: { top: 1581, left: 1945, width: 1268, height: 287 },
+      guide: { top: 781, left: 1725, width: 481, height: 213 }
     },
     images: {
       'bottom-left': [
@@ -103,15 +107,22 @@ export const POINTS: ResearchPoint[] = [
   },
   {
     id: 'turbine',
-    hasContent: false,
+    name: '水轮机',
     status: 'ongoing',
     map: { top: 915, left: 2814 }
   },
   {
     id: 'blasting',
-    hasContent: false,
+    name: '旧桥爆破',
     status: 'done',
-    map: { top: 1877, left: 2381 }
+    map: { top: 1877, left: 2381 },
+    detail: {
+      zoom: { top: 1808, left: 2234, width: 515, height: 352 },
+      desc: { top: 1012, left: 1684, width: 731, height: 463 },
+      needs: { top: 257, left: 464, width: 1155, height: 1591 },
+      project: { top: 595, left: 1650, width: 776, height: 375 },
+      guide: { top: 1520, left: 1672, width: 819, height: 304 }
+    }
   }
 ]
 

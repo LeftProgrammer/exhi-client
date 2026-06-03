@@ -47,7 +47,7 @@
 ## 新增点位内容步骤
 
 1. 把该点位 8 张/类切片按上面结构放入 `points/<id>/<screen>/`
-2. 在 `src/baima-research/data/points.ts` 把对应点位的 `hasContent` 改为 `true`
+2. 在 `src/baima-research/data/points.ts` 给对应点位添加 `detail` 配置（含坐标与尺寸）
 
 ## 副屏调试（浏览器 dev）
 

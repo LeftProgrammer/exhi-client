@@ -22,7 +22,11 @@ const devChannel: BroadcastChannel | null =
     ? new BroadcastChannel('baima-research-sync')
     : null
 
-type SyncMsg = { type: 'research:point'; id: string } | { type: 'research:idle' }
+type SyncMsg =
+  | { type: 'research:point'; id: string }
+  | { type: 'research:idle' }
+  | { type: 'research:video-play' }
+  | { type: 'research:video-pause' }
 
 /** 从 URL 读取调试点位：如 /baima-research/#/top-left?point=baima-bridge */
 export function getDebugPoint(): string | null {
@@ -40,7 +44,9 @@ export function useScreenSync() {
 
   function broadcast(msg: SyncMsg) {
     if (msg.type === 'research:point') emit('research:point', { id: msg.id })
-    else emit('research:idle', {})
+    else if (msg.type === 'research:idle') emit('research:idle', {})
+    else if (msg.type === 'research:video-play') emit('research:video-play', {})
+    else if (msg.type === 'research:video-pause') emit('research:video-pause', {})
     devChannel?.postMessage(msg)
   }
 
@@ -54,6 +60,16 @@ export function useScreenSync() {
   function syncIdle() {
     state.value.activePointId = null
     broadcast({ type: 'research:idle' })
+  }
+
+  /** 主屏：通知所有副屏播放视频 */
+  function syncVideoPlay() {
+    broadcast({ type: 'research:video-play' })
+  }
+
+  /** 主屏：通知所有副屏暂停视频 */
+  function syncVideoPause() {
+    broadcast({ type: 'research:video-pause' })
   }
 
   /** 副屏：监听点位选中 */
@@ -95,11 +111,39 @@ export function useScreenSync() {
     }
   }
 
+  /** 副屏：监听视频播放指令 */
+  function onSyncVideoPlay(cb: () => void) {
+    on('research:video-play', () => cb())
+    if (devChannel) {
+      const handler = (e: MessageEvent<SyncMsg>) => {
+        if (e.data?.type === 'research:video-play') cb()
+      }
+      devChannel.addEventListener('message', handler)
+      onBeforeUnmount(() => devChannel.removeEventListener('message', handler))
+    }
+  }
+
+  /** 副屏：监听视频暂停指令 */
+  function onSyncVideoPause(cb: () => void) {
+    on('research:video-pause', () => cb())
+    if (devChannel) {
+      const handler = (e: MessageEvent<SyncMsg>) => {
+        if (e.data?.type === 'research:video-pause') cb()
+      }
+      devChannel.addEventListener('message', handler)
+      onBeforeUnmount(() => devChannel.removeEventListener('message', handler))
+    }
+  }
+
   return {
     state: readonly(state),
     syncPoint,
     syncIdle,
+    syncVideoPlay,
+    syncVideoPause,
     onSyncPoint,
-    onSyncIdle
+    onSyncIdle,
+    onSyncVideoPlay,
+    onSyncVideoPause
   }
 }

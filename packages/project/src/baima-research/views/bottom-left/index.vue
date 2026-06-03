@@ -13,7 +13,6 @@ onSyncPoint((id) => (activeId.value = id))
 onSyncIdle(() => (activeId.value = null))
 
 const point = computed(() => getPoint(activeId.value))
-const hasContent = computed(() => !!point.value?.hasContent)
 
 const bg = resolvePkgUrl(`common/${SCREEN}-bg.png`)
 const text = resolvePkgUrl(`common/${SCREEN}-text.png`)
@@ -120,7 +119,7 @@ function onCardClick3(i: number) {
 
     <!-- baima-bridge：质量创新成果 -->
     <transition name="fade">
-      <div v-if="activeId === 'baima-bridge' && hasContent" class="bl__content bl__content--baima">
+      <div v-if="activeId === 'baima-bridge' && point?.detail" class="bl__content bl__content--baima">
         <img class="bl__baima bl-title" :src="asset('title.png')" alt="" />
         <img class="bl__baima bl-c1" :src="asset('content-1.png')" alt="" />
         <img class="bl__baima bl-c2" :src="asset('content-2.png')" alt="" />
@@ -130,7 +129,7 @@ function onCardClick3(i: number) {
 
     <!-- slope：核心创新点 -->
     <transition name="fade">
-      <div v-if="activeId === 'slope' && hasContent" class="bl__content bl__content--slope">
+      <div v-if="activeId === 'slope' && point?.detail" class="bl__content bl__content--slope">
         <img class="bl__slope bl-st-title" :src="asset('title.png')" alt="" />
         <img class="bl__slope bl-st-l1" :src="asset('left-1.png')" alt="" />
         <img class="bl__slope bl-st-l2" :src="asset('left-2.png')" alt="" />
@@ -143,7 +142,7 @@ function onCardClick3(i: number) {
 
     <!-- coating：专利证书展示（相册堆叠） -->
     <transition name="fade">
-      <div v-if="activeId === 'coating' && hasContent" class="bl__content bl__content--coating">
+      <div v-if="activeId === 'coating' && point?.detail" class="bl__content bl__content--coating">
         <img class="bl__coating ct-title" :src="asset('title.png')" alt="" />
         <div class="bl__coating ct-block ct-block--1">
           <div
@@ -208,8 +207,18 @@ function onCardClick3(i: number) {
       </div>
     </transition>
 
+    <!-- blasting：成果总结 -->
     <transition name="fade">
-      <div v-if="point && !hasContent" class="bl__placeholder">「{{ point.id }}」内容建设中</div>
+      <div v-if="activeId === 'blasting' && point?.detail" class="bl__content bl__content--blasting">
+        <img class="bl__blasting bl-bs-title" :src="asset('title.png')" alt="" />
+        <img class="bl__blasting bl-bs-1" :src="asset('content-1.png')" alt="" />
+        <img class="bl__blasting bl-bs-2" :src="asset('content-2.png')" alt="" />
+        <img class="bl__blasting bl-bs-3" :src="asset('content-3.png')" alt="" />
+      </div>
+    </transition>
+
+    <transition name="fade">
+      <div v-if="point && !point.detail" class="bl__placeholder">「{{ point.id }}」内容建设中</div>
     </transition>
   </main>
 </template>
@@ -484,6 +493,43 @@ function onCardClick3(i: number) {
           object-fit: contain;
           z-index: 2;
         }
+      }
+    }
+
+    &--blasting {
+      display: block;
+
+      .bl__blasting {
+        position: absolute;
+        object-fit: contain;
+      }
+
+      .bl-bs-title {
+        left: d.w(309);
+        top: d.h(238);
+        width: d.w(1821);
+        height: d.h(167);
+      }
+
+      .bl-bs-1 {
+        left: d.w(131);
+        top: d.h(570);
+        width: d.w(1219);
+        height: d.h(1129);
+      }
+
+      .bl-bs-2 {
+        left: d.w(1243);
+        top: d.h(570);
+        width: d.w(1430);
+        height: d.h(1129);
+      }
+
+      .bl-bs-3 {
+        left: d.w(2526);
+        top: d.h(570);
+        width: d.w(1219);
+        height: d.h(1129);
       }
     }
   }

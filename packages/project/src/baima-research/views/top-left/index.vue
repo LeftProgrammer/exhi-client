@@ -5,15 +5,34 @@ import { useScreenSync, getDebugPoint } from '../../composables/useScreenSync'
 import { getPoint } from '../../data/points'
 
 const SCREEN = 'top-left'
-const { onSyncPoint, onSyncIdle } = useScreenSync()
+const { onSyncPoint, onSyncIdle, onSyncVideoPlay, onSyncVideoPause } = useScreenSync()
 
 // dev 调试：可通过 URL ?point=baima-bridge 直接预览选中态
 const activeId = ref<string | null>(getDebugPoint())
-onSyncPoint((id) => (activeId.value = id))
-onSyncIdle(() => (activeId.value = null))
+onSyncPoint((id) => {
+  activeId.value = id
+  isPaused.value = true
+})
+onSyncIdle(() => {
+  activeId.value = null
+  isPaused.value = true
+})
+
+onSyncVideoPlay(() => {
+  const v = videoRef.value
+  if (!v) return
+  v.play()
+  isPaused.value = false
+})
+
+onSyncVideoPause(() => {
+  const v = videoRef.value
+  if (!v) return
+  v.pause()
+  isPaused.value = true
+})
 
 const point = computed(() => getPoint(activeId.value))
-const hasContent = computed(() => !!point.value?.hasContent)
 
 const videoRef = ref<HTMLVideoElement | null>(null)
 const isPaused = ref(true)
@@ -49,7 +68,7 @@ function asset(name: string) {
 
     <!-- baima-bridge：项目简介 + 创新技术 + 视频播放器 -->
     <transition name="fade">
-      <div v-if="activeId === 'baima-bridge' && hasContent" class="tl__content tl__content--baima">
+      <div v-if="activeId === 'baima-bridge' && point?.detail" class="tl__content tl__content--baima">
         <img class="tl__baima lt-title" :src="asset('left-top-title.png')" alt="" />
         <img class="tl__baima lt-content" :src="asset('left-top-content.png')" alt="" />
         <img class="tl__baima lb-title" :src="asset('left-bottom-title.png')" alt="" />
@@ -73,7 +92,7 @@ function asset(name: string) {
 
     <!-- slope：研究目标 / 技术路线 / 研究课题 -->
     <transition name="fade">
-      <div v-if="activeId === 'slope' && hasContent" class="tl__content tl__content--slope">
+      <div v-if="activeId === 'slope' && point?.detail" class="tl__content tl__content--slope">
         <img class="tl__slope sl-lt-title" :src="asset('left-top-title.png')" alt="" />
         <img class="tl__slope sl-lt-1" :src="asset('left-top-1.png')" alt="" />
         <img class="tl__slope sl-lt-2" :src="asset('left-top-2.png')" alt="" />
@@ -90,7 +109,7 @@ function asset(name: string) {
 
     <!-- coating：研究内容 + 技术路线 + 新装备创新点 -->
     <transition name="fade">
-      <div v-if="activeId === 'coating' && hasContent" class="tl__content tl__content--coating">
+      <div v-if="activeId === 'coating' && point?.detail" class="tl__content tl__content--coating">
         <img class="tl__coating ct-top-title" :src="asset('top-title.png')" alt="" />
         <img class="tl__coating ct-top-1" :src="asset('top-1.png')" alt="" />
         <img class="tl__coating ct-top-2" :src="asset('top-2.png')" alt="" />
@@ -102,8 +121,32 @@ function asset(name: string) {
       </div>
     </transition>
 
+    <!-- blasting：实施方案 -->
     <transition name="fade">
-      <div v-if="point && !hasContent" class="tl__placeholder">「{{ point.id }}」内容建设中</div>
+      <div v-if="activeId === 'blasting' && point?.detail" class="tl__content tl__content--blasting">
+        <img class="tl__blasting bl-title" :src="asset('title.png')" alt="" />
+        <img class="tl__blasting bl-ct-title-1" :src="asset('content-title-1.png')" alt="" />
+        <img class="tl__blasting bl-ct-1" :src="asset('content-1.png')" alt="" />
+        <img class="tl__blasting bl-ct-title-2" :src="asset('content-title-2.png')" alt="" />
+        <img class="tl__blasting bl-ct-2" :src="asset('content-2.png')" alt="" />
+        <img class="tl__blasting bl-ct-title-3" :src="asset('content-title-3.png')" alt="" />
+        <img class="tl__blasting bl-ct-3" :src="asset('content-3.png')" alt="" />
+        <img class="tl__blasting bl-video-frame" :src="asset('video-frame.png')" alt="" />
+        <div class="tl__blasting bl-video-wrap" @click="toggleVideo">
+          <video
+            ref="videoRef"
+            class="tl__video-player"
+            :src="asset('video.mp4')"
+            loop
+            muted
+          ></video>
+          <img v-show="isPaused" class="tl__video-pause" :src="asset('play-btn.png')" alt="" />
+        </div>
+      </div>
+    </transition>
+
+    <transition name="fade">
+      <div v-if="point && !point.detail" class="tl__placeholder">「{{ point.id }}」内容建设中</div>
     </transition>
   </main>
 </template>
@@ -388,6 +431,79 @@ function asset(name: string) {
         top: d.h(1074);
         width: d.w(1695);
         height: d.h(867);
+      }
+    }
+
+    &--blasting {
+      display: block;
+
+      .tl__blasting {
+        position: absolute;
+        object-fit: contain;
+      }
+
+      .bl-title {
+        left: d.w(171);
+        top: d.h(182);
+        width: d.w(1024);
+        height: d.h(96);
+      }
+
+      .bl-ct-title-1 {
+        left: d.w(135);
+        top: d.h(380);
+        width: d.w(1144);
+        height: d.h(80);
+      }
+
+      .bl-ct-1 {
+        left: d.w(135);
+        top: d.h(480);
+        width: d.w(1144);
+        height: d.h(435);
+      }
+
+      .bl-ct-title-2 {
+        left: d.w(1289);
+        top: d.h(380);
+        width: d.w(1152);
+        height: d.h(80);
+      }
+
+      .bl-ct-2 {
+        left: d.w(1289);
+        top: d.h(480);
+        width: d.w(1152);
+        height: d.h(435);
+      }
+
+      .bl-ct-title-3 {
+        left: d.w(2451);
+        top: d.h(380);
+        width: d.w(1152);
+        height: d.h(80);
+      }
+
+      .bl-ct-3 {
+        left: d.w(2451);
+        top: d.h(480);
+        width: d.w(1152);
+        height: d.h(435);
+      }
+
+      .bl-video-frame {
+        left: d.w(1289);
+        top: d.h(950);
+        width: d.w(1152);
+        height: d.h(650);
+      }
+
+      .bl-video-wrap {
+        left: d.w(1289);
+        top: d.h(950);
+        width: d.w(1152);
+        height: d.h(650);
+        cursor: pointer;
       }
     }
   }

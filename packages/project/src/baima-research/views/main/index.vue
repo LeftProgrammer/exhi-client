@@ -5,13 +5,17 @@ import { useIdleReset } from '@shared/composables/useIdleReset'
 import { useScreenSync } from '../../composables/useScreenSync'
 import { POINTS, MENU_POINTS, getPoint, type PointStatus, type Layout } from '../../data/points'
 
-const { syncPoint, syncIdle } = useScreenSync()
+const { syncPoint, syncIdle, syncVideoPlay, syncVideoPause } = useScreenSync()
 
 const bgImage = resolvePkgUrl('common/main-bg.png')
 const topText = resolvePkgUrl('common/top-text.png')
 const iconSample = resolvePkgUrl('buttons/icon-sample.png')
-const playImg = resolvePkgUrl('points/baima-bridge/main/play.png')
-const pauseImg = resolvePkgUrl('points/baima-bridge/main/pause.png')
+const playImg = computed(() =>
+  activeId.value ? resolvePkgUrl(`points/${activeId.value}/main/play.png`) : ''
+)
+const pauseImg = computed(() =>
+  activeId.value ? resolvePkgUrl(`points/${activeId.value}/main/pause.png`) : ''
+)
 
 const activeId = ref<string | null>(null)
 const activePoint = computed(() => getPoint(activeId.value))
@@ -20,16 +24,17 @@ const visiblePoints = computed(() =>
   isStandby.value ? POINTS : POINTS.filter((p) => p.id === activeId.value)
 )
 
-// 选中点位的主屏详情素材（仅 hasContent 点位）
+// 选中点位的主屏详情素材（有 detail 配置时展示）
 const detail = computed(() => {
   const p = activePoint.value
-  if (!p?.hasContent || !p.detail) return null
+  if (!p?.detail) return null
   const base = `points/${activeId.value}/main`
   const result: Record<string, string> = {}
   if (p.detail.zoom) result.zoom = resolvePkgUrl(`${base}/zoom.png`)
   if (p.detail.desc) result.desc = resolvePkgUrl(`${base}/desc.png`)
   if (p.detail.project) result.project = resolvePkgUrl(`${base}/project.png`)
   if (p.detail.needs) result.needs = resolvePkgUrl(`${base}/needs.png`)
+  if (p.detail.guide) result.guide = resolvePkgUrl(`${base}/guide.png`)
   return result
 })
 
@@ -67,16 +72,17 @@ function selectPoint(id: string) {
 }
 
 function backToStandby() {
+  if (isStandby.value) return
   activeId.value = null
   syncIdle()
 }
 
 function handlePlay() {
-  // TODO: 向 top-left 屏幕发送播放指令
+  syncVideoPlay()
 }
 
 function handlePause() {
-  // TODO: 向 top-left 屏幕发送暂停指令
+  syncVideoPause()
 }
 
 useIdleReset(() => {
@@ -111,7 +117,7 @@ useIdleReset(() => {
 
     <!-- 选中点位详情：区域放大图 + 详情描述 + 科研项目 + 科研需求 -->
     <transition name="fade">
-      <div v-if="detail && activePoint?.detail" class="home__detail">
+      <div v-if="detail && activePoint?.detail" :key="activeId ?? 'standby'" class="home__detail">
         <img
           v-if="activePoint.detail.zoom"
           class="home__detail-zoom"
@@ -140,12 +146,23 @@ useIdleReset(() => {
           :style="toDesignStyle(activePoint.detail.needs)"
           alt="科研需求"
         />
+        <img
+          v-if="activePoint.detail.guide"
+          class="home__detail-guide"
+          :src="detail.guide"
+          :style="toDesignStyle(activePoint.detail.guide)"
+          alt=""
+        />
       </div>
     </transition>
 
     <!-- 选中无内容点位时的占位提示 -->
     <transition name="fade">
-      <div v-if="activePoint && !activePoint.hasContent" class="home__placeholder">
+      <div
+        v-if="activePoint && !activePoint.detail"
+        :key="activeId ?? 'standby'"
+        class="home__placeholder"
+      >
         「{{ activePoint.id }}」内容建设中
       </div>
     </transition>
@@ -156,12 +173,12 @@ useIdleReset(() => {
     <!-- 右侧导航菜单（图片按钮，常驻） -->
     <nav class="home__menu">
       <template v-for="p in MENU_POINTS" :key="p.id">
-        <div v-if="p.id === 'baima-bridge'" class="home__menu-wrapper">
+        <div v-if="p.id === 'baima-bridge' || p.id === 'blasting'" class="home__menu-wrapper">
           <button class="home__menu-item" @click="selectPoint(p.id)">
             <img :src="menuBtn(p.id, activeId === p.id)" :alt="p.id" />
           </button>
           <transition name="fade">
-            <div v-if="activeId === 'baima-bridge'" class="home__media-controls">
+            <div v-if="activeId === p.id" class="home__media-controls">
               <button class="home__media-play" @click="handlePlay">
                 <img :src="playImg" alt="播放" />
               </button>

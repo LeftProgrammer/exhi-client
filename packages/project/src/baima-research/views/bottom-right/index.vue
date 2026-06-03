@@ -13,7 +13,6 @@ onSyncPoint((id) => (activeId.value = id))
 onSyncIdle(() => (activeId.value = null))
 
 const point = computed(() => getPoint(activeId.value))
-const hasContent = computed(() => !!point.value?.hasContent)
 
 const bg = resolvePkgUrl(`common/${SCREEN}-bg.png`)
 const text = resolvePkgUrl(`common/${SCREEN}-text.png`)
@@ -33,7 +32,7 @@ function asset(name: string) {
 
     <!-- baima-bridge：荣誉认证 -->
     <transition name="fade">
-      <div v-if="activeId === 'baima-bridge' && hasContent" class="br__content br__content--baima">
+      <div v-if="activeId === 'baima-bridge' && point?.detail" class="br__content br__content--baima">
         <img class="br__baima br-title" :src="asset('title.png')" alt="" />
         <img class="br__baima br-center" :src="asset('center.png')" alt="" />
         <img class="br__baima br-bottom" :src="asset('bottom.png')" alt="" />
@@ -43,7 +42,7 @@ function asset(name: string) {
 
     <!-- slope：科研成果 -->
     <transition name="fade">
-      <div v-if="activeId === 'slope' && hasContent" class="br__content br__content--slope">
+      <div v-if="activeId === 'slope' && point?.detail" class="br__content br__content--slope">
         <img class="br__slope br-st-title" :src="asset('title.png')" alt="" />
         <img class="br__slope br-st-1" :src="asset('content-1.png')" alt="" />
         <img class="br__slope br-st-2" :src="asset('content-2.png')" alt="" />
@@ -54,15 +53,23 @@ function asset(name: string) {
 
     <!-- coating：科研成果 -->
     <transition name="fade">
-      <div v-if="activeId === 'coating' && hasContent" class="br__content br__content--coating">
+      <div v-if="activeId === 'coating' && point?.detail" class="br__content br__content--coating">
         <img class="br__coating br-ct-title" :src="asset('title.png')" alt="" />
         <img class="br__coating br-ct-files" :src="asset('files.png')" alt="" />
         <img class="br__coating br-ct-desc" :src="asset('desc.png')" alt="" />
       </div>
     </transition>
 
+    <!-- blasting：荣誉认证 -->
     <transition name="fade">
-      <div v-if="point && !hasContent" class="br__placeholder">「{{ point.id }}」内容建设中</div>
+      <div v-if="activeId === 'blasting' && point?.detail" class="br__content br__content--blasting">
+        <img class="br__blasting br-bs-title" :src="asset('title.png')" alt="" />
+        <img class="br__blasting br-bs-content" :src="asset('content.png')" alt="" />
+      </div>
+    </transition>
+
+    <transition name="fade">
+      <div v-if="point && !point.detail" class="br__placeholder">「{{ point.id }}」内容建设中</div>
     </transition>
   </main>
 </template>
@@ -206,6 +213,29 @@ function asset(name: string) {
       }
 
       .br-ct-files {
+        left: d.w(57);
+        top: d.h(577);
+        width: d.w(3700);
+        height: d.h(1583);
+      }
+    }
+
+    &--blasting {
+      display: block;
+
+      .br__blasting {
+        position: absolute;
+        object-fit: contain;
+      }
+
+      .br-bs-title {
+        left: d.w(274);
+        top: d.h(210);
+        width: d.w(1624);
+        height: d.h(149);
+      }
+
+      .br-bs-content {
         left: d.w(57);
         top: d.h(577);
         width: d.w(3700);

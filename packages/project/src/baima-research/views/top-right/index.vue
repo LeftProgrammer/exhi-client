@@ -13,7 +13,6 @@ onSyncPoint((id) => (activeId.value = id))
 onSyncIdle(() => (activeId.value = null))
 
 const point = computed(() => getPoint(activeId.value))
-const hasContent = computed(() => !!point.value?.hasContent)
 
 const bg = resolvePkgUrl(`common/${SCREEN}-bg.png`)
 const text = resolvePkgUrl(`common/${SCREEN}-text.png`)
@@ -33,7 +32,7 @@ function asset(name: string) {
 
     <!-- baima-bridge：社会效益 -->
     <transition name="fade">
-      <div v-if="activeId === 'baima-bridge' && hasContent" class="tr__content tr__content--baima">
+      <div v-if="activeId === 'baima-bridge' && point?.detail" class="tr__content tr__content--baima">
         <img class="tr__baima tr-title" :src="asset('title.png')" alt="" />
         <img class="tr__baima tr-content" :src="asset('content.png')" alt="" />
       </div>
@@ -41,7 +40,7 @@ function asset(name: string) {
 
     <!-- slope：工程效益 -->
     <transition name="fade">
-      <div v-if="activeId === 'slope' && hasContent" class="tr__content tr__content--slope">
+      <div v-if="activeId === 'slope' && point?.detail" class="tr__content tr__content--slope">
         <img class="tr__slope tr-st-title" :src="asset('title.png')" alt="" />
         <img class="tr__slope tr-st-1" :src="asset('content-1.png')" alt="" />
         <img class="tr__slope tr-st-2" :src="asset('content-2.png')" alt="" />
@@ -51,14 +50,22 @@ function asset(name: string) {
 
     <!-- coating：经济效益 -->
     <transition name="fade">
-      <div v-if="activeId === 'coating' && hasContent" class="tr__content tr__content--coating">
+      <div v-if="activeId === 'coating' && point?.detail" class="tr__content tr__content--coating">
         <img class="tr__coating tr-ct-title" :src="asset('title.png')" alt="" />
         <img class="tr__coating tr-ct-content" :src="asset('content.png')" alt="" />
       </div>
     </transition>
 
+    <!-- blasting：推广和社会效益 -->
     <transition name="fade">
-      <div v-if="point && !hasContent" class="tr__placeholder">「{{ point.id }}」内容建设中</div>
+      <div v-if="activeId === 'blasting' && point?.detail" class="tr__content tr__content--blasting">
+        <img class="tr__blasting tr-bs-title" :src="asset('title.png')" alt="" />
+        <img class="tr__blasting tr-bs-content" :src="asset('content.png')" alt="" />
+      </div>
+    </transition>
+
+    <transition name="fade">
+      <div v-if="point && !point.detail" class="tr__placeholder">「{{ point.id }}」内容建设中</div>
     </transition>
   </main>
 </template>
@@ -174,6 +181,29 @@ function asset(name: string) {
       }
 
       .tr-ct-content {
+        left: d.w(207);
+        top: d.h(604);
+        width: d.w(3494);
+        height: d.h(1259);
+      }
+    }
+
+    &--blasting {
+      display: block;
+
+      .tr__blasting {
+        position: absolute;
+        object-fit: contain;
+      }
+
+      .tr-bs-title {
+        left: d.w(308);
+        top: d.h(237);
+        width: d.w(1791);
+        height: d.h(166);
+      }
+
+      .tr-bs-content {
         left: d.w(207);
         top: d.h(604);
         width: d.w(3494);
