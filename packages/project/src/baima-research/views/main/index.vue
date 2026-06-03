@@ -31,7 +31,11 @@ const detail = computed(() => {
   const base = `points/${activeId.value}/main`
   const result: Record<string, string> = {}
   if (p.detail.zoom) result.zoom = resolvePkgUrl(`${base}/zoom.png`)
-  if (p.detail.desc) result.desc = resolvePkgUrl(`${base}/desc.png`)
+  if (p.detail.desc) {
+    result.desc = resolvePkgUrl(`${base}/desc.png`)
+    result.desc2 = resolvePkgUrl(`${base}/desc-2.png`)
+    result.desc3 = resolvePkgUrl(`${base}/desc-3.png`)
+  }
   if (p.detail.project) result.project = resolvePkgUrl(`${base}/project.png`)
   if (p.detail.needs) result.needs = resolvePkgUrl(`${base}/needs.png`)
   if (p.detail.guide) result.guide = resolvePkgUrl(`${base}/guide.png`)
@@ -131,6 +135,20 @@ useIdleReset(() => {
           :src="detail.desc"
           :style="toDesignStyle(activePoint.detail.desc)"
           alt="详情描述"
+        />
+        <img
+          v-if="activePoint.detail.desc2 && detail.desc2"
+          class="home__detail-desc2"
+          :src="detail.desc2"
+          :style="toDesignStyle(activePoint.detail.desc2)"
+          alt="详情描述2"
+        />
+        <img
+          v-if="activePoint.detail.desc3 && detail.desc3"
+          class="home__detail-desc3"
+          :src="detail.desc3"
+          :style="toDesignStyle(activePoint.detail.desc3)"
+          alt="详情描述3"
         />
         <img
           v-if="activePoint.detail.project"
@@ -276,8 +294,11 @@ useIdleReset(() => {
     }
 
     &-desc,
+    &-desc2,
+    &-desc3,
     &-project,
-    &-needs {
+    &-needs,
+    &-guide {
       position: absolute;
       object-fit: contain;
     }

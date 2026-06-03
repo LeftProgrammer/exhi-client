@@ -68,7 +68,10 @@ function asset(name: string) {
 
     <!-- baima-bridge：项目简介 + 创新技术 + 视频播放器 -->
     <transition name="fade">
-      <div v-if="activeId === 'baima-bridge' && point?.detail" class="tl__content tl__content--baima">
+      <div
+        v-if="activeId === 'baima-bridge' && point?.detail"
+        class="tl__content tl__content--baima"
+      >
         <img class="tl__baima lt-title" :src="asset('left-top-title.png')" alt="" />
         <img class="tl__baima lt-content" :src="asset('left-top-content.png')" alt="" />
         <img class="tl__baima lb-title" :src="asset('left-bottom-title.png')" alt="" />
@@ -123,7 +126,10 @@ function asset(name: string) {
 
     <!-- concrete：研究内容 + 技术路线 + 新材料创新点 -->
     <transition name="fade">
-      <div v-if="activeId === 'concrete' && point?.detail" class="tl__content tl__content--concrete">
+      <div
+        v-if="activeId === 'concrete' && point?.detail"
+        class="tl__content tl__content--concrete"
+      >
         <img class="tl__concrete cc-top-title" :src="asset('top-title.png')" alt="" />
         <img class="tl__concrete cc-top-1" :src="asset('top-content-1.png')" alt="" />
         <img class="tl__concrete cc-top-2" :src="asset('top-content-2.png')" alt="" />
@@ -137,7 +143,10 @@ function asset(name: string) {
 
     <!-- excavation：技术难点 + 研究内容 -->
     <transition name="fade">
-      <div v-if="activeId === 'excavation' && point?.detail" class="tl__content tl__content--excavation">
+      <div
+        v-if="activeId === 'excavation' && point?.detail"
+        class="tl__content tl__content--excavation"
+      >
         <img class="tl__excavation ex-top-content" :src="asset('top-content.png')" alt="" />
         <img class="tl__excavation ex-top-bg" :src="asset('top-right-bg.png')" alt="" />
         <img class="tl__excavation ex-bottom-title" :src="asset('bottom-title.png')" alt="" />
@@ -149,9 +158,40 @@ function asset(name: string) {
       </div>
     </transition>
 
+    <!-- navigation：研究目标 + 研究课题 + 技术路线 -->
+    <transition name="fade">
+      <div
+        v-if="activeId === 'navigation' && point?.detail"
+        class="tl__content tl__content--navigation"
+      >
+        <img class="tl__navigation nav-lt-title" :src="asset('left-top-title.png')" alt="" />
+        <img class="tl__navigation nav-lt-content" :src="asset('left-top-content.png')" alt="" />
+        <img class="tl__navigation nav-lb-title" :src="asset('left-bottom-title.png')" alt="" />
+        <img class="tl__navigation nav-lb-1" :src="asset('left-bottom-content-1.png')" alt="" />
+        <img class="tl__navigation nav-lb-2" :src="asset('left-bottom-content-2.png')" alt="" />
+        <img class="tl__navigation nav-lb-3" :src="asset('left-bottom-content-3.png')" alt="" />
+        <img class="tl__navigation nav-lb-4" :src="asset('left-bottom-content-4.png')" alt="" />
+        <img class="tl__navigation nav-lb-5" :src="asset('left-bottom-content-5.png')" alt="" />
+        <img class="tl__navigation nav-rt-title" :src="asset('right-title.png')" alt="" />
+        <img class="tl__navigation nav-rt-content" :src="asset('right-content.png')" alt="" />
+      </div>
+    </transition>
+
+    <!-- turbine：研究内容 -->
+    <transition name="fade">
+      <div v-if="activeId === 'turbine' && point?.detail" class="tl__content tl__content--turbine">
+        <img class="tl__turbine tr-title" :src="asset('title.png')" alt="" />
+        <img class="tl__turbine tr-1" :src="asset('content-1.png')" alt="" />
+        <img class="tl__turbine tr-2" :src="asset('content-2.png')" alt="" />
+      </div>
+    </transition>
+
     <!-- blasting：实施方案 -->
     <transition name="fade">
-      <div v-if="activeId === 'blasting' && point?.detail" class="tl__content tl__content--blasting">
+      <div
+        v-if="activeId === 'blasting' && point?.detail"
+        class="tl__content tl__content--blasting"
+      >
         <img class="tl__blasting bl-title" :src="asset('title.png')" alt="" />
         <img class="tl__blasting bl-ct-title-1" :src="asset('content-title-1.png')" alt="" />
         <img class="tl__blasting bl-ct-1" :src="asset('content-1.png')" alt="" />
@@ -589,6 +629,115 @@ function asset(name: string) {
         top: d.h(1000);
         width: d.w(600);
         height: d.h(400);
+      }
+    }
+
+    &--navigation {
+      display: block;
+
+      .tl__navigation {
+        position: absolute;
+        object-fit: contain;
+      }
+
+      .nav-lt-title {
+        left: d.w(135);
+        top: d.h(182);
+        width: d.w(1144);
+        height: d.h(80);
+      }
+
+      .nav-lt-content {
+        left: d.w(135);
+        top: d.h(300);
+        width: d.w(1144);
+        height: d.h(580);
+      }
+
+      .nav-lb-title {
+        left: d.w(135);
+        top: d.h(920);
+        width: d.w(1144);
+        height: d.h(80);
+      }
+
+      .nav-lb-1 {
+        left: d.w(135);
+        top: d.h(1020);
+        width: d.w(1144);
+        height: d.h(250);
+      }
+
+      .nav-lb-2 {
+        left: d.w(135);
+        top: d.h(1290);
+        width: d.w(1144);
+        height: d.h(250);
+      }
+
+      .nav-lb-3 {
+        left: d.w(135);
+        top: d.h(1560);
+        width: d.w(1144);
+        height: d.h(250);
+      }
+
+      .nav-lb-4 {
+        left: d.w(1289);
+        top: d.h(920);
+        width: d.w(1152);
+        height: d.h(250);
+      }
+
+      .nav-lb-5 {
+        left: d.w(1289);
+        top: d.h(1190);
+        width: d.w(1152);
+        height: d.h(250);
+      }
+
+      .nav-rt-title {
+        left: d.w(1289);
+        top: d.h(182);
+        width: d.w(1152);
+        height: d.h(80);
+      }
+
+      .nav-rt-content {
+        left: d.w(1289);
+        top: d.h(300);
+        width: d.w(1152);
+        height: d.h(580);
+      }
+    }
+
+    &--turbine {
+      display: block;
+
+      .tl__turbine {
+        position: absolute;
+        object-fit: contain;
+      }
+
+      .tr-title {
+        left: d.w(171);
+        top: d.h(182);
+        width: d.w(1024);
+        height: d.h(96);
+      }
+
+      .tr-1 {
+        left: d.w(135);
+        top: d.h(380);
+        width: d.w(1750);
+        height: d.h(800);
+      }
+
+      .tr-2 {
+        left: d.w(1920);
+        top: d.h(380);
+        width: d.w(1750);
+        height: d.h(800);
       }
     }
 

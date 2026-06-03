@@ -33,6 +33,8 @@ export interface ResearchPoint {
   detail?: {
     zoom: Layout
     desc?: Layout
+    desc2?: Layout
+    desc3?: Layout
     project: Layout
     /** 科研需求图（部分点位有） */
     needs?: Layout
@@ -61,13 +63,12 @@ export const POINTS: ResearchPoint[] = [
     status: 'done',
     map: { top: 634, left: 891 },
     detail: {
-      zoom: { top: 500, left: 500, width: 500, height: 500 },
-      needs: { top: 500, left: 500, width: 500, height: 500 },
-      project: { top: 500, left: 500, width: 500, height: 500 },
-      guide: { top: 500, left: 500, width: 500, height: 500 }
+      zoom: { top: 565, left: 743, width: 514, height: 514 },
+      needs: { top: 123, left: 1650, width: 996, height: 1297 },
+      project: { top: 1482, left: 161, width: 956, height: 375 }
     },
     images: {
-      'bottom-right': [['files/file-1-1.png'], ['files/file-2-1.png']]
+      'bottom-right': [['files/file-1-1.png'], ['files/file-2-1.png'], ['files/file-2-2.png']]
     }
   },
   {
@@ -87,7 +88,15 @@ export const POINTS: ResearchPoint[] = [
     id: 'navigation',
     name: '急弯通航',
     status: 'ongoing',
-    map: { top: 1019, left: 1497 }
+    map: { top: 1019, left: 1497 },
+    detail: {
+      zoom: { top: 948, left: 1349, width: 515, height: 515 },
+      desc: { top: 458, left: 1293, width: 751, height: 397 },
+      desc2: { top: 365, left: 316, width: 934, height: 921 },
+      desc3: { top: 569, left: 2199, width: 301, height: 243 },
+      project: { top: 267, left: 2565, width: 1025, height: 375 },
+      guide: { top: 871, left: 1261, width: 321, height: 81 }
+    }
   },
   {
     id: 'concrete',
@@ -95,10 +104,10 @@ export const POINTS: ResearchPoint[] = [
     status: 'ongoing',
     map: { top: 572, left: 1933 },
     detail: {
-      zoom: { top: 500, left: 500, width: 500, height: 500 },
-      needs: { top: 500, left: 500, width: 500, height: 500 },
-      project: { top: 500, left: 500, width: 500, height: 500 },
-      guide: { top: 500, left: 500, width: 500, height: 500 }
+      zoom: { top: 502, left: 1785, width: 515, height: 515 },
+      needs: { top: 270, left: 480, width: 1071, height: 1535 },
+      project: { top: 273, left: 2351, width: 942, height: 375 },
+      guide: { top: 925, left: 1565, width: 481, height: 213 }
     },
     images: {
       'bottom-left': [
@@ -114,10 +123,10 @@ export const POINTS: ResearchPoint[] = [
     status: 'ongoing',
     map: { top: 439, left: 2220 },
     detail: {
-      zoom: { top: 297, left: 2073, width: 514, height: 514 },
-      needs: { top: 333, left: 655, width: 1071, height: 1535 },
-      project: { top: 1581, left: 1945, width: 1268, height: 287 },
-      guide: { top: 781, left: 1725, width: 481, height: 213 }
+      zoom: { top: 502, left: 1785, width: 515, height: 515 },
+      needs: { top: 270, left: 480, width: 1071, height: 1535 },
+      project: { top: 273, left: 2351, width: 942, height: 375 },
+      guide: { top: 925, left: 1565, width: 481, height: 213 }
     },
     images: {
       'bottom-left': [
@@ -131,7 +140,14 @@ export const POINTS: ResearchPoint[] = [
     id: 'turbine',
     name: '水轮机',
     status: 'ongoing',
-    map: { top: 915, left: 2814 }
+    map: { top: 915, left: 2814 },
+    detail: {
+      zoom: { top: 846, left: 2667, width: 515, height: 515 },
+      desc: { top: 373, left: 2499, width: 667, height: 379 },
+      project: { top: 281, left: 161, width: 909, height: 377 },
+      needs: { top: 318, left: 1169, width: 1292, height: 1219 },
+      guide: { top: 801, left: 2497, width: 429, height: 65 }
+    }
   },
   {
     id: 'blasting',

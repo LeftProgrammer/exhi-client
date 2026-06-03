@@ -32,7 +32,10 @@ function asset(name: string) {
 
     <!-- baima-bridge：社会效益 -->
     <transition name="fade">
-      <div v-if="activeId === 'baima-bridge' && point?.detail" class="tr__content tr__content--baima">
+      <div
+        v-if="activeId === 'baima-bridge' && point?.detail"
+        class="tr__content tr__content--baima"
+      >
         <img class="tr__baima tr-title" :src="asset('title.png')" alt="" />
         <img class="tr__baima tr-content" :src="asset('content.png')" alt="" />
       </div>
@@ -58,7 +61,10 @@ function asset(name: string) {
 
     <!-- concrete：经济效益 -->
     <transition name="fade">
-      <div v-if="activeId === 'concrete' && point?.detail" class="tr__content tr__content--concrete">
+      <div
+        v-if="activeId === 'concrete' && point?.detail"
+        class="tr__content tr__content--concrete"
+      >
         <img class="tr__concrete tr-cc-title" :src="asset('title.png')" alt="" />
         <img class="tr__concrete tr-cc-content" :src="asset('content.png')" alt="" />
       </div>
@@ -66,7 +72,10 @@ function asset(name: string) {
 
     <!-- excavation：综合效益 -->
     <transition name="fade">
-      <div v-if="activeId === 'excavation' && point?.detail" class="tr__content tr__content--excavation">
+      <div
+        v-if="activeId === 'excavation' && point?.detail"
+        class="tr__content tr__content--excavation"
+      >
         <img class="tr__excavation ex-title" :src="asset('title.png')" alt="" />
         <img class="tr__excavation ex-1" :src="asset('content-1.png')" alt="" />
         <img class="tr__excavation ex-2" :src="asset('content-2.png')" alt="" />
@@ -75,9 +84,36 @@ function asset(name: string) {
       </div>
     </transition>
 
+    <!-- navigation：核心效益 -->
+    <transition name="fade">
+      <div
+        v-if="activeId === 'navigation' && point?.detail"
+        class="tr__content tr__content--navigation"
+      >
+        <img class="tr__navigation nav-title" :src="asset('title.png')" alt="" />
+        <img class="tr__navigation nav-content" :src="asset('content.png')" alt="" />
+      </div>
+    </transition>
+
+    <!-- turbine：预期成果产出 -->
+    <transition name="fade">
+      <div v-if="activeId === 'turbine' && point?.detail" class="tr__content tr__content--turbine">
+        <img class="tr__turbine tr-title" :src="asset('title.png')" alt="" />
+        <img class="tr__turbine tr-1" :src="asset('content-1.png')" alt="" />
+        <img class="tr__turbine tr-2" :src="asset('content-2.png')" alt="" />
+        <img class="tr__turbine tr-3" :src="asset('content-3.png')" alt="" />
+        <img class="tr__turbine tr-4" :src="asset('content-4.png')" alt="" />
+        <img class="tr__turbine tr-5" :src="asset('content-5.png')" alt="" />
+        <img class="tr__turbine tr-6" :src="asset('content-6.png')" alt="" />
+      </div>
+    </transition>
+
     <!-- blasting：推广和社会效益 -->
     <transition name="fade">
-      <div v-if="activeId === 'blasting' && point?.detail" class="tr__content tr__content--blasting">
+      <div
+        v-if="activeId === 'blasting' && point?.detail"
+        class="tr__content tr__content--blasting"
+      >
         <img class="tr__blasting tr-bs-title" :src="asset('title.png')" alt="" />
         <img class="tr__blasting tr-bs-content" :src="asset('content.png')" alt="" />
       </div>
@@ -271,6 +307,87 @@ function asset(name: string) {
         top: d.h(450);
         width: d.w(870);
         height: d.h(1300);
+      }
+    }
+
+    &--navigation {
+      display: block;
+
+      .tr__navigation {
+        position: absolute;
+        object-fit: contain;
+      }
+
+      .nav-title {
+        left: d.w(308);
+        top: d.h(237);
+        width: d.w(1791);
+        height: d.h(166);
+      }
+
+      .nav-content {
+        left: d.w(207);
+        top: d.h(604);
+        width: d.w(3494);
+        height: d.h(1259);
+      }
+    }
+
+    &--turbine {
+      display: block;
+
+      .tr__turbine {
+        position: absolute;
+        object-fit: contain;
+      }
+
+      .tr-title {
+        left: d.w(308);
+        top: d.h(237);
+        width: d.w(1791);
+        height: d.h(166);
+      }
+
+      .tr-1 {
+        left: d.w(80);
+        top: d.h(480);
+        width: d.w(1200);
+        height: d.h(350);
+      }
+
+      .tr-2 {
+        left: d.w(1320);
+        top: d.h(480);
+        width: d.w(1200);
+        height: d.h(350);
+      }
+
+      .tr-3 {
+        left: d.w(2560);
+        top: d.h(480);
+        width: d.w(1200);
+        height: d.h(350);
+      }
+
+      .tr-4 {
+        left: d.w(80);
+        top: d.h(860);
+        width: d.w(1200);
+        height: d.h(350);
+      }
+
+      .tr-5 {
+        left: d.w(1320);
+        top: d.h(860);
+        width: d.w(1200);
+        height: d.h(350);
+      }
+
+      .tr-6 {
+        left: d.w(2560);
+        top: d.h(860);
+        width: d.w(1200);
+        height: d.h(350);
       }
     }
 

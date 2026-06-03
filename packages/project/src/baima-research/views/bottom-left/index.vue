@@ -323,6 +323,32 @@ function onCardClick3(i: number) {
       </div>
     </transition>
 
+    <!-- navigation：已完结课题 -->
+    <transition name="fade">
+      <div
+        v-if="activeId === 'navigation' && point?.detail"
+        class="bl__content bl__content--navigation"
+      >
+        <img class="bl__navigation nav-title" :src="asset('title.png')" alt="" />
+        <img class="bl__navigation nav-top" :src="asset('content-top-1.png')" alt="" />
+        <img class="bl__navigation nav-bottom" :src="asset('content-bottom.png')" alt="" />
+        <img
+          class="bl__navigation nav-bottom-title"
+          :src="asset('content-bottom-title.png')"
+          alt=""
+        />
+      </div>
+    </transition>
+
+    <!-- turbine：实施计划和推进形式 -->
+    <transition name="fade">
+      <div v-if="activeId === 'turbine' && point?.detail" class="bl__content bl__content--turbine">
+        <img class="bl__turbine tr-title" :src="asset('title.png')" alt="" />
+        <img class="bl__turbine tr-1" :src="asset('content-1.png')" alt="" />
+        <img class="bl__turbine tr-2" :src="asset('content-2.png')" alt="" />
+      </div>
+    </transition>
+
     <!-- blasting：成果总结 -->
     <transition name="fade">
       <div
@@ -792,6 +818,73 @@ function onCardClick3(i: number) {
         top: d.h(1250);
         width: d.w(1750);
         height: d.h(600);
+      }
+    }
+
+    &--navigation {
+      display: block;
+
+      .bl__navigation {
+        position: absolute;
+        object-fit: contain;
+      }
+
+      .nav-title {
+        left: d.w(309);
+        top: d.h(238);
+        width: d.w(1821);
+        height: d.h(167);
+      }
+
+      .nav-top {
+        left: d.w(131);
+        top: d.h(450);
+        width: d.w(3580);
+        height: d.h(600);
+      }
+
+      .nav-bottom {
+        left: d.w(131);
+        top: d.h(1100);
+        width: d.w(3580);
+        height: d.h(500);
+      }
+
+      .nav-bottom-title {
+        left: d.w(131);
+        top: d.h(1650);
+        width: d.w(3580);
+        height: d.h(120);
+      }
+    }
+
+    &--turbine {
+      display: block;
+
+      .bl__turbine {
+        position: absolute;
+        object-fit: contain;
+      }
+
+      .tr-title {
+        left: d.w(309);
+        top: d.h(238);
+        width: d.w(1821);
+        height: d.h(167);
+      }
+
+      .tr-1 {
+        left: d.w(131);
+        top: d.h(500);
+        width: d.w(1750);
+        height: d.h(1200);
+      }
+
+      .tr-2 {
+        left: d.w(1920);
+        top: d.h(500);
+        width: d.w(1750);
+        height: d.h(1200);
       }
     }
 

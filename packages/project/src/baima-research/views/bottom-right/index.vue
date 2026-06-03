@@ -32,7 +32,10 @@ function asset(name: string) {
 
     <!-- baima-bridge：荣誉认证 -->
     <transition name="fade">
-      <div v-if="activeId === 'baima-bridge' && point?.detail" class="br__content br__content--baima">
+      <div
+        v-if="activeId === 'baima-bridge' && point?.detail"
+        class="br__content br__content--baima"
+      >
         <img class="br__baima br-title" :src="asset('title.png')" alt="" />
         <img class="br__baima br-center" :src="asset('center.png')" alt="" />
         <img class="br__baima br-bottom" :src="asset('bottom.png')" alt="" />
@@ -62,7 +65,10 @@ function asset(name: string) {
 
     <!-- concrete：科研成果 -->
     <transition name="fade">
-      <div v-if="activeId === 'concrete' && point?.detail" class="br__content br__content--concrete">
+      <div
+        v-if="activeId === 'concrete' && point?.detail"
+        class="br__content br__content--concrete"
+      >
         <img class="br__concrete br-cc-title" :src="asset('title.png')" alt="" />
         <img class="br__concrete br-cc-content" :src="asset('content.png')" alt="" />
       </div>
@@ -70,7 +76,10 @@ function asset(name: string) {
 
     <!-- excavation：研究成果（证书展示） -->
     <transition name="fade">
-      <div v-if="activeId === 'excavation' && point?.detail" class="br__content br__content--excavation">
+      <div
+        v-if="activeId === 'excavation' && point?.detail"
+        class="br__content br__content--excavation"
+      >
         <img class="br__excavation ex-title" :src="asset('title.png')" alt="" />
         <img class="br__excavation ex-frame" :src="asset('file-frame.png')" alt="" />
         <img class="br__excavation ex-text-1" :src="asset('text-1.png')" alt="" />
@@ -78,9 +87,34 @@ function asset(name: string) {
       </div>
     </transition>
 
+    <!-- navigation：成果目标（预期） -->
+    <transition name="fade">
+      <div
+        v-if="activeId === 'navigation' && point?.detail"
+        class="br__content br__content--navigation"
+      >
+        <img class="br__navigation nav-title" :src="asset('title.png')" alt="" />
+        <img class="br__navigation nav-1" :src="asset('content-1.png')" alt="" />
+        <img class="br__navigation nav-2" :src="asset('content-2.png')" alt="" />
+        <img class="br__navigation nav-3" :src="asset('content-3.png')" alt="" />
+        <img class="br__navigation nav-4" :src="asset('content-4.png')" alt="" />
+      </div>
+    </transition>
+
+    <!-- turbine：研发效益 -->
+    <transition name="fade">
+      <div v-if="activeId === 'turbine' && point?.detail" class="br__content br__content--turbine">
+        <img class="br__turbine tr-title" :src="asset('title.png')" alt="" />
+        <img class="br__turbine tr-content" :src="asset('content.png')" alt="" />
+      </div>
+    </transition>
+
     <!-- blasting：荣誉认证 -->
     <transition name="fade">
-      <div v-if="activeId === 'blasting' && point?.detail" class="br__content br__content--blasting">
+      <div
+        v-if="activeId === 'blasting' && point?.detail"
+        class="br__content br__content--blasting"
+      >
         <img class="br__blasting br-bs-title" :src="asset('title.png')" alt="" />
         <img class="br__blasting br-bs-content" :src="asset('content.png')" alt="" />
       </div>
@@ -295,6 +329,73 @@ function asset(name: string) {
         top: d.h(1800);
         width: d.w(1600);
         height: d.h(120);
+      }
+    }
+
+    &--navigation {
+      display: block;
+
+      .br__navigation {
+        position: absolute;
+        object-fit: contain;
+      }
+
+      .nav-title {
+        left: d.w(274);
+        top: d.h(210);
+        width: d.w(1624);
+        height: d.h(149);
+      }
+
+      .nav-1 {
+        left: d.w(80);
+        top: d.h(420);
+        width: d.w(1800);
+        height: d.h(850);
+      }
+
+      .nav-2 {
+        left: d.w(1920);
+        top: d.h(420);
+        width: d.w(1800);
+        height: d.h(850);
+      }
+
+      .nav-3 {
+        left: d.w(80);
+        top: d.h(1300);
+        width: d.w(1800);
+        height: d.h(850);
+      }
+
+      .nav-4 {
+        left: d.w(1920);
+        top: d.h(1300);
+        width: d.w(1800);
+        height: d.h(850);
+      }
+    }
+
+    &--turbine {
+      display: block;
+
+      .br__turbine {
+        position: absolute;
+        object-fit: contain;
+      }
+
+      .tr-title {
+        left: d.w(274);
+        top: d.h(210);
+        width: d.w(1624);
+        height: d.h(149);
+      }
+
+      .tr-content {
+        left: d.w(207);
+        top: d.h(604);
+        width: d.w(3494);
+        height: d.h(1259);
       }
     }
 
