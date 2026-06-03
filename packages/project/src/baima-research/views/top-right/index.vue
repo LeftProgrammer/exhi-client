@@ -31,9 +31,17 @@ function asset(name: string) {
       <img v-if="!activeId" class="tr__text" :src="text" alt="" />
     </transition>
 
-    <!-- 工程效益（预期） -->
+    <!-- baima-bridge：社会效益 -->
     <transition name="fade">
-      <div v-if="hasContent" class="tr__content">
+      <div v-if="activeId === 'baima-bridge' && hasContent" class="tr__content tr__content--baima">
+        <img class="tr__baima tr-title" :src="asset('title.png')" alt="" />
+        <img class="tr__baima tr-content" :src="asset('content.png')" alt="" />
+      </div>
+    </transition>
+
+    <!-- 其他点位：工程效益 -->
+    <transition name="fade">
+      <div v-if="activeId === 'slope' && hasContent" class="tr__content tr__content--default">
         <img class="tr__title" :src="asset('title.png')" alt="工程效益" />
         <div class="tr__row">
           <img :src="asset('content-1.png')" alt="" />
@@ -83,6 +91,29 @@ function asset(name: string) {
     flex-direction: column;
     gap: d.h(50);
     padding: d.h(120) d.w(90) d.h(100);
+
+    &--baima {
+      display: block;
+
+      .tr__baima {
+        position: absolute;
+        object-fit: contain;
+      }
+
+      .tr-title {
+        left: d.w(307);
+        top: d.h(250);
+        width: d.w(1791);
+        height: d.h(162);
+      }
+
+      .tr-content {
+        left: d.w(376);
+        top: d.h(615);
+        width: d.w(3263);
+        height: d.h(1256);
+      }
+    }
   }
 
   &__title {

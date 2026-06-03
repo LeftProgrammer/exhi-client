@@ -10,10 +10,15 @@ const { syncPoint, syncIdle } = useScreenSync()
 const bgImage = resolvePkgUrl('common/main-bg.png')
 const topText = resolvePkgUrl('common/top-text.png')
 const iconSample = resolvePkgUrl('buttons/icon-sample.png')
+const playImg = resolvePkgUrl('points/baima-bridge/main/play.png')
+const pauseImg = resolvePkgUrl('points/baima-bridge/main/pause.png')
 
 const activeId = ref<string | null>(null)
 const activePoint = computed(() => getPoint(activeId.value))
 const isStandby = computed(() => activeId.value === null)
+const visiblePoints = computed(() =>
+  isStandby.value ? POINTS : POINTS.filter((p) => p.id === activeId.value)
+)
 
 // 选中点位的主屏详情素材（仅 hasContent 点位）
 const detail = computed(() => {
@@ -21,8 +26,9 @@ const detail = computed(() => {
   const base = `points/${activeId.value}/main`
   return {
     zoom: resolvePkgUrl(`${base}/zoom.png`),
-    minsheng: resolvePkgUrl(`${base}/minsheng.png`),
-    project: resolvePkgUrl(`${base}/project.png`)
+    desc: resolvePkgUrl(`${base}/desc.png`),
+    project: resolvePkgUrl(`${base}/project.png`),
+    needs: resolvePkgUrl(`${base}/needs.png`)
   }
 })
 
@@ -64,6 +70,14 @@ function backToStandby() {
   syncIdle()
 }
 
+function handlePlay() {
+  // TODO: 向 top-left 屏幕发送播放指令
+}
+
+function handlePause() {
+  // TODO: 向 top-left 屏幕发送暂停指令
+}
+
 useIdleReset(() => {
   if (!isStandby.value) backToStandby()
 })
@@ -78,11 +92,11 @@ useIdleReset(() => {
       <img v-if="isStandby" class="home__top-text" :src="topText" alt="" />
     </transition>
 
-    <!-- 地图标记点位：仅待机展示，选中后隐藏全部 -->
+    <!-- 地图标记点位：待机展示全部，选中后仅保留当前点位 -->
     <transition name="fade">
-      <div v-if="isStandby" class="home__markers">
+      <div v-if="visiblePoints.length" class="home__markers">
         <button
-          v-for="p in POINTS"
+          v-for="p in visiblePoints"
           :key="p.id"
           class="home__marker"
           :style="markerStyle(p)"
@@ -104,16 +118,23 @@ useIdleReset(() => {
           alt=""
         />
         <img
-          class="home__detail-minsheng"
-          :src="detail.minsheng"
-          :style="toDesignStyle(activePoint.detail.minsheng)"
-          alt="民生痛点"
+          class="home__detail-desc"
+          :src="detail.desc"
+          :style="toDesignStyle(activePoint.detail.desc)"
+          alt="详情描述"
         />
         <img
           class="home__detail-project"
           :src="detail.project"
           :style="toDesignStyle(activePoint.detail.project)"
           alt="科研项目"
+        />
+        <img
+          v-if="activePoint.detail.needs"
+          class="home__detail-needs"
+          :src="detail.needs"
+          :style="toDesignStyle(activePoint.detail.needs)"
+          alt="科研需求"
         />
       </div>
     </transition>
@@ -130,14 +151,26 @@ useIdleReset(() => {
 
     <!-- 右侧导航菜单（图片按钮，常驻） -->
     <nav class="home__menu">
-      <button
-        v-for="p in MENU_POINTS"
-        :key="p.id"
-        class="home__menu-item"
-        @click="selectPoint(p.id)"
-      >
-        <img :src="menuBtn(p.id, activeId === p.id)" :alt="p.id" />
-      </button>
+      <template v-for="p in MENU_POINTS" :key="p.id">
+        <div v-if="p.id === 'baima-bridge'" class="home__menu-wrapper">
+          <button class="home__menu-item" @click="selectPoint(p.id)">
+            <img :src="menuBtn(p.id, activeId === p.id)" :alt="p.id" />
+          </button>
+          <transition name="fade">
+            <div v-if="activeId === 'baima-bridge'" class="home__media-controls">
+              <button class="home__media-play" @click="handlePlay">
+                <img :src="playImg" alt="播放" />
+              </button>
+              <button class="home__media-pause" @click="handlePause">
+                <img :src="pauseImg" alt="暂停" />
+              </button>
+            </div>
+          </transition>
+        </div>
+        <button v-else class="home__menu-item" @click="selectPoint(p.id)">
+          <img :src="menuBtn(p.id, activeId === p.id)" :alt="p.id" />
+        </button>
+      </template>
       <button class="home__menu-item" @click="backToStandby">
         <img :src="menuBtn('home', isStandby)" alt="首页" />
       </button>
@@ -212,12 +245,18 @@ useIdleReset(() => {
   &__detail {
     position: absolute;
     inset: 0;
-    z-index: 8;
+    z-index: 3;
     pointer-events: none;
 
-    &-zoom,
-    &-minsheng,
-    &-project {
+    &-zoom {
+      position: absolute;
+      object-fit: contain;
+      z-index: 1;
+    }
+
+    &-desc,
+    &-project,
+    &-needs {
       position: absolute;
       object-fit: contain;
     }
@@ -273,6 +312,38 @@ useIdleReset(() => {
 
     &:hover {
       transform: scale(1.04);
+    }
+  }
+
+  &__menu-wrapper {
+    position: relative;
+  }
+
+  &__media-controls {
+    position: absolute;
+    right: calc(100% + d.w(30));
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: d.h(11);
+    pointer-events: auto;
+  }
+
+  &__media-play,
+  &__media-pause {
+    background: none;
+    border: none;
+    padding: 0;
+    width: d.w(213);
+    height: d.h(51);
+    cursor: pointer;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
     }
   }
 }

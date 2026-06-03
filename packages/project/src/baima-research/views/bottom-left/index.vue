@@ -31,9 +31,19 @@ function asset(name: string) {
       <img v-if="!activeId" class="bl__text" :src="text" alt="" />
     </transition>
 
-    <!-- 核心创新点 -->
+    <!-- baima-bridge：质量创新成果 -->
     <transition name="fade">
-      <div v-if="hasContent" class="bl__content">
+      <div v-if="activeId === 'baima-bridge' && hasContent" class="bl__content bl__content--baima">
+        <img class="bl__baima bl-title" :src="asset('title.png')" alt="" />
+        <img class="bl__baima bl-c1" :src="asset('content-1.png')" alt="" />
+        <img class="bl__baima bl-c2" :src="asset('content-2.png')" alt="" />
+        <img class="bl__baima bl-c3" :src="asset('content-3.png')" alt="" />
+      </div>
+    </transition>
+
+    <!-- 其他点位：核心创新点 -->
+    <transition name="fade">
+      <div v-if="activeId === 'slope' && hasContent" class="bl__content bl__content--default">
         <img class="bl__title" :src="asset('title.png')" alt="核心创新点" />
         <div class="bl__grid">
           <img :src="asset('left-1.png')" alt="" />
@@ -86,6 +96,43 @@ function asset(name: string) {
     flex-direction: column;
     gap: d.h(40);
     padding: d.h(120) d.w(90) d.h(80);
+
+    &--baima {
+      display: block;
+
+      .bl__baima {
+        position: absolute;
+        object-fit: contain;
+      }
+
+      .bl-title {
+        left: d.w(309);
+        top: d.h(252);
+        width: d.w(1791);
+        height: d.h(162);
+      }
+
+      .bl-c1 {
+        left: d.w(131);
+        top: d.h(570);
+        width: d.w(1219);
+        height: d.h(1129);
+      }
+
+      .bl-c2 {
+        left: d.w(1243);
+        top: d.h(570);
+        width: d.w(1430);
+        height: d.h(1129);
+      }
+
+      .bl-c3 {
+        left: d.w(2526);
+        top: d.h(570);
+        width: d.w(1219);
+        height: d.h(1129);
+      }
+    }
   }
 
   &__title {
@@ -93,6 +140,19 @@ function asset(name: string) {
     width: auto;
     object-fit: contain;
     align-self: flex-start;
+  }
+
+  &__row {
+    display: flex;
+    gap: d.w(40);
+    width: 100%;
+    height: 80%;
+
+    img {
+      flex: 1;
+      min-width: 0;
+      object-fit: contain;
+    }
   }
 
   &__grid {

@@ -15,6 +15,21 @@ onSyncIdle(() => (activeId.value = null))
 const point = computed(() => getPoint(activeId.value))
 const hasContent = computed(() => !!point.value?.hasContent)
 
+const videoRef = ref<HTMLVideoElement | null>(null)
+const isPaused = ref(true)
+
+function toggleVideo() {
+  const v = videoRef.value
+  if (!v) return
+  if (v.paused) {
+    v.play()
+    isPaused.value = false
+  } else {
+    v.pause()
+    isPaused.value = true
+  }
+}
+
 const bg = resolvePkgUrl(`common/${SCREEN}-bg.png`)
 const text = resolvePkgUrl(`common/${SCREEN}-text.png`)
 
@@ -32,9 +47,33 @@ function asset(name: string) {
       <img v-if="!activeId" class="tl__text" :src="text" alt="" />
     </transition>
 
-    <!-- 选中点位：研究目标 / 技术路线 / 研究课题 -->
+    <!-- baima-bridge：项目简介 + 创新技术 + 视频播放器 -->
     <transition name="fade">
-      <div v-if="hasContent" class="tl__content">
+      <div v-if="activeId === 'baima-bridge' && hasContent" class="tl__content tl__content--baima">
+        <img class="tl__baima lt-title" :src="asset('left-top-title.png')" alt="" />
+        <img class="tl__baima lt-content" :src="asset('left-top-content.png')" alt="" />
+        <img class="tl__baima lb-title" :src="asset('left-bottom-title.png')" alt="" />
+        <img class="tl__baima lb-content" :src="asset('left-bottom-content.png')" alt="" />
+        <img class="tl__baima rt-1" :src="asset('right-top-1.png')" alt="" />
+        <img class="tl__baima rt-2" :src="asset('right-top-2.png')" alt="" />
+        <img class="tl__baima video-deco" :src="asset('video-deco.png')" alt="" />
+        <img class="tl__baima video-frame" :src="asset('video-frame.png')" alt="" />
+        <div class="tl__baima video-wrap" @click="toggleVideo">
+          <video
+            ref="videoRef"
+            class="tl__video-player"
+            :src="asset('video.mp4')"
+            loop
+            muted
+          ></video>
+          <img v-show="isPaused" class="tl__video-pause" :src="asset('play-btn.png')" alt="" />
+        </div>
+      </div>
+    </transition>
+
+    <!-- 其他点位：研究目标 / 技术路线 / 研究课题 -->
+    <transition name="fade">
+      <div v-if="activeId === 'slope' && hasContent" class="tl__content tl__content--default">
         <div class="tl__col tl__col--left">
           <section class="tl__block tl__block--goal">
             <img class="tl__title" :src="asset('left-top-title.png')" alt="研究目标" />
@@ -48,7 +87,6 @@ function asset(name: string) {
             <img class="tl__fill" :src="asset('left-bottom.png')" alt="" />
           </section>
         </div>
-
         <div class="tl__col tl__col--right">
           <section class="tl__block">
             <img class="tl__title" :src="asset('right-title.png')" alt="技术路线" />
@@ -100,6 +138,104 @@ function asset(name: string) {
     display: flex;
     gap: d.w(60);
     padding: d.h(160) d.w(100) d.h(100);
+
+    &--baima {
+      display: block;
+
+      .tl__baima {
+        position: absolute;
+        object-fit: contain;
+      }
+
+      .lt-title {
+        left: d.w(171);
+        top: d.h(287);
+        width: d.w(1010);
+        height: d.h(91);
+      }
+
+      .lt-content {
+        left: d.w(161);
+        top: d.h(397);
+        width: d.w(2093);
+        height: d.h(557);
+      }
+
+      .lb-title {
+        left: d.w(171);
+        top: d.h(1000);
+        width: d.w(1010);
+        height: d.h(91);
+      }
+
+      .lb-content {
+        left: d.w(170);
+        top: d.h(1147);
+        width: d.w(2073);
+        height: d.h(731);
+      }
+
+      .rt-1 {
+        left: d.w(2323);
+        top: d.h(399);
+        width: d.w(658);
+        height: d.h(433);
+      }
+
+      .rt-2 {
+        left: d.w(3022);
+        top: d.h(399);
+        width: d.w(658);
+        height: d.h(433);
+      }
+
+      .video-deco {
+        left: d.w(2329);
+        top: d.h(1538);
+        width: d.w(1346);
+        height: d.h(305);
+      }
+
+      .video-frame {
+        left: d.w(2322);
+        top: d.h(889);
+        width: d.w(1355);
+        height: d.h(774);
+        z-index: 2;
+        pointer-events: none;
+      }
+
+      .video-wrap {
+        left: d.w(2322);
+        top: d.h(889);
+        width: d.w(1355);
+        height: d.h(774);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 1;
+      }
+
+      .tl__video-player {
+        width: 96%;
+        height: 90%;
+        object-fit: cover;
+        border-radius: d.w(20);
+      }
+
+      .tl__video-pause {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: d.w(186);
+        height: d.h(186);
+        object-fit: contain;
+        pointer-events: none;
+        z-index: 3;
+      }
+    }
   }
 
   &__col {
@@ -135,6 +271,14 @@ function asset(name: string) {
     align-self: flex-start;
   }
 
+  &__fill {
+    flex: 1;
+    width: 100%;
+    min-height: 0;
+    object-fit: contain;
+    object-position: left top;
+  }
+
   &__row {
     display: flex;
     gap: d.w(40);
@@ -148,12 +292,37 @@ function asset(name: string) {
     }
   }
 
-  &__fill {
+  &__video {
+    position: relative;
     flex: 1;
     width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     min-height: 0;
+  }
+
+  &__video-frame {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
     object-fit: contain;
-    object-position: left top;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  &__video-player {
+    width: 90%;
+    height: 90%;
+    object-fit: cover;
+    z-index: 1;
+  }
+
+  &__video-deco {
+    height: d.h(60);
+    width: auto;
+    object-fit: contain;
   }
 
   &__placeholder {

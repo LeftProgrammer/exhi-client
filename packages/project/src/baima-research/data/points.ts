@@ -32,8 +32,10 @@ export interface ResearchPoint {
   /** 主屏详情三张子图的位置与大小（设计稿原始像素） */
   detail?: {
     zoom: Layout
-    minsheng: Layout
+    desc: Layout
     project: Layout
+    /** 科研需求图（部分点位有，如高边坡建模） */
+    needs?: Layout
   }
 }
 
@@ -45,7 +47,7 @@ export const POINTS: ResearchPoint[] = [
     map: { top: 757, left: 138 },
     detail: {
       zoom: { top: 688, left: 0, width: 505, height: 515 },
-      minsheng: { top: 167, left: 519, width: 1295, height: 950 },
+      desc: { top: 167, left: 519, width: 1295, height: 950 },
       project: { top: 1495, left: 154, width: 1453, height: 375 }
     }
   },
@@ -61,9 +63,10 @@ export const POINTS: ResearchPoint[] = [
     status: 'ongoing',
     map: { top: 634, left: 1255 },
     detail: {
-      zoom: { top: 688, left: 0, width: 505, height: 515 },
-      minsheng: { top: 167, left: 519, width: 1295, height: 950 },
-      project: { top: 1495, left: 154, width: 1453, height: 375 }
+      zoom: { top: 565, left: 1109, width: 513, height: 514 },
+      desc: { top: 946, left: 385, width: 962, height: 599 },
+      project: { top: 239, left: 161, width: 1009, height: 359 },
+      needs: { top: 276, left: 1966, width: 995, height: 1341 }
     }
   },
   {

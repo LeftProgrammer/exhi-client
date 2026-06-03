@@ -31,9 +31,19 @@ function asset(name: string) {
       <img v-if="!activeId" class="br__text" :src="text" alt="" />
     </transition>
 
-    <!-- 科研成果（预期） -->
+    <!-- baima-bridge：荣誉认证 -->
     <transition name="fade">
-      <div v-if="hasContent" class="br__content">
+      <div v-if="activeId === 'baima-bridge' && hasContent" class="br__content br__content--baima">
+        <img class="br__baima br-title" :src="asset('title.png')" alt="" />
+        <img class="br__baima br-center" :src="asset('center.png')" alt="" />
+        <img class="br__baima br-bottom" :src="asset('bottom.png')" alt="" />
+        <img class="br__baima br-right-bg" :src="asset('right-bg.png')" alt="" />
+      </div>
+    </transition>
+
+    <!-- 其他点位：科研成果 -->
+    <transition name="fade">
+      <div v-if="activeId === 'slope' && hasContent" class="br__content br__content--default">
         <img class="br__title" :src="asset('title.png')" alt="科研成果" />
         <div class="br__list">
           <img :src="asset('content-1.png')" alt="" />
@@ -84,6 +94,43 @@ function asset(name: string) {
     flex-direction: column;
     gap: d.h(40);
     padding: d.h(120) d.w(90) d.h(80);
+
+    &--baima {
+      display: block;
+
+      .br__baima {
+        position: absolute;
+        object-fit: contain;
+      }
+
+      .br-title {
+        left: d.w(273);
+        top: d.h(224);
+        width: d.w(1598);
+        height: d.h(144);
+      }
+
+      .br-center {
+        left: d.w(460);
+        top: d.h(524);
+        width: d.w(2930);
+        height: d.h(901);
+      }
+
+      .br-bottom {
+        left: d.w(1069);
+        top: d.h(1618);
+        width: d.w(1713);
+        height: d.h(310);
+      }
+
+      .br-right-bg {
+        left: d.w(1954);
+        top: d.h(143);
+        width: d.w(1886);
+        height: d.h(1958);
+      }
+    }
   }
 
   &__title {
@@ -107,6 +154,18 @@ function asset(name: string) {
       object-fit: contain;
       object-position: left center;
     }
+  }
+
+  &__center {
+    flex: 1;
+    width: 100%;
+    object-fit: contain;
+  }
+
+  &__bottom {
+    height: d.h(100);
+    width: auto;
+    object-fit: contain;
   }
 
   &__placeholder {
