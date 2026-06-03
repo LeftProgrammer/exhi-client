@@ -84,7 +84,20 @@ export const POINTS: ResearchPoint[] = [
     id: 'concrete',
     name: '抗冲磨混凝土',
     status: 'ongoing',
-    map: { top: 572, left: 1933 }
+    map: { top: 572, left: 1933 },
+    detail: {
+      zoom: { top: 500, left: 500, width: 500, height: 500 },
+      needs: { top: 500, left: 500, width: 500, height: 500 },
+      project: { top: 500, left: 500, width: 500, height: 500 },
+      guide: { top: 500, left: 500, width: 500, height: 500 }
+    },
+    images: {
+      'bottom-left': [
+        ['files/file-1-1.png'],
+        ['files/file-2-1.png', 'files/file-2-2.png'],
+        ['files/file-3-1.png', 'files/file-3-2.png', 'files/file-3-3.png', 'files/file-3-4.png']
+      ]
+    }
   },
   {
     id: 'coating',

@@ -60,6 +60,14 @@ function asset(name: string) {
       </div>
     </transition>
 
+    <!-- concrete：科研成果 -->
+    <transition name="fade">
+      <div v-if="activeId === 'concrete' && point?.detail" class="br__content br__content--concrete">
+        <img class="br__concrete br-cc-title" :src="asset('title.png')" alt="" />
+        <img class="br__concrete br-cc-content" :src="asset('content.png')" alt="" />
+      </div>
+    </transition>
+
     <!-- blasting：荣誉认证 -->
     <transition name="fade">
       <div v-if="activeId === 'blasting' && point?.detail" class="br__content br__content--blasting">
@@ -213,6 +221,29 @@ function asset(name: string) {
       }
 
       .br-ct-files {
+        left: d.w(57);
+        top: d.h(577);
+        width: d.w(3700);
+        height: d.h(1583);
+      }
+    }
+
+    &--concrete {
+      display: block;
+
+      .br__concrete {
+        position: absolute;
+        object-fit: contain;
+      }
+
+      .br-cc-title {
+        left: d.w(274);
+        top: d.h(210);
+        width: d.w(1624);
+        height: d.h(149);
+      }
+
+      .br-cc-content {
         left: d.w(57);
         top: d.h(577);
         width: d.w(3700);

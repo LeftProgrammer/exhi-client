@@ -121,6 +121,20 @@ function asset(name: string) {
       </div>
     </transition>
 
+    <!-- concrete：研究内容 + 技术路线 + 新材料创新点 -->
+    <transition name="fade">
+      <div v-if="activeId === 'concrete' && point?.detail" class="tl__content tl__content--concrete">
+        <img class="tl__concrete cc-top-title" :src="asset('top-title.png')" alt="" />
+        <img class="tl__concrete cc-top-1" :src="asset('top-content-1.png')" alt="" />
+        <img class="tl__concrete cc-top-2" :src="asset('top-content-2.png')" alt="" />
+        <img class="tl__concrete cc-top-3" :src="asset('top-content-3.png')" alt="" />
+        <img class="tl__concrete cc-bl-title" :src="asset('bottom-left-title.png')" alt="" />
+        <img class="tl__concrete cc-bl-content" :src="asset('bottom-left-content.png')" alt="" />
+        <img class="tl__concrete cc-br-title" :src="asset('bottom-right-title.png')" alt="" />
+        <img class="tl__concrete cc-br-content" :src="asset('bottom-right-content.png')" alt="" />
+      </div>
+    </transition>
+
     <!-- blasting：实施方案 -->
     <transition name="fade">
       <div v-if="activeId === 'blasting' && point?.detail" class="tl__content tl__content--blasting">
@@ -431,6 +445,71 @@ function asset(name: string) {
         top: d.h(1074);
         width: d.w(1695);
         height: d.h(867);
+      }
+    }
+
+    &--concrete {
+      display: block;
+
+      .tl__concrete {
+        position: absolute;
+        object-fit: contain;
+      }
+
+      .cc-top-title {
+        left: d.w(171);
+        top: d.h(182);
+        width: d.w(1024);
+        height: d.h(96);
+      }
+
+      .cc-top-1 {
+        left: d.w(135);
+        top: d.h(380);
+        width: d.w(1144);
+        height: d.h(435);
+      }
+
+      .cc-top-2 {
+        left: d.w(1289);
+        top: d.h(380);
+        width: d.w(1152);
+        height: d.h(435);
+      }
+
+      .cc-top-3 {
+        left: d.w(2451);
+        top: d.h(380);
+        width: d.w(1152);
+        height: d.h(435);
+      }
+
+      .cc-bl-title {
+        left: d.w(135);
+        top: d.h(950);
+        width: d.w(1144);
+        height: d.h(80);
+      }
+
+      .cc-bl-content {
+        left: d.w(135);
+        top: d.h(1050);
+        width: d.w(1144);
+        height: d.h(550);
+      }
+
+      .cc-br-title {
+        left: d.w(1289);
+        top: d.h(950);
+        width: d.w(1152);
+        height: d.h(80);
+      }
+
+      .cc-br-content {
+        left: d.w(1289);
+        top: d.h(1050);
+        width: d.w(1152);
+        height: d.h(550);
       }
     }
 

@@ -119,7 +119,10 @@ function onCardClick3(i: number) {
 
     <!-- baima-bridge：质量创新成果 -->
     <transition name="fade">
-      <div v-if="activeId === 'baima-bridge' && point?.detail" class="bl__content bl__content--baima">
+      <div
+        v-if="activeId === 'baima-bridge' && point?.detail"
+        class="bl__content bl__content--baima"
+      >
         <img class="bl__baima bl-title" :src="asset('title.png')" alt="" />
         <img class="bl__baima bl-c1" :src="asset('content-1.png')" alt="" />
         <img class="bl__baima bl-c2" :src="asset('content-2.png')" alt="" />
@@ -151,15 +154,20 @@ function onCardClick3(i: number) {
             @touchmove="touch1.onTouchMove"
             @touchend="touch1.onTouchEnd"
           >
-            <div
-              v-for="(file, idx) in list1"
-              :key="idx"
-              class="ct-card-wrap"
-              :class="`ct-card-wrap--offset-${cardOffset(idx + 1, activeCard1)}`"
-              @click="onCardClick1(idx + 1)"
-            >
+            <template v-if="list1.length">
+              <div
+                v-for="(file, idx) in list1"
+                :key="idx"
+                class="ct-card-wrap"
+                :class="`ct-card-wrap--offset-${cardOffset(idx + 1, activeCard1)}`"
+                @click="onCardClick1(idx + 1)"
+              >
+                <img class="ct-card-frame" :src="asset('frame-bg.png')" alt="" />
+                <img class="ct-card-content" :src="asset(file)" alt="" />
+              </div>
+            </template>
+            <div v-else class="ct-card-wrap ct-card-wrap--offset-0">
               <img class="ct-card-frame" :src="asset('frame-bg.png')" alt="" />
-              <img class="ct-card-content" :src="asset(file)" alt="" />
             </div>
           </div>
           <img class="ct-text" :src="asset('text-1.png')" alt="" />
@@ -171,15 +179,20 @@ function onCardClick3(i: number) {
             @touchmove="touch2.onTouchMove"
             @touchend="touch2.onTouchEnd"
           >
-            <div
-              v-for="(file, idx) in list2"
-              :key="idx"
-              class="ct-card-wrap"
-              :class="`ct-card-wrap--offset-${cardOffset(idx + 1, activeCard2)}`"
-              @click="onCardClick2(idx + 1)"
-            >
+            <template v-if="list2.length">
+              <div
+                v-for="(file, idx) in list2"
+                :key="idx"
+                class="ct-card-wrap"
+                :class="`ct-card-wrap--offset-${cardOffset(idx + 1, activeCard2)}`"
+                @click="onCardClick2(idx + 1)"
+              >
+                <img class="ct-card-frame" :src="asset('frame-bg.png')" alt="" />
+                <img class="ct-card-content" :src="asset(file)" alt="" />
+              </div>
+            </template>
+            <div v-else class="ct-card-wrap ct-card-wrap--offset-0">
               <img class="ct-card-frame" :src="asset('frame-bg.png')" alt="" />
-              <img class="ct-card-content" :src="asset(file)" alt="" />
             </div>
           </div>
           <img class="ct-text" :src="asset('text-2.png')" alt="" />
@@ -191,15 +204,105 @@ function onCardClick3(i: number) {
             @touchmove="touch3.onTouchMove"
             @touchend="touch3.onTouchEnd"
           >
-            <div
-              v-for="(file, idx) in list3"
-              :key="idx"
-              class="ct-card-wrap"
-              :class="`ct-card-wrap--offset-${cardOffset(idx + 1, activeCard3)}`"
-              @click="onCardClick3(idx + 1)"
-            >
+            <template v-if="list3.length">
+              <div
+                v-for="(file, idx) in list3"
+                :key="idx"
+                class="ct-card-wrap"
+                :class="`ct-card-wrap--offset-${cardOffset(idx + 1, activeCard3)}`"
+                @click="onCardClick3(idx + 1)"
+              >
+                <img class="ct-card-frame" :src="asset('frame-bg.png')" alt="" />
+                <img class="ct-card-content" :src="asset(file)" alt="" />
+              </div>
+            </template>
+            <div v-else class="ct-card-wrap ct-card-wrap--offset-0">
               <img class="ct-card-frame" :src="asset('frame-bg.png')" alt="" />
-              <img class="ct-card-content" :src="asset(file)" alt="" />
+            </div>
+          </div>
+          <img class="ct-text" :src="asset('text-3.png')" alt="" />
+        </div>
+      </div>
+    </transition>
+
+    <!-- concrete：科研成果（相册堆叠，与 coating 逻辑一致） -->
+    <transition name="fade">
+      <div
+        v-if="activeId === 'concrete' && point?.detail"
+        class="bl__content bl__content--concrete"
+      >
+        <img class="bl__coating ct-title" :src="asset('title.png')" alt="" />
+        <div class="bl__coating ct-block ct-block--1">
+          <div
+            class="ct-stack"
+            @touchstart="touch1.onTouchStart"
+            @touchmove="touch1.onTouchMove"
+            @touchend="touch1.onTouchEnd"
+          >
+            <template v-if="list1.length">
+              <div
+                v-for="(file, idx) in list1"
+                :key="idx"
+                class="ct-card-wrap"
+                :class="`ct-card-wrap--offset-${cardOffset(idx + 1, activeCard1)}`"
+                @click="onCardClick1(idx + 1)"
+              >
+                <img class="ct-card-frame" :src="asset('frame-bg.png')" alt="" />
+                <img class="ct-card-content" :src="asset(file)" alt="" />
+              </div>
+            </template>
+            <div v-else class="ct-card-wrap ct-card-wrap--offset-0">
+              <img class="ct-card-frame" :src="asset('frame-bg.png')" alt="" />
+            </div>
+          </div>
+          <img class="ct-text" :src="asset('text-1.png')" alt="" />
+        </div>
+        <div class="bl__coating ct-block ct-block--2">
+          <div
+            class="ct-stack"
+            @touchstart="touch2.onTouchStart"
+            @touchmove="touch2.onTouchMove"
+            @touchend="touch2.onTouchEnd"
+          >
+            <template v-if="list2.length">
+              <div
+                v-for="(file, idx) in list2"
+                :key="idx"
+                class="ct-card-wrap"
+                :class="`ct-card-wrap--offset-${cardOffset(idx + 1, activeCard2)}`"
+                @click="onCardClick2(idx + 1)"
+              >
+                <img class="ct-card-frame" :src="asset('frame-bg.png')" alt="" />
+                <img class="ct-card-content" :src="asset(file)" alt="" />
+              </div>
+            </template>
+            <div v-else class="ct-card-wrap ct-card-wrap--offset-0">
+              <img class="ct-card-frame" :src="asset('frame-bg.png')" alt="" />
+            </div>
+          </div>
+          <img class="ct-text" :src="asset('text-2.png')" alt="" />
+        </div>
+        <div class="bl__coating ct-block ct-block--3">
+          <div
+            class="ct-stack"
+            @touchstart="touch3.onTouchStart"
+            @touchmove="touch3.onTouchMove"
+            @touchend="touch3.onTouchEnd"
+          >
+            <template v-if="list3.length">
+              <div
+                v-for="(file, idx) in list3"
+                :key="idx"
+                class="ct-card-wrap"
+                :class="`ct-card-wrap--offset-${cardOffset(idx + 1, activeCard3)}`"
+                @click="onCardClick3(idx + 1)"
+              >
+                <img class="ct-card-frame" :src="asset('frame-bg.png')" alt="" />
+                <img class="ct-card-content" :src="asset(file)" alt="" />
+              </div>
+            </template>
+            <div v-else class="ct-card-wrap ct-card-wrap--offset-0">
+              <img class="ct-card-frame" :src="asset('frame-bg.png')" alt="" />
             </div>
           </div>
           <img class="ct-text" :src="asset('text-3.png')" alt="" />
@@ -209,7 +312,10 @@ function onCardClick3(i: number) {
 
     <!-- blasting：成果总结 -->
     <transition name="fade">
-      <div v-if="activeId === 'blasting' && point?.detail" class="bl__content bl__content--blasting">
+      <div
+        v-if="activeId === 'blasting' && point?.detail"
+        class="bl__content bl__content--blasting"
+      >
         <img class="bl__blasting bl-bs-title" :src="asset('title.png')" alt="" />
         <img class="bl__blasting bl-bs-1" :src="asset('content-1.png')" alt="" />
         <img class="bl__blasting bl-bs-2" :src="asset('content-2.png')" alt="" />
@@ -354,6 +460,149 @@ function onCardClick3(i: number) {
     }
 
     &--coating {
+      display: block;
+
+      .bl__coating {
+        position: absolute;
+        object-fit: contain;
+      }
+
+      .ct-title {
+        left: d.w(308);
+        top: d.h(238);
+        width: d.w(1821);
+        height: d.h(167);
+      }
+
+      .ct-block {
+        position: absolute;
+        transition: transform 0.3s ease;
+
+        &--1 {
+          left: d.w(104);
+          top: d.h(754);
+          width: d.w(1290);
+          height: d.h(1012);
+        }
+
+        &--2 {
+          left: d.w(1279);
+          top: d.h(754);
+          width: d.w(1290);
+          height: d.h(1012);
+        }
+
+        &--3 {
+          left: d.w(2454);
+          top: d.h(754);
+          width: d.w(1290);
+          height: d.h(1012);
+        }
+
+        &:hover {
+          z-index: 10;
+        }
+
+        .ct-stack {
+          position: absolute;
+          left: d.w(323);
+          top: 0;
+          width: d.w(644);
+          height: d.h(890);
+          z-index: 1;
+
+          &.is-dragging .ct-card-wrap {
+            transition: none !important;
+          }
+        }
+
+        .ct-card-wrap {
+          position: absolute;
+          width: 96%;
+          height: 96%;
+          transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+          cursor: pointer;
+
+          &--offset-0 {
+            transform: translateX(0) scale(1);
+            z-index: 5;
+            opacity: 1;
+          }
+
+          &--offset--1 {
+            transform: translateX(-38%) scale(0.88);
+            z-index: 4;
+            opacity: 0.55;
+          }
+
+          &--offset-1 {
+            transform: translateX(38%) scale(0.88);
+            z-index: 4;
+            opacity: 0.55;
+          }
+
+          &--offset--2,
+          &--offset--3,
+          &--offset--4 {
+            transform: translateX(-55%) translateY(25%) scale(0.5);
+            z-index: 1;
+            opacity: 0;
+          }
+
+          &--offset-2,
+          &--offset-3,
+          &--offset-4 {
+            transform: translateX(55%) translateY(25%) scale(0.5);
+            z-index: 1;
+            opacity: 0;
+          }
+
+          .ct-card-frame {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transition: inherit;
+            z-index: 1;
+          }
+
+          .ct-card-content {
+            position: absolute;
+            inset: 0;
+            width: 96%;
+            height: 96%;
+            margin: auto;
+            object-fit: contain;
+            transition: inherit;
+            z-index: 2;
+          }
+
+          &--offset-0 {
+            .ct-card-frame {
+              filter: drop-shadow(0 d.h(6) d.w(20) rgba(0, 0, 0, 0.55));
+            }
+          }
+
+          &--offset--1,
+          &--offset-1 {
+            filter: brightness(0.8);
+          }
+        }
+
+        .ct-text {
+          position: absolute;
+          left: 0;
+          top: d.h(905);
+          width: d.w(1290);
+          height: d.h(107);
+          object-fit: contain;
+          z-index: 2;
+        }
+      }
+    }
+
+    &--concrete {
       display: block;
 
       .bl__coating {

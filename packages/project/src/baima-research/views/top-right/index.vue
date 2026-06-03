@@ -56,6 +56,14 @@ function asset(name: string) {
       </div>
     </transition>
 
+    <!-- concrete：经济效益 -->
+    <transition name="fade">
+      <div v-if="activeId === 'concrete' && point?.detail" class="tr__content tr__content--concrete">
+        <img class="tr__concrete tr-cc-title" :src="asset('title.png')" alt="" />
+        <img class="tr__concrete tr-cc-content" :src="asset('content.png')" alt="" />
+      </div>
+    </transition>
+
     <!-- blasting：推广和社会效益 -->
     <transition name="fade">
       <div v-if="activeId === 'blasting' && point?.detail" class="tr__content tr__content--blasting">
@@ -181,6 +189,29 @@ function asset(name: string) {
       }
 
       .tr-ct-content {
+        left: d.w(207);
+        top: d.h(604);
+        width: d.w(3494);
+        height: d.h(1259);
+      }
+    }
+
+    &--concrete {
+      display: block;
+
+      .tr__concrete {
+        position: absolute;
+        object-fit: contain;
+      }
+
+      .tr-cc-title {
+        left: d.w(308);
+        top: d.h(237);
+        width: d.w(1791);
+        height: d.h(166);
+      }
+
+      .tr-cc-content {
         left: d.w(207);
         top: d.h(604);
         width: d.w(3494);
