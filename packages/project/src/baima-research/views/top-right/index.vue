@@ -64,6 +64,17 @@ function asset(name: string) {
       </div>
     </transition>
 
+    <!-- excavation：综合效益 -->
+    <transition name="fade">
+      <div v-if="activeId === 'excavation' && point?.detail" class="tr__content tr__content--excavation">
+        <img class="tr__excavation ex-title" :src="asset('title.png')" alt="" />
+        <img class="tr__excavation ex-1" :src="asset('content-1.png')" alt="" />
+        <img class="tr__excavation ex-2" :src="asset('content-2.png')" alt="" />
+        <img class="tr__excavation ex-3" :src="asset('content-3.png')" alt="" />
+        <img class="tr__excavation ex-4" :src="asset('content-4.png')" alt="" />
+      </div>
+    </transition>
+
     <!-- blasting：推广和社会效益 -->
     <transition name="fade">
       <div v-if="activeId === 'blasting' && point?.detail" class="tr__content tr__content--blasting">
@@ -216,6 +227,50 @@ function asset(name: string) {
         top: d.h(604);
         width: d.w(3494);
         height: d.h(1259);
+      }
+    }
+
+    &--excavation {
+      display: block;
+
+      .tr__excavation {
+        position: absolute;
+        object-fit: contain;
+      }
+
+      .ex-title {
+        left: d.w(274);
+        top: d.h(210);
+        width: d.w(1624);
+        height: d.h(149);
+      }
+
+      .ex-1 {
+        left: d.w(80);
+        top: d.h(450);
+        width: d.w(870);
+        height: d.h(1300);
+      }
+
+      .ex-2 {
+        left: d.w(990);
+        top: d.h(450);
+        width: d.w(870);
+        height: d.h(1300);
+      }
+
+      .ex-3 {
+        left: d.w(1900);
+        top: d.h(450);
+        width: d.w(870);
+        height: d.h(1300);
+      }
+
+      .ex-4 {
+        left: d.w(2810);
+        top: d.h(450);
+        width: d.w(870);
+        height: d.h(1300);
       }
     }
 

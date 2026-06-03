@@ -135,6 +135,20 @@ function asset(name: string) {
       </div>
     </transition>
 
+    <!-- excavation：技术难点 + 研究内容 -->
+    <transition name="fade">
+      <div v-if="activeId === 'excavation' && point?.detail" class="tl__content tl__content--excavation">
+        <img class="tl__excavation ex-top-content" :src="asset('top-content.png')" alt="" />
+        <img class="tl__excavation ex-top-bg" :src="asset('top-right-bg.png')" alt="" />
+        <img class="tl__excavation ex-bottom-title" :src="asset('bottom-title.png')" alt="" />
+        <img class="tl__excavation ex-bottom-1" :src="asset('bttom-content-1.png')" alt="" />
+        <img class="tl__excavation ex-bottom-2" :src="asset('bttom-content-2.png')" alt="" />
+        <img class="tl__excavation ex-bottom-3" :src="asset('bttom-content-3.png')" alt="" />
+        <img class="tl__excavation ex-bottom-4" :src="asset('bttom-content-4.png')" alt="" />
+        <img class="tl__excavation ex-bottom-5" :src="asset('bttom-content-5.png')" alt="" />
+      </div>
+    </transition>
+
     <!-- blasting：实施方案 -->
     <transition name="fade">
       <div v-if="activeId === 'blasting' && point?.detail" class="tl__content tl__content--blasting">
@@ -510,6 +524,71 @@ function asset(name: string) {
         top: d.h(1050);
         width: d.w(1152);
         height: d.h(550);
+      }
+    }
+
+    &--excavation {
+      display: block;
+
+      .tl__excavation {
+        position: absolute;
+        object-fit: contain;
+      }
+
+      .ex-top-content {
+        left: d.w(135);
+        top: d.h(182);
+        width: d.w(1680);
+        height: d.h(650);
+      }
+
+      .ex-top-bg {
+        left: d.w(1915);
+        top: d.h(182);
+        width: d.w(1695);
+        height: d.h(650);
+      }
+
+      .ex-bottom-title {
+        left: d.w(135);
+        top: d.h(880);
+        width: d.w(1024);
+        height: d.h(96);
+      }
+
+      .ex-bottom-1 {
+        left: d.w(135);
+        top: d.h(1000);
+        width: d.w(600);
+        height: d.h(400);
+      }
+
+      .ex-bottom-2 {
+        left: d.w(760);
+        top: d.h(1000);
+        width: d.w(600);
+        height: d.h(400);
+      }
+
+      .ex-bottom-3 {
+        left: d.w(1385);
+        top: d.h(1000);
+        width: d.w(600);
+        height: d.h(400);
+      }
+
+      .ex-bottom-4 {
+        left: d.w(2010);
+        top: d.h(1000);
+        width: d.w(600);
+        height: d.h(400);
+      }
+
+      .ex-bottom-5 {
+        left: d.w(2635);
+        top: d.h(1000);
+        width: d.w(600);
+        height: d.h(400);
       }
     }
 

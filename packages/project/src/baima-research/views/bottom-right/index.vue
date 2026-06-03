@@ -68,6 +68,16 @@ function asset(name: string) {
       </div>
     </transition>
 
+    <!-- excavation：研究成果（证书展示） -->
+    <transition name="fade">
+      <div v-if="activeId === 'excavation' && point?.detail" class="br__content br__content--excavation">
+        <img class="br__excavation ex-title" :src="asset('title.png')" alt="" />
+        <img class="br__excavation ex-frame" :src="asset('file-frame.png')" alt="" />
+        <img class="br__excavation ex-text-1" :src="asset('text-1.png')" alt="" />
+        <img class="br__excavation ex-text-2" :src="asset('text-2.png')" alt="" />
+      </div>
+    </transition>
+
     <!-- blasting：荣誉认证 -->
     <transition name="fade">
       <div v-if="activeId === 'blasting' && point?.detail" class="br__content br__content--blasting">
@@ -248,6 +258,43 @@ function asset(name: string) {
         top: d.h(577);
         width: d.w(3700);
         height: d.h(1583);
+      }
+    }
+
+    &--excavation {
+      display: block;
+
+      .br__excavation {
+        position: absolute;
+        object-fit: contain;
+      }
+
+      .ex-title {
+        left: d.w(274);
+        top: d.h(210);
+        width: d.w(1624);
+        height: d.h(149);
+      }
+
+      .ex-frame {
+        left: d.w(200);
+        top: d.h(450);
+        width: d.w(1600);
+        height: d.h(1300);
+      }
+
+      .ex-text-1 {
+        left: d.w(200);
+        top: d.h(1800);
+        width: d.w(1600);
+        height: d.h(120);
+      }
+
+      .ex-text-2 {
+        left: d.w(2000);
+        top: d.h(1800);
+        width: d.w(1600);
+        height: d.h(120);
       }
     }
 

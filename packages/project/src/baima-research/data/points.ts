@@ -59,7 +59,16 @@ export const POINTS: ResearchPoint[] = [
     id: 'excavation',
     name: '绿色开挖料',
     status: 'done',
-    map: { top: 634, left: 891 }
+    map: { top: 634, left: 891 },
+    detail: {
+      zoom: { top: 500, left: 500, width: 500, height: 500 },
+      needs: { top: 500, left: 500, width: 500, height: 500 },
+      project: { top: 500, left: 500, width: 500, height: 500 },
+      guide: { top: 500, left: 500, width: 500, height: 500 }
+    },
+    images: {
+      'bottom-right': [['files/file-1-1.png'], ['files/file-2-1.png']]
+    }
   },
   {
     id: 'slope',

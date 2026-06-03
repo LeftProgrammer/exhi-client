@@ -310,6 +310,19 @@ function onCardClick3(i: number) {
       </div>
     </transition>
 
+    <!-- excavation：研究成果 -->
+    <transition name="fade">
+      <div
+        v-if="activeId === 'excavation' && point?.detail"
+        class="bl__content bl__content--excavation"
+      >
+        <img class="bl__excavation ex-title" :src="asset('title.png')" alt="" />
+        <img class="bl__excavation ex-top" :src="asset('content-top.png')" alt="" />
+        <img class="bl__excavation ex-bottom-1" :src="asset('content-bottom-1.png')" alt="" />
+        <img class="bl__excavation ex-bottom-2" :src="asset('content-bottom-2.png')" alt="" />
+      </div>
+    </transition>
+
     <!-- blasting：成果总结 -->
     <transition name="fade">
       <div
@@ -742,6 +755,43 @@ function onCardClick3(i: number) {
           object-fit: contain;
           z-index: 2;
         }
+      }
+    }
+
+    &--excavation {
+      display: block;
+
+      .bl__excavation {
+        position: absolute;
+        object-fit: contain;
+      }
+
+      .ex-title {
+        left: d.w(309);
+        top: d.h(238);
+        width: d.w(1821);
+        height: d.h(167);
+      }
+
+      .ex-top {
+        left: d.w(131);
+        top: d.h(500);
+        width: d.w(3580);
+        height: d.h(700);
+      }
+
+      .ex-bottom-1 {
+        left: d.w(131);
+        top: d.h(1250);
+        width: d.w(1750);
+        height: d.h(600);
+      }
+
+      .ex-bottom-2 {
+        left: d.w(1920);
+        top: d.h(1250);
+        width: d.w(1750);
+        height: d.h(600);
       }
     }
 
