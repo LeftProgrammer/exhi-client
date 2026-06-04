@@ -86,6 +86,7 @@ function makeTab(id: string, title: string, pages: ContentPage[] = []): TabDef {
 // 已有素材：tab「工作室管理制度和工作职责」首页（标题 + 上下两段内容）。
 // 其余 tab 标题暂复用首个 tab 标题，待补充对应素材后替换。
 const ZHIDU_TITLE_GZSGL = url('modules/zhidu/title-gzsgl.png')
+const ZHIDU_TITLE_GZZ = url('modules/zhidu/gzz-title.png')
 const zhidu: ModuleDef = {
   id: 'zhidu',
   name: '制度机制',
@@ -113,10 +114,130 @@ const zhidu: ModuleDef = {
         ]
       }
     ]),
-    makeTab('zhidu-gzz', ZHIDU_TITLE_GZSGL),
-    makeTab('zhidu-rygl', ZHIDU_TITLE_GZSGL),
-    makeTab('zhidu-jgcx', ZHIDU_TITLE_GZSGL),
-    makeTab('zhidu-kjcg', ZHIDU_TITLE_GZSGL)
+    makeTab('zhidu-gzz', ZHIDU_TITLE_GZZ, [
+      {
+        blocks: [
+          {
+            src: url('modules/zhidu/gzz-p1-a.png'),
+            left: 173,
+            top: 1151,
+            width: 1814,
+            height: 890
+          },
+          {
+            src: url('modules/zhidu/gzz-p1-b.png'),
+            left: 173,
+            top: 2041,
+            width: 1814,
+            height: 1117
+          }
+        ]
+      },
+      {
+        blocks: [
+          {
+            src: url('modules/zhidu/gzz-p2-a.png'),
+            left: 173,
+            top: 1151,
+            width: 1814,
+            height: 890
+          },
+          {
+            src: url('modules/zhidu/gzz-p2-b.png'),
+            left: 173,
+            top: 2041,
+            width: 1814,
+            height: 1117
+          }
+        ]
+      }
+    ]),
+    makeTab('zhidu-rygl', url('modules/zhidu/rygl-title.png'), [
+      {
+        blocks: [
+          {
+            src: url('modules/zhidu/rygl-p1-a.png'),
+            left: 173,
+            top: 1151,
+            width: 1814,
+            height: 890
+          },
+          {
+            src: url('modules/zhidu/rygl-p1-b.png'),
+            left: 173,
+            top: 2041,
+            width: 1814,
+            height: 1117
+          }
+        ]
+      },
+      {
+        blocks: [
+          {
+            src: url('modules/zhidu/rygl-p2-a.png'),
+            left: 173,
+            top: 1151,
+            width: 1814,
+            height: 890
+          },
+          {
+            src: url('modules/zhidu/rygl-p2-b.png'),
+            left: 173,
+            top: 2041,
+            width: 1814,
+            height: 1117
+          }
+        ]
+      },
+      {
+        blocks: [
+          {
+            src: url('modules/zhidu/rygl-p3-a.png'),
+            left: 173,
+            top: 1151,
+            width: 1814,
+            height: 2007
+          }
+        ]
+      }
+    ]),
+    makeTab('zhidu-jgcx', url('modules/zhidu/jgcx-title.png'), [
+      {
+        blocks: [
+          {
+            src: url('modules/zhidu/jgcx-p1.png'),
+            left: 173,
+            top: 1151,
+            width: 1814,
+            height: 2007
+          }
+        ]
+      },
+      {
+        blocks: [
+          {
+            src: url('modules/zhidu/jgcx-p2.png'),
+            left: 173,
+            top: 1151,
+            width: 1814,
+            height: 2007
+          }
+        ]
+      }
+    ]),
+    makeTab('zhidu-kjcg', url('modules/zhidu/kjcg-title.png'), [
+      {
+        blocks: [
+          {
+            src: url('modules/zhidu/kjcg-p1.png'),
+            left: 173,
+            top: 1151,
+            width: 1814,
+            height: 2007
+          }
+        ]
+      }
+    ])
   ]
 }
 
