@@ -20,6 +20,22 @@ export interface Layout {
   height: number
 }
 
+/** 文件轮播的一「组」：若干卡片图 + 1 个文字/标题图（路径相对点位目录） */
+export interface CarouselGroup {
+  /** 该组卡片图（可多张，会在卡片栈内左右切换） */
+  files: string[]
+  /** 该组的文字/标题图（当该组卡片置顶时显示在最上层） */
+  text?: string
+}
+
+/**
+ * 一个屏幕的文件轮播配置：
+ *   外层 = 展示位（屏幕上的每个卡片栈，各自一个 FileCarousel）
+ *   内层 = 该展示位包含的「组」，每组 = 卡片图 + 文字图
+ * 例：[ [组A, 组B], [组C] ] 表示 2 个展示位，第 1 个含 2 组、第 2 个含 1 组。
+ */
+export type ScreenCarousels = CarouselGroup[][]
+
 export interface ResearchPoint {
   /** 英文 id，用于素材路径、同步消息与 labels/ 图片文件名 */
   id: string
@@ -41,8 +57,8 @@ export interface ResearchPoint {
     /** 指线图（所有点位有） */
     guide?: Layout
   }
-  /** 各屏幕的文件列表（如 bottom-left 的相册图片） */
-  images?: Record<string, string[][]>
+  /** 各屏幕的文件轮播配置（如 bottom-left/bottom-right 的相册卡片栈） */
+  images?: Record<string, ScreenCarousels>
 }
 
 export const POINTS: ResearchPoint[] = [
@@ -57,7 +73,18 @@ export const POINTS: ResearchPoint[] = [
       project: { top: 1482, left: 161, width: 956, height: 375 }
     },
     images: {
-      'bottom-right': [['files/file-1-1.png'], ['files/file-2-1.png', 'files/file-2-2.png']]
+      'bottom-right': [
+        // 展示位 1：3 组（测试一个组件展示多组数据）
+        [
+          { files: ['files/file-1-1.png'], text: 'text-1-1.png' },
+          { files: ['files/file-2-1.png', 'files/file-2-2.png'], text: 'text-1-2.png' }
+        ],
+        // 展示位 2：2 组
+        [
+          { files: ['files/file-2-1.png', 'files/file-2-2.png'], text: 'text-2-1.png' },
+          { files: ['files/file-1-1.png'], text: 'text-2-2.png' }
+        ]
+      ]
     }
   },
   {
@@ -87,9 +114,19 @@ export const POINTS: ResearchPoint[] = [
     },
     images: {
       'bottom-left': [
-        ['files/file-1-1.png'],
-        ['files/file-2-1.png', 'files/file-2-2.png'],
-        ['files/file-3-1.png', 'files/file-3-2.png', 'files/file-3-3.png', 'files/file-3-4.png']
+        [{ files: ['files/file-1-1.png'], text: 'text-1.png' }],
+        [{ files: ['files/file-2-1.png', 'files/file-2-2.png'], text: 'text-2.png' }],
+        [
+          {
+            files: [
+              'files/file-3-1.png',
+              'files/file-3-2.png',
+              'files/file-3-3.png',
+              'files/file-3-4.png'
+            ],
+            text: 'text-3.png'
+          }
+        ]
       ]
     }
   },
@@ -106,9 +143,19 @@ export const POINTS: ResearchPoint[] = [
     },
     images: {
       'bottom-left': [
-        ['files/file-1-1.png'],
-        ['files/file-2-1.png', 'files/file-2-2.png'],
-        ['files/file-3-1.png', 'files/file-3-2.png', 'files/file-3-3.png', 'files/file-3-4.png']
+        [{ files: ['files/file-1-1.png'], text: 'text-1.png' }],
+        [{ files: ['files/file-2-1.png', 'files/file-2-2.png'], text: 'text-2.png' }],
+        [
+          {
+            files: [
+              'files/file-3-1.png',
+              'files/file-3-2.png',
+              'files/file-3-3.png',
+              'files/file-3-4.png'
+            ],
+            text: 'text-3.png'
+          }
+        ]
       ]
     }
   },
