@@ -123,10 +123,10 @@ export const POINTS: ResearchPoint[] = [
     status: 'ongoing',
     map: { top: 439, left: 2220 },
     detail: {
-      zoom: { top: 502, left: 1785, width: 515, height: 515 },
-      needs: { top: 270, left: 480, width: 1071, height: 1535 },
-      project: { top: 273, left: 2351, width: 942, height: 375 },
-      guide: { top: 925, left: 1565, width: 481, height: 213 }
+      zoom: { top: 297, left: 2073, width: 514, height: 514 },
+      needs: { top: 333, left: 655, width: 1071, height: 1535 },
+      project: { top: 1581, left: 1945, width: 1268, height: 287 },
+      guide: { top: 781, left: 1725, width: 481, height: 213 }
     },
     images: {
       'bottom-left': [
