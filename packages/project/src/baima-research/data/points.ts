@@ -47,17 +47,6 @@ export interface ResearchPoint {
 
 export const POINTS: ResearchPoint[] = [
   {
-    id: 'baima-bridge',
-    name: '白马大桥',
-    status: 'done',
-    map: { top: 757, left: 138 },
-    detail: {
-      zoom: { top: 688, left: 0, width: 505, height: 515 },
-      desc: { top: 167, left: 519, width: 1295, height: 950 },
-      project: { top: 1495, left: 154, width: 1453, height: 375 }
-    }
-  },
-  {
     id: 'excavation',
     name: '绿色开挖料',
     status: 'done',
@@ -68,20 +57,7 @@ export const POINTS: ResearchPoint[] = [
       project: { top: 1482, left: 161, width: 956, height: 375 }
     },
     images: {
-      'bottom-right': [['files/file-1-1.png'], ['files/file-2-1.png'], ['files/file-2-2.png']]
-    }
-  },
-  {
-    id: 'slope',
-    name: '高边坡建模',
-    status: 'ongoing',
-    map: { top: 634, left: 1255 },
-    detail: {
-      zoom: { top: 565, left: 1109, width: 513, height: 514 },
-      desc: { top: 946, left: 385, width: 962, height: 599 },
-      project: { top: 239, left: 161, width: 1009, height: 359 },
-      needs: { top: 276, left: 1966, width: 995, height: 1341 },
-      guide: { top: 485, left: 1370, width: 566, height: 82 }
+      'bottom-right': [['files/file-1-1.png'], ['files/file-2-1.png', 'files/file-2-2.png']]
     }
   },
   {
@@ -96,25 +72,6 @@ export const POINTS: ResearchPoint[] = [
       desc3: { top: 569, left: 2199, width: 301, height: 243 },
       project: { top: 267, left: 2565, width: 1025, height: 375 },
       guide: { top: 871, left: 1261, width: 321, height: 81 }
-    }
-  },
-  {
-    id: 'concrete',
-    name: '抗冲磨混凝土',
-    status: 'ongoing',
-    map: { top: 572, left: 1933 },
-    detail: {
-      zoom: { top: 502, left: 1785, width: 515, height: 515 },
-      needs: { top: 270, left: 480, width: 1071, height: 1535 },
-      project: { top: 273, left: 2351, width: 942, height: 375 },
-      guide: { top: 925, left: 1565, width: 481, height: 213 }
-    },
-    images: {
-      'bottom-left': [
-        ['files/file-1-1.png'],
-        ['files/file-2-1.png', 'files/file-2-2.png'],
-        ['files/file-3-1.png', 'files/file-3-2.png', 'files/file-3-3.png', 'files/file-3-4.png']
-      ]
     }
   },
   {
@@ -137,16 +94,46 @@ export const POINTS: ResearchPoint[] = [
     }
   },
   {
-    id: 'turbine',
-    name: '水轮机',
+    id: 'concrete',
+    name: '抗冲磨混凝土',
     status: 'ongoing',
-    map: { top: 915, left: 2814 },
+    map: { top: 572, left: 1933 },
     detail: {
-      zoom: { top: 846, left: 2667, width: 515, height: 515 },
-      desc: { top: 373, left: 2499, width: 667, height: 379 },
-      project: { top: 281, left: 161, width: 909, height: 377 },
-      needs: { top: 318, left: 1169, width: 1292, height: 1219 },
-      guide: { top: 801, left: 2497, width: 429, height: 65 }
+      zoom: { top: 502, left: 1785, width: 515, height: 515 },
+      needs: { top: 270, left: 480, width: 1071, height: 1535 },
+      project: { top: 273, left: 2351, width: 942, height: 375 },
+      guide: { top: 925, left: 1565, width: 481, height: 213 }
+    },
+    images: {
+      'bottom-left': [
+        ['files/file-1-1.png'],
+        ['files/file-2-1.png', 'files/file-2-2.png'],
+        ['files/file-3-1.png', 'files/file-3-2.png', 'files/file-3-3.png', 'files/file-3-4.png']
+      ]
+    }
+  },
+  {
+    id: 'slope',
+    name: '高边坡建模',
+    status: 'ongoing',
+    map: { top: 634, left: 1255 },
+    detail: {
+      zoom: { top: 565, left: 1109, width: 513, height: 514 },
+      desc: { top: 946, left: 385, width: 962, height: 599 },
+      project: { top: 239, left: 161, width: 1009, height: 359 },
+      needs: { top: 276, left: 1966, width: 995, height: 1341 },
+      guide: { top: 485, left: 1370, width: 566, height: 82 }
+    }
+  },
+  {
+    id: 'baima-bridge',
+    name: '白马大桥',
+    status: 'done',
+    map: { top: 757, left: 138 },
+    detail: {
+      zoom: { top: 688, left: 0, width: 505, height: 515 },
+      desc: { top: 167, left: 519, width: 1295, height: 950 },
+      project: { top: 1495, left: 154, width: 1453, height: 375 }
     }
   },
   {
@@ -160,6 +147,19 @@ export const POINTS: ResearchPoint[] = [
       needs: { top: 257, left: 464, width: 1155, height: 1591 },
       project: { top: 595, left: 1650, width: 776, height: 375 },
       guide: { top: 1520, left: 1672, width: 819, height: 304 }
+    }
+  },
+  {
+    id: 'turbine',
+    name: '水轮机',
+    status: 'ongoing',
+    map: { top: 915, left: 2814 },
+    detail: {
+      zoom: { top: 846, left: 2667, width: 515, height: 515 },
+      desc: { top: 373, left: 2499, width: 667, height: 379 },
+      project: { top: 281, left: 161, width: 909, height: 377 },
+      needs: { top: 318, left: 1169, width: 1292, height: 1219 },
+      guide: { top: 801, left: 2497, width: 429, height: 65 }
     }
   }
 ]

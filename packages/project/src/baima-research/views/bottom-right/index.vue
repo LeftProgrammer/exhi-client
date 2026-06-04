@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch, type Ref } from 'vue'
 import { resolvePkgUrl } from '@shared/utils/url'
 import { useScreenSync, getDebugPoint } from '../../composables/useScreenSync'
 import { getPoint } from '../../data/points'
@@ -19,6 +19,92 @@ const text = resolvePkgUrl(`common/${SCREEN}-text.png`)
 
 function asset(name: string) {
   return resolvePkgUrl(`points/${activeId.value}/${SCREEN}/${name}`)
+}
+
+// excavation 相册当前活跃卡片索引
+const activeCard1 = ref(1)
+const activeCard2 = ref(1)
+const activeCard3 = ref(1)
+
+const imageList = computed(() => point.value?.images?.['bottom-right'] ?? [])
+const list1 = computed(() => imageList.value[0] ?? [])
+const list2 = computed(() => imageList.value[1] ?? [])
+const list3 = computed(() => imageList.value[2] ?? [])
+
+watch(
+  point,
+  (p) => {
+    const imgs = p?.images?.['bottom-right'] ?? []
+    activeCard1.value = (imgs[0]?.length ?? 0) >= 2 ? 2 : 1
+    activeCard2.value = (imgs[1]?.length ?? 0) >= 2 ? 2 : 1
+    activeCard3.value = (imgs[2]?.length ?? 0) >= 2 ? 2 : 1
+  },
+  { immediate: true }
+)
+
+function cardOffset(i: number, active: number) {
+  return i - active
+}
+
+function createTouchHandlers(ref: Ref<number>, totalRef: { value: number }) {
+  let startX = 0
+  let isDragging = false
+  let stackEl: HTMLElement | null = null
+
+  return {
+    onTouchStart(e: TouchEvent) {
+      startX = e.touches[0].clientX
+      isDragging = true
+      stackEl = e.currentTarget as HTMLElement
+      stackEl.classList.add('is-dragging')
+    },
+    onTouchMove(e: TouchEvent) {
+      if (!isDragging || !stackEl) return
+      e.preventDefault()
+      const delta = e.touches[0].clientX - startX
+      stackEl.style.transform = `translateX(${delta})`
+    },
+    onTouchEnd(e: TouchEvent) {
+      if (!isDragging || !stackEl) return
+      isDragging = false
+      stackEl.classList.remove('is-dragging')
+      stackEl.style.transform = ''
+
+      const delta = e.changedTouches[0].clientX - startX
+      const threshold = 80
+      if (delta > threshold && ref.value < totalRef.value) {
+        ref.value = ref.value + 1
+      } else if (delta < -threshold && ref.value > 1) {
+        ref.value = ref.value - 1
+      }
+    }
+  }
+}
+
+const touch1 = createTouchHandlers(activeCard1, {
+  get value() {
+    return list1.value.length
+  }
+})
+const touch2 = createTouchHandlers(activeCard2, {
+  get value() {
+    return list2.value.length
+  }
+})
+const touch3 = createTouchHandlers(activeCard3, {
+  get value() {
+    return list3.value.length
+  }
+})
+
+function onCardClick1(i: number) {
+  if (i !== activeCard1.value) activeCard1.value = i
+}
+function onCardClick2(i: number) {
+  if (i !== activeCard2.value) activeCard2.value = i
+}
+function onCardClick3(i: number) {
+  if (i !== activeCard3.value) activeCard3.value = i
 }
 </script>
 
@@ -74,16 +160,63 @@ function asset(name: string) {
       </div>
     </transition>
 
-    <!-- excavation：研究成果（证书展示） -->
+    <!-- excavation：研究成果（证书展示，卡片栈） -->
     <transition name="fade">
       <div
         v-if="activeId === 'excavation' && point?.detail"
         class="br__content br__content--excavation"
       >
         <img class="br__excavation ex-title" :src="asset('title.png')" alt="" />
-        <img class="br__excavation ex-frame" :src="asset('file-frame.png')" alt="" />
-        <img class="br__excavation ex-text-1" :src="asset('text-1.png')" alt="" />
-        <img class="br__excavation ex-text-2" :src="asset('text-2.png')" alt="" />
+        <div class="br__excavation ex-block ex-block--1">
+          <div
+            class="ex-stack"
+            @touchstart="touch1.onTouchStart"
+            @touchmove="touch1.onTouchMove"
+            @touchend="touch1.onTouchEnd"
+          >
+            <template v-if="list1.length">
+              <div
+                v-for="(file, idx) in list1"
+                :key="idx"
+                class="ex-card-wrap"
+                :class="`ex-card-wrap--offset-${cardOffset(idx + 1, activeCard1)}`"
+                @click="onCardClick1(idx + 1)"
+              >
+                <img class="ex-card-frame" :src="asset('file-frame.png')" alt="" />
+                <img class="ex-card-content" :src="asset(file)" alt="" />
+              </div>
+            </template>
+            <div v-else class="ex-card-wrap ex-card-wrap--offset-0">
+              <img class="ex-card-frame" :src="asset('file-frame.png')" alt="" />
+            </div>
+          </div>
+          <img class="ex-text" :src="asset('text-1.png')" alt="" />
+        </div>
+        <div class="br__excavation ex-block ex-block--2">
+          <div
+            class="ex-stack"
+            @touchstart="touch2.onTouchStart"
+            @touchmove="touch2.onTouchMove"
+            @touchend="touch2.onTouchEnd"
+          >
+            <template v-if="list2.length">
+              <div
+                v-for="(file, idx) in list2"
+                :key="idx"
+                class="ex-card-wrap"
+                :class="`ex-card-wrap--offset-${cardOffset(idx + 1, activeCard2)}`"
+                @click="onCardClick2(idx + 1)"
+              >
+                <img class="ex-card-frame" :src="asset('file-frame.png')" alt="" />
+                <img class="ex-card-content" :src="asset(file)" alt="" />
+              </div>
+            </template>
+            <div v-else class="ex-card-wrap ex-card-wrap--offset-0">
+              <img class="ex-card-frame" :src="asset('file-frame.png')" alt="" />
+            </div>
+          </div>
+          <img class="ex-text" :src="asset('text-2.png')" alt="" />
+        </div>
       </div>
     </transition>
 
@@ -289,9 +422,9 @@ function asset(name: string) {
 
       .br-cc-content {
         left: d.w(57);
-        top: d.h(577);
+        top: d.h(524);
         width: d.w(3700);
-        height: d.h(1583);
+        height: d.h(1636);
       }
     }
 
@@ -310,25 +443,124 @@ function asset(name: string) {
         height: d.h(149);
       }
 
-      .ex-frame {
-        left: d.w(200);
-        top: d.h(450);
-        width: d.w(1600);
-        height: d.h(1300);
-      }
+      .ex-block {
+        position: absolute;
+        transition: transform 0.3s ease;
 
-      .ex-text-1 {
-        left: d.w(200);
-        top: d.h(1800);
-        width: d.w(1600);
-        height: d.h(120);
-      }
+        &--1 {
+          left: d.w(681);
+          top: d.h(563);
+          width: d.w(868);
+          height: d.h(1195);
+        }
 
-      .ex-text-2 {
-        left: d.w(2000);
-        top: d.h(1800);
-        width: d.w(1600);
-        height: d.h(120);
+        &--2 {
+          left: d.w(2312);
+          top: d.h(563);
+          width: d.w(867);
+          height: d.h(1195);
+        }
+
+        &:hover {
+          z-index: 10;
+        }
+
+        .ex-stack {
+          position: absolute;
+          left: d.w(323);
+          top: 0;
+          width: d.w(644);
+          height: d.h(890);
+          z-index: 1;
+
+          &.is-dragging .ex-card-wrap {
+            transition: none !important;
+          }
+        }
+
+        .ex-card-wrap {
+          position: absolute;
+          width: 96%;
+          height: 96%;
+          transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+          cursor: pointer;
+
+          &--offset-0 {
+            transform: translateX(0) scale(1);
+            z-index: 5;
+            opacity: 1;
+          }
+
+          &--offset--1 {
+            transform: translateX(-38%) scale(0.88);
+            z-index: 4;
+            opacity: 0.55;
+          }
+
+          &--offset-1 {
+            transform: translateX(38%) scale(0.88);
+            z-index: 4;
+            opacity: 0.55;
+          }
+
+          &--offset--2,
+          &--offset--3,
+          &--offset--4 {
+            transform: translateX(-55%) translateY(25%) scale(0.5);
+            z-index: 1;
+            opacity: 0;
+          }
+
+          &--offset-2,
+          &--offset-3,
+          &--offset-4 {
+            transform: translateX(55%) translateY(25%) scale(0.5);
+            z-index: 1;
+            opacity: 0;
+          }
+
+          .ex-card-frame {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transition: inherit;
+            z-index: 1;
+          }
+
+          .ex-card-content {
+            position: absolute;
+            inset: 0;
+            width: 96%;
+            height: 96%;
+            margin: auto;
+            object-fit: contain;
+            transition: inherit;
+            z-index: 2;
+          }
+
+          &--offset-0 {
+            .ex-card-frame {
+              filter: drop-shadow(0 d.h(6) d.w(20) rgba(0, 0, 0, 0.55));
+            }
+          }
+
+          &--offset--1,
+          &--offset-1 {
+            filter: brightness(0.8);
+          }
+        }
+
+        .ex-text {
+          position: absolute;
+          left: 0;
+          bottom: d.h(20);
+          width: 100%;
+          height: d.h(120);
+          object-fit: contain;
+          z-index: 10;
+        }
       }
     }
 
@@ -341,38 +573,38 @@ function asset(name: string) {
       }
 
       .nav-title {
-        left: d.w(274);
+        left: d.w(273);
         top: d.h(210);
         width: d.w(1624);
         height: d.h(149);
       }
 
       .nav-1 {
-        left: d.w(80);
-        top: d.h(420);
-        width: d.w(1800);
-        height: d.h(850);
+        left: d.w(255);
+        top: d.h(546);
+        width: d.w(1789);
+        height: d.h(912);
       }
 
       .nav-2 {
-        left: d.w(1920);
-        top: d.h(420);
-        width: d.w(1800);
-        height: d.h(850);
+        left: d.w(1827);
+        top: d.h(546);
+        width: d.w(1789);
+        height: d.h(912);
       }
 
       .nav-3 {
-        left: d.w(80);
-        top: d.h(1300);
-        width: d.w(1800);
-        height: d.h(850);
+        left: d.w(255);
+        top: d.h(1361);
+        width: d.w(1789);
+        height: d.h(543);
       }
 
       .nav-4 {
-        left: d.w(1920);
-        top: d.h(1300);
-        width: d.w(1800);
-        height: d.h(850);
+        left: d.w(1827);
+        top: d.h(1361);
+        width: d.w(1789);
+        height: d.h(543);
       }
     }
 
@@ -408,17 +640,17 @@ function asset(name: string) {
       }
 
       .br-bs-title {
-        left: d.w(274);
-        top: d.h(210);
+        left: d.w(275);
+        top: d.h(211);
         width: d.w(1624);
         height: d.h(149);
       }
 
       .br-bs-content {
-        left: d.w(57);
-        top: d.h(577);
-        width: d.w(3700);
-        height: d.h(1583);
+        left: d.w(178);
+        top: d.h(516);
+        width: d.w(3497);
+        height: d.h(1202);
       }
     }
   }
@@ -464,10 +696,6 @@ function asset(name: string) {
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 8;
-    padding: d.h(40) d.w(80);
-    background: rgba(2, 6, 23, 0.8);
-    border: 1px solid rgba(0, 212, 255, 0.3);
-    border-radius: d.w(12);
     color: #00d4ff;
     font-size: d.h(56);
   }

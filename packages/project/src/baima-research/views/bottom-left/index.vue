@@ -64,7 +64,7 @@ function createTouchHandlers(ref: Ref<number>, totalRef: { value: number }) {
       if (!isDragging || !stackEl) return
       e.preventDefault()
       const delta = e.touches[0].clientX - startX
-      stackEl.style.transform = `translateX(${delta}px)`
+      stackEl.style.transform = `translateX(${delta})`
     },
     onTouchEnd(e: TouchEvent) {
       if (!isDragging || !stackEl) return
@@ -793,31 +793,31 @@ function onCardClick3(i: number) {
       }
 
       .ex-title {
-        left: d.w(309);
-        top: d.h(238);
+        left: d.w(308);
+        top: d.h(237);
         width: d.w(1821);
         height: d.h(167);
       }
 
       .ex-top {
-        left: d.w(131);
-        top: d.h(500);
-        width: d.w(3580);
-        height: d.h(700);
+        left: d.w(292);
+        top: d.h(495);
+        width: d.w(3372);
+        height: d.h(632);
       }
 
       .ex-bottom-1 {
-        left: d.w(131);
-        top: d.h(1250);
-        width: d.w(1750);
-        height: d.h(600);
+        left: d.w(295);
+        top: d.h(1182);
+        width: d.w(1474);
+        height: d.h(820);
       }
 
       .ex-bottom-2 {
-        left: d.w(1920);
-        top: d.h(1250);
-        width: d.w(1750);
-        height: d.h(600);
+        left: d.w(1807);
+        top: d.h(1182);
+        width: d.w(1623);
+        height: d.h(767);
       }
     }
 
@@ -830,31 +830,31 @@ function onCardClick3(i: number) {
       }
 
       .nav-title {
-        left: d.w(309);
-        top: d.h(238);
-        width: d.w(1821);
+        left: d.w(183);
+        top: d.h(237);
+        width: d.w(3513);
         height: d.h(167);
       }
 
       .nav-top {
-        left: d.w(131);
-        top: d.h(450);
-        width: d.w(3580);
-        height: d.h(600);
+        left: d.w(188);
+        top: d.h(498);
+        width: d.w(3500);
+        height: d.h(775);
       }
 
       .nav-bottom {
-        left: d.w(131);
-        top: d.h(1100);
-        width: d.w(3580);
-        height: d.h(500);
+        left: d.w(791);
+        top: d.h(1318);
+        width: d.w(2839);
+        height: d.h(683);
       }
 
       .nav-bottom-title {
-        left: d.w(131);
-        top: d.h(1650);
-        width: d.w(3580);
-        height: d.h(120);
+        left: d.w(0);
+        top: d.h(1618);
+        width: d.w(727);
+        height: d.h(113);
       }
     }
 
@@ -867,24 +867,24 @@ function onCardClick3(i: number) {
       }
 
       .tr-title {
-        left: d.w(309);
-        top: d.h(238);
+        left: d.w(308);
+        top: d.h(200);
         width: d.w(1821);
         height: d.h(167);
       }
 
       .tr-1 {
-        left: d.w(131);
-        top: d.h(500);
-        width: d.w(1750);
-        height: d.h(1200);
+        left: d.w(313);
+        top: d.h(641);
+        width: d.w(3240);
+        height: d.h(987);
       }
 
       .tr-2 {
-        left: d.w(1920);
-        top: d.h(500);
-        width: d.w(1750);
-        height: d.h(1200);
+        left: d.w(1808);
+        top: d.h(758);
+        width: d.w(1490);
+        height: d.h(753);
       }
     }
 
@@ -898,30 +898,30 @@ function onCardClick3(i: number) {
 
       .bl-bs-title {
         left: d.w(309);
-        top: d.h(238);
+        top: d.h(200);
         width: d.w(1821);
         height: d.h(167);
       }
 
       .bl-bs-1 {
-        left: d.w(131);
-        top: d.h(570);
-        width: d.w(1219);
-        height: d.h(1129);
+        left: d.w(258);
+        top: d.h(471);
+        width: d.w(3285);
+        height: d.h(440);
       }
 
       .bl-bs-2 {
-        left: d.w(1243);
-        top: d.h(570);
-        width: d.w(1430);
-        height: d.h(1129);
+        left: d.w(258);
+        top: d.h(1026);
+        width: d.w(3285);
+        height: d.h(440);
       }
 
       .bl-bs-3 {
-        left: d.w(2526);
-        top: d.h(570);
-        width: d.w(1219);
-        height: d.h(1129);
+        left: d.w(258);
+        top: d.h(1581);
+        width: d.w(3285);
+        height: d.h(440);
       }
     }
   }
@@ -968,10 +968,6 @@ function onCardClick3(i: number) {
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 8;
-    padding: d.h(40) d.w(80);
-    background: rgba(2, 6, 23, 0.8);
-    border: 1px solid rgba(0, 212, 255, 0.3);
-    border-radius: d.w(12);
     color: #00d4ff;
     font-size: d.h(56);
   }

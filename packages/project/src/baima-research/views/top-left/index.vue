@@ -147,6 +147,7 @@ function asset(name: string) {
         v-if="activeId === 'excavation' && point?.detail"
         class="tl__content tl__content--excavation"
       >
+        <img class="tl__excavation ex-top-title" :src="asset('top-title.png')" alt="" />
         <img class="tl__excavation ex-top-content" :src="asset('top-content.png')" alt="" />
         <img class="tl__excavation ex-top-bg" :src="asset('top-right-bg.png')" alt="" />
         <img class="tl__excavation ex-bottom-title" :src="asset('bottom-title.png')" alt="" />
@@ -203,12 +204,12 @@ function asset(name: string) {
         <div class="tl__blasting bl-video-wrap" @click="toggleVideo">
           <video
             ref="videoRef"
-            class="tl__video-player"
+            class="bl-video-player"
             :src="asset('video.mp4')"
             loop
             muted
           ></video>
-          <img v-show="isPaused" class="tl__video-pause" :src="asset('play-btn.png')" alt="" />
+          <img v-show="isPaused" class="bl-video-pause" :src="asset('play-btn.png')" alt="" />
         </div>
       </div>
     </transition>
@@ -512,58 +513,58 @@ function asset(name: string) {
 
       .cc-top-title {
         left: d.w(171);
-        top: d.h(182);
+        top: d.h(187);
         width: d.w(1024);
         height: d.h(96);
       }
 
       .cc-top-1 {
-        left: d.w(135);
-        top: d.h(380);
-        width: d.w(1144);
-        height: d.h(435);
+        left: d.w(134);
+        top: d.h(384);
+        width: d.w(1124);
+        height: d.h(446);
       }
 
       .cc-top-2 {
-        left: d.w(1289);
-        top: d.h(380);
-        width: d.w(1152);
-        height: d.h(435);
+        left: d.w(1288);
+        top: d.h(384);
+        width: d.w(1132);
+        height: d.h(446);
       }
 
       .cc-top-3 {
-        left: d.w(2451);
-        top: d.h(380);
-        width: d.w(1152);
-        height: d.h(435);
+        left: d.w(2450);
+        top: d.h(384);
+        width: d.w(1130);
+        height: d.h(446);
       }
 
       .cc-bl-title {
-        left: d.w(135);
-        top: d.h(950);
-        width: d.w(1144);
-        height: d.h(80);
+        left: d.w(170);
+        top: d.h(907);
+        width: d.w(1024);
+        height: d.h(96);
       }
 
       .cc-bl-content {
-        left: d.w(135);
-        top: d.h(1050);
-        width: d.w(1144);
-        height: d.h(550);
+        left: d.w(157);
+        top: d.h(1079);
+        width: d.w(1687);
+        height: d.h(865);
       }
 
       .cc-br-title {
-        left: d.w(1289);
-        top: d.h(950);
-        width: d.w(1152);
-        height: d.h(80);
+        left: d.w(1907);
+        top: d.h(907);
+        width: d.w(1024);
+        height: d.h(96);
       }
 
       .cc-br-content {
-        left: d.w(1289);
-        top: d.h(1050);
-        width: d.w(1152);
-        height: d.h(550);
+        left: d.w(1922);
+        top: d.h(1079);
+        width: d.w(1687);
+        height: d.h(865);
       }
     }
 
@@ -575,60 +576,67 @@ function asset(name: string) {
         object-fit: contain;
       }
 
+      .ex-top-title {
+        left: d.w(171);
+        top: d.h(184);
+        width: d.w(1024);
+        height: d.h(96);
+      }
+
       .ex-top-content {
-        left: d.w(135);
-        top: d.h(182);
-        width: d.w(1680);
-        height: d.h(650);
+        left: d.w(194);
+        top: d.h(335);
+        width: d.w(2050);
+        height: d.h(584);
       }
 
       .ex-top-bg {
-        left: d.w(1915);
-        top: d.h(182);
-        width: d.w(1695);
-        height: d.h(650);
+        left: d.w(2428);
+        top: d.h(259);
+        width: d.w(1076);
+        height: d.h(781);
       }
 
       .ex-bottom-title {
-        left: d.w(135);
-        top: d.h(880);
+        left: d.w(171);
+        top: d.h(984);
         width: d.w(1024);
         height: d.h(96);
       }
 
       .ex-bottom-1 {
         left: d.w(135);
-        top: d.h(1000);
-        width: d.w(600);
-        height: d.h(400);
+        top: d.h(1130);
+        width: d.w(1258);
+        height: d.h(403);
       }
 
       .ex-bottom-2 {
-        left: d.w(760);
-        top: d.h(1000);
-        width: d.w(600);
-        height: d.h(400);
+        left: d.w(1435);
+        top: d.h(1130);
+        width: d.w(1258);
+        height: d.h(403);
       }
 
       .ex-bottom-3 {
-        left: d.w(1385);
-        top: d.h(1000);
-        width: d.w(600);
-        height: d.h(400);
+        left: d.w(135);
+        top: d.h(1575);
+        width: d.w(1258);
+        height: d.h(403);
       }
 
       .ex-bottom-4 {
-        left: d.w(2010);
-        top: d.h(1000);
-        width: d.w(600);
-        height: d.h(400);
+        left: d.w(1435);
+        top: d.h(1576);
+        width: d.w(1258);
+        height: d.h(403);
       }
 
       .ex-bottom-5 {
-        left: d.w(2635);
-        top: d.h(1000);
-        width: d.w(600);
-        height: d.h(400);
+        left: d.w(2791);
+        top: d.h(1215);
+        width: d.w(815);
+        height: d.h(594);
       }
     }
 
@@ -641,73 +649,73 @@ function asset(name: string) {
       }
 
       .nav-lt-title {
-        left: d.w(135);
-        top: d.h(182);
-        width: d.w(1144);
-        height: d.h(80);
+        left: d.w(171);
+        top: d.h(85);
+        width: d.w(1024);
+        height: d.h(96);
       }
 
       .nav-lt-content {
-        left: d.w(135);
-        top: d.h(300);
-        width: d.w(1144);
-        height: d.h(580);
+        left: d.w(161);
+        top: d.h(229);
+        width: d.w(1692);
+        height: d.h(412);
       }
 
       .nav-lb-title {
-        left: d.w(135);
-        top: d.h(920);
-        width: d.w(1144);
-        height: d.h(80);
+        left: d.w(171);
+        top: d.h(682);
+        width: d.w(1024);
+        height: d.h(96);
       }
 
       .nav-lb-1 {
-        left: d.w(135);
-        top: d.h(1020);
-        width: d.w(1144);
-        height: d.h(250);
+        left: d.w(170);
+        top: d.h(862);
+        width: d.w(1675);
+        height: d.h(466);
       }
 
       .nav-lb-2 {
-        left: d.w(135);
-        top: d.h(1290);
-        width: d.w(1144);
-        height: d.h(250);
+        left: d.w(170);
+        top: d.h(1408);
+        width: d.w(1675);
+        height: d.h(466);
       }
 
       .nav-lb-3 {
-        left: d.w(135);
-        top: d.h(1560);
-        width: d.w(1144);
-        height: d.h(250);
+        left: d.w(1921);
+        top: d.h(820);
+        width: d.w(1674);
+        height: d.h(400);
       }
 
       .nav-lb-4 {
-        left: d.w(1289);
-        top: d.h(920);
-        width: d.w(1152);
-        height: d.h(250);
+        left: d.w(1921);
+        top: d.h(1280);
+        width: d.w(1674);
+        height: d.h(370);
       }
 
       .nav-lb-5 {
-        left: d.w(1289);
-        top: d.h(1190);
-        width: d.w(1152);
-        height: d.h(250);
+        left: d.w(1921);
+        top: d.h(1692);
+        width: d.w(1675);
+        height: d.h(358);
       }
 
       .nav-rt-title {
-        left: d.w(1289);
-        top: d.h(182);
-        width: d.w(1152);
-        height: d.h(80);
+        left: d.w(1964);
+        top: d.h(86);
+        width: d.w(1024);
+        height: d.h(96);
       }
 
       .nav-rt-content {
-        left: d.w(1289);
-        top: d.h(300);
-        width: d.w(1152);
-        height: d.h(580);
+        left: d.w(1976);
+        top: d.h(253);
+        width: d.w(1610);
+        height: d.h(374);
       }
     }
 
@@ -720,24 +728,24 @@ function asset(name: string) {
       }
 
       .tr-title {
-        left: d.w(171);
-        top: d.h(182);
+        left: d.w(170);
+        top: d.h(379);
         width: d.w(1024);
         height: d.h(96);
       }
 
       .tr-1 {
-        left: d.w(135);
-        top: d.h(380);
-        width: d.w(1750);
-        height: d.h(800);
+        left: d.w(216);
+        top: d.h(587);
+        width: d.w(1679);
+        height: d.h(1000);
       }
 
       .tr-2 {
-        left: d.w(1920);
-        top: d.h(380);
-        width: d.w(1750);
-        height: d.h(800);
+        left: d.w(1945);
+        top: d.h(588);
+        width: d.w(1676);
+        height: d.h(997);
       }
     }
 
@@ -751,66 +759,89 @@ function asset(name: string) {
 
       .bl-title {
         left: d.w(171);
-        top: d.h(182);
+        top: d.h(183);
         width: d.w(1024);
         height: d.h(96);
       }
 
       .bl-ct-title-1 {
-        left: d.w(135);
-        top: d.h(380);
-        width: d.w(1144);
-        height: d.h(80);
+        left: d.w(294);
+        top: d.h(423);
+        width: d.w(903);
+        height: d.h(100);
       }
 
       .bl-ct-1 {
-        left: d.w(135);
-        top: d.h(480);
-        width: d.w(1144);
-        height: d.h(435);
+        left: d.w(219);
+        top: d.h(483);
+        width: d.w(1054);
+        height: d.h(1545);
       }
 
       .bl-ct-title-2 {
-        left: d.w(1289);
-        top: d.h(380);
-        width: d.w(1152);
-        height: d.h(80);
+        left: d.w(1471);
+        top: d.h(423);
+        width: d.w(903);
+        height: d.h(100);
       }
 
       .bl-ct-2 {
-        left: d.w(1289);
-        top: d.h(480);
-        width: d.w(1152);
-        height: d.h(435);
+        left: d.w(1397);
+        top: d.h(483);
+        width: d.w(1053);
+        height: d.h(1545);
       }
 
       .bl-ct-title-3 {
-        left: d.w(2451);
-        top: d.h(380);
-        width: d.w(1152);
-        height: d.h(80);
+        left: d.w(2649);
+        top: d.h(423);
+        width: d.w(903);
+        height: d.h(100);
       }
 
       .bl-ct-3 {
-        left: d.w(2451);
-        top: d.h(480);
-        width: d.w(1152);
-        height: d.h(435);
+        left: d.w(2574);
+        top: d.h(483);
+        width: d.w(1054);
+        height: d.h(1545);
       }
 
       .bl-video-frame {
-        left: d.w(1289);
-        top: d.h(950);
-        width: d.w(1152);
-        height: d.h(650);
+        left: d.w(2642);
+        top: d.h(1150);
+        width: d.w(923);
+        height: d.h(520);
+        z-index: 2;
       }
 
       .bl-video-wrap {
-        left: d.w(1289);
-        top: d.h(950);
-        width: d.w(1152);
-        height: d.h(650);
+        left: d.w(2642);
+        top: d.h(1150);
+        width: d.w(923);
+        height: d.h(520);
         cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1;
+      }
+
+      .bl-video-player {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+
+      .bl-video-pause {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: d.w(187);
+        height: d.h(187);
+        object-fit: contain;
+        pointer-events: none;
+        z-index: 3;
       }
     }
   }
@@ -908,10 +939,6 @@ function asset(name: string) {
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 8;
-    padding: d.h(40) d.w(80);
-    background: rgba(2, 6, 23, 0.8);
-    border: 1px solid rgba(0, 212, 255, 0.3);
-    border-radius: d.w(12);
     color: #00d4ff;
     font-size: d.h(56);
   }

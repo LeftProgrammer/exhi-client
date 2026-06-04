@@ -252,17 +252,17 @@ function asset(name: string) {
       }
 
       .tr-cc-title {
-        left: d.w(308);
-        top: d.h(237);
+        left: d.w(307);
+        top: d.h(238);
         width: d.w(1791);
         height: d.h(166);
       }
 
       .tr-cc-content {
-        left: d.w(207);
-        top: d.h(604);
-        width: d.w(3494);
-        height: d.h(1259);
+        left: d.w(289);
+        top: d.h(513);
+        width: d.w(3401);
+        height: d.h(1422);
       }
     }
 
@@ -275,38 +275,38 @@ function asset(name: string) {
       }
 
       .ex-title {
-        left: d.w(274);
-        top: d.h(210);
-        width: d.w(1624);
-        height: d.h(149);
+        left: d.w(307);
+        top: d.h(238);
+        width: d.w(1791);
+        height: d.h(166);
       }
 
       .ex-1 {
-        left: d.w(80);
-        top: d.h(450);
-        width: d.w(870);
-        height: d.h(1300);
+        left: d.w(161);
+        top: d.h(634);
+        width: d.w(774);
+        height: d.h(1000);
       }
 
       .ex-2 {
-        left: d.w(990);
-        top: d.h(450);
-        width: d.w(870);
-        height: d.h(1300);
+        left: d.w(1078);
+        top: d.h(634);
+        width: d.w(773);
+        height: d.h(1000);
       }
 
       .ex-3 {
-        left: d.w(1900);
-        top: d.h(450);
-        width: d.w(870);
-        height: d.h(1300);
+        left: d.w(1996);
+        top: d.h(634);
+        width: d.w(774);
+        height: d.h(1000);
       }
 
       .ex-4 {
-        left: d.w(2810);
-        top: d.h(450);
-        width: d.w(870);
-        height: d.h(1300);
+        left: d.w(2913);
+        top: d.h(634);
+        width: d.w(773);
+        height: d.h(1000);
       }
     }
 
@@ -319,17 +319,17 @@ function asset(name: string) {
       }
 
       .nav-title {
-        left: d.w(308);
+        left: d.w(307);
         top: d.h(237);
         width: d.w(1791);
         height: d.h(166);
       }
 
       .nav-content {
-        left: d.w(207);
-        top: d.h(604);
-        width: d.w(3494);
-        height: d.h(1259);
+        left: d.w(246);
+        top: d.h(637);
+        width: d.w(3389);
+        height: d.h(1047);
       }
     }
 
@@ -343,51 +343,51 @@ function asset(name: string) {
 
       .tr-title {
         left: d.w(308);
-        top: d.h(237);
+        top: d.h(238);
         width: d.w(1791);
         height: d.h(166);
       }
 
       .tr-1 {
-        left: d.w(80);
-        top: d.h(480);
-        width: d.w(1200);
-        height: d.h(350);
+        left: d.w(1459);
+        top: d.h(433);
+        width: d.w(2381);
+        height: d.h(347);
       }
 
       .tr-2 {
-        left: d.w(1320);
-        top: d.h(480);
-        width: d.w(1200);
-        height: d.h(350);
+        left: d.w(604);
+        top: d.h(693);
+        width: d.w(2800);
+        height: d.h(347);
       }
 
       .tr-3 {
-        left: d.w(2560);
-        top: d.h(480);
-        width: d.w(1200);
-        height: d.h(350);
+        left: d.w(1499);
+        top: d.h(960);
+        width: d.w(2341);
+        height: d.h(348);
       }
 
       .tr-4 {
-        left: d.w(80);
-        top: d.h(860);
-        width: d.w(1200);
-        height: d.h(350);
+        left: d.w(342);
+        top: d.h(1210);
+        width: d.w(2800);
+        height: d.h(348);
       }
 
       .tr-5 {
-        left: d.w(1320);
-        top: d.h(860);
-        width: d.w(1200);
-        height: d.h(350);
+        left: d.w(1639);
+        top: d.h(1468);
+        width: d.w(2201);
+        height: d.h(347);
       }
 
       .tr-6 {
-        left: d.w(2560);
-        top: d.h(860);
-        width: d.w(1200);
-        height: d.h(350);
+        left: d.w(787);
+        top: d.h(1728);
+        width: d.w(2800);
+        height: d.h(347);
       }
     }
 
@@ -407,10 +407,10 @@ function asset(name: string) {
       }
 
       .tr-bs-content {
-        left: d.w(207);
-        top: d.h(604);
-        width: d.w(3494);
-        height: d.h(1259);
+        left: d.w(464);
+        top: d.h(749);
+        width: d.w(3026);
+        height: d.h(799);
       }
     }
   }
@@ -441,10 +441,6 @@ function asset(name: string) {
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 8;
-    padding: d.h(40) d.w(80);
-    background: rgba(2, 6, 23, 0.8);
-    border: 1px solid rgba(0, 212, 255, 0.3);
-    border-radius: d.w(12);
     color: #00d4ff;
     font-size: d.h(56);
   }
