@@ -1,0 +1,10 @@
+{
+  "scenes": {
+    "app": {
+      "type": "web",
+      "src": "contents/baima-zhineng/index.html",
+      "allowInteraction": true,
+      "injectBridge": true
+    }
+  }
+}

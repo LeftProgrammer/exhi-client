@@ -24,7 +24,13 @@ const MIME: Record<string, string> = {
   '.woff2': 'font/woff2'
 }
 
-const MPA_ENTRIES = ['baima-duowei', 'baima-yushui-leaders', 'baima-milestone', 'baima-research']
+const MPA_ENTRIES = [
+  'baima-duowei',
+  'baima-yushui-leaders',
+  'baima-milestone',
+  'baima-research',
+  'baima-zhineng'
+]
 
 /**
  * /baima-duowei 不带尾部斜杠时 302 重定向到 /baima-duowei/
@@ -116,7 +122,8 @@ export default defineConfig(({ command }) => ({
         'baima-yushui-leaders': resolve(__dirname, 'src/baima-yushui-leaders/index.html'),
         'baima-milestone': resolve(__dirname, 'src/baima-milestone/index.html'),
         'baima-duowei': resolve(__dirname, 'src/baima-duowei/index.html'),
-        'baima-research': resolve(__dirname, 'src/baima-research/index.html')
+        'baima-research': resolve(__dirname, 'src/baima-research/index.html'),
+        'baima-zhineng': resolve(__dirname, 'src/baima-zhineng/index.html')
       }
     }
   },
@@ -127,6 +134,7 @@ export default defineConfig(({ command }) => ({
       '@baima-milestone': resolve(__dirname, 'src/baima-milestone'),
       '@baima-duowei': resolve(__dirname, 'src/baima-duowei'),
       '@baima-research': resolve(__dirname, 'src/baima-research'),
+      '@baima-zhineng': resolve(__dirname, 'src/baima-zhineng'),
       '@assets': resolve(__dirname, 'deploy/baima-yushui-leaders/contents')
     }
   }
