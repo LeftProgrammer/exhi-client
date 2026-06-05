@@ -3,7 +3,7 @@ import EntryCard from '@baima-yushui/components/EntryCard.vue'
 import { usePageLeave } from '@shared/composables/usePageLeave'
 import { resolvePkgUrl } from '@shared/utils/url'
 
-const bgVideoUrl = resolvePkgUrl('shared/bg.mp4')
+const bgVideoUrl = resolvePkgUrl('common/bg.mp4')
 const headerBgUrl = resolvePkgUrl('home/header-bg.png')
 const headerTextUrl = resolvePkgUrl('home/header-title.png')
 const cardBgYushui = resolvePkgUrl('home/card-bg-yushui.png')
@@ -74,9 +74,6 @@ function enterSection(sectionId: 'yushui' | 'leaders') {
 </template>
 
 <style scoped lang="scss">
-// @use '@shared/styles/tokens' as t;
-// @use '@shared/styles/transitions' as fx;
-
 .home {
   position: relative;
   width: 100vw;
@@ -157,18 +154,6 @@ function enterSection(sectionId: 'yushui' | 'leaders') {
   opacity: 0;
   animation: home-title-enter 0.8s cubic-bezier(0.25, 1, 0.5, 1) 0.4s both;
 }
-
-/* 扫光特效层：从中心向两侧扫过，半透明掠过文字 */
-// .home__header-shine {
-//   position: absolute;
-//   top: 0;
-//   left: 0;
-//   right: 0;
-//   height: 100%;
-//   z-index: 3;
-//   pointer-events: none;
-//   @include fx.auto-shine-from-center($duration: 1.4s, $interval: 5s, $width: 25%);
-// }
 
 /* 卡片容器：flex 居中布局 */
 .home__cards {

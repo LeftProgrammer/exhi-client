@@ -86,10 +86,6 @@ function onUp() {
 </template>
 
 <style scoped lang="scss">
-// @use '@shared/styles/tokens' as t;
-// @use '@shared/styles/design' as d;
-// @use '@shared/styles/transitions' as fx;
-
 $card-w: d.w(1022);
 $card-h: d.h(1371);
 
@@ -103,14 +99,35 @@ $card-h: d.h(1371);
   cursor: pointer;
   outline: none;
   -webkit-tap-highlight-color: transparent;
-  transition: transform t.$dur-base t.$ease-base;
+  transition: filter t.$dur-base t.$ease-base;
 
-  &:hover {
-    transform: translateY(-6px);
+  /* hover 仅在支持 hover 的设备生效 */
+  @media (hover: hover) {
+    &:hover {
+      .entry-card__bg {
+        transform: translateY(-10px) scale(1.03);
+      }
+    }
   }
+
+  /* 按下状态 */
+  &:active,
   &.pressed {
-    transform: translateY(-2px) scale(0.98);
-    transition-duration: t.$dur-fast;
+    .entry-card__bg {
+      filter: brightness(1.25);
+      transform: translateY(8px) scale(0.95);
+      transition-duration: 0.3s;
+    }
+  }
+
+  /* 键盘/焦点导航：外边框提示 */
+  &:focus-visible {
+    outline: 2px solid rgba(0, 229, 212, 0.5);
+    outline-offset: 4px;
+
+    .entry-card__bg {
+      transform: translateY(d.h(-4)) scale(1.01);
+    }
   }
 }
 
@@ -125,6 +142,11 @@ $card-h: d.h(1371);
   user-select: none;
   -webkit-user-drag: none;
   z-index: 1;
+  transform: translateY(0) scale(1);
+  /* 平滑回弹曲线 */
+  transition:
+    transform 0.3s cubic-bezier(0.25, 1, 0.5, 1),
+    filter 0.3s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 /* ===== 边框流光 ===== */
@@ -144,19 +166,23 @@ $card-h: d.h(1371);
   z-index: 2;
   border-radius: 4px;
   overflow: hidden; // 把伪元素亮带裁在卡片内
+  pointer-events: none; // 让触摸事件穿透到 button
 }
 
 .entry-card__shine--lr {
   @include fx.shine-base;
 }
-.entry-card:hover .entry-card__shine--lr {
+/* 扫光：鼠标 hover + 触摸按下都触发 */
+.entry-card:hover .entry-card__shine--lr,
+.entry-card:active .entry-card__shine--lr {
   @include fx.shine-trigger($duration: 1.4s);
 }
 
 .entry-card__shine--rl {
   @include fx.shine-base($reverse: true);
 }
-.entry-card:hover .entry-card__shine--rl {
+.entry-card:hover .entry-card__shine--rl,
+.entry-card:active .entry-card__shine--rl {
   @include fx.shine-trigger($duration: 1.4s, $reverse: true);
 }
 

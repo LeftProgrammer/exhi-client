@@ -96,7 +96,7 @@ export function vortexRevealIn(
 }
 
 /**
- * 从右侧带微模糊滑入。适合同分类内翻页的入场。
+ * 从右侧带微模糊滑入。适合同分类内翻页的入场（下一页）。
  */
 export function slideInFromRight(
   el: Element,
@@ -112,6 +112,47 @@ export function slideInFromRight(
     x: 0,
     opacity: 1,
     filter: 'blur(0px)',
+    onComplete: done
+  })
+}
+
+/**
+ * 从左侧带微模糊滑入。适合同分类内翻页的入场（上一页）。
+ */
+export function slideInFromLeft(
+  el: Element,
+  done: () => void,
+  opts: { delay?: number; x?: number; blur?: number; duration?: number } = {}
+) {
+  const { delay = 0.2, x = -70, blur = 4, duration = 0.82 } = opts
+  gsap.set(el, { x, opacity: 0, filter: `blur(${blur}px)` })
+  gsap.to(el, {
+    delay,
+    duration,
+    ease: 'expo.out',
+    x: 0,
+    opacity: 1,
+    filter: 'blur(0px)',
+    onComplete: done
+  })
+}
+
+/**
+ * 轻推向右滑出 + 微缩离场。
+ * 适合同分类内翻页的离场，为左侧滑入腾出空间（上一页）。
+ */
+export function slidePushOutRight(
+  el: Element,
+  done: () => void,
+  opts: { duration?: number; x?: number; scale?: number } = {}
+) {
+  const { duration = 0.32, x = 55, scale = 0.97 } = opts
+  gsap.to(el, {
+    duration,
+    ease: 'power2.in',
+    x,
+    scale,
+    opacity: 0,
     onComplete: done
   })
 }

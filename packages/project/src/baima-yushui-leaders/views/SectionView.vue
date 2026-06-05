@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { getSection, type Category, type SectionId } from '@baima-yushui/data/sections'
 import { resolvePkgUrl } from '@shared/utils/url'
@@ -10,8 +10,10 @@ import StageFooter from '@baima-yushui/components/StageFooter.vue'
 import {
   blurDissolveOut,
   slidePushOut,
+  slidePushOutRight,
   vortexRevealIn,
-  slideInFromRight
+  slideInFromRight,
+  slideInFromLeft
 } from '@shared/effects/gsapPresets'
 
 const props = defineProps<{
@@ -57,43 +59,39 @@ const tabAssets = computed<Record<string, string>>(() =>
   )
 )
 
-const bgVideoUrl = resolvePkgUrl('shared/bg.mp4')
-
-const bannerFrameUrl = computed(() => {
-  if (props.sectionId === 'leaders') return resolvePkgUrl('leader/header-bg.png')
-  return resolvePkgUrl('yushui/header-bg.png')
-})
-
-const bannerTitleUrl = computed(() => {
-  if (props.sectionId === 'leaders') return resolvePkgUrl('leader/header-title.png')
-  return resolvePkgUrl('yushui/header-title.png')
-})
+const bgVideoUrl = resolvePkgUrl('common/bg.mp4')
 
 const footerFrameUrl = resolvePkgUrl('yushui/footer-frame.png')
 
 const btnBgUrl = computed(() => resolvePkgUrl(`${slicesDir.value}/btn-bg.png`))
-const btnBgActiveUrl = resolvePkgUrl('shared/btn-bg-active.png')
+const btnBgActiveUrl = resolvePkgUrl('common/btn-bg-active.png')
 const btnPrevUrl = computed(() => resolvePkgUrl(`${slicesDir.value}/btn-left.png`))
-const btnPrevActiveUrl = resolvePkgUrl('shared/btn-left-active.png')
+const btnPrevActiveUrl = resolvePkgUrl('common/btn-left-active.png')
 const btnNextUrl = computed(() => resolvePkgUrl(`${slicesDir.value}/btn-right.png`))
-const btnNextActiveUrl = resolvePkgUrl('shared/btn-right-active.png')
+const btnNextActiveUrl = resolvePkgUrl('common/btn-right-active.png')
 const btnHomeUrl = computed(() => resolvePkgUrl(`${slicesDir.value}/btn-home.png`))
-const btnHomeActiveUrl = resolvePkgUrl('shared/btn-home-active.png')
+const btnHomeActiveUrl = resolvePkgUrl('common/btn-home-active.png')
 
 const stageImageUrl = computed(() => {
   if (currentEntry.value.image) return resolvePkgUrl(currentEntry.value.image)
   return null
 })
 
-const transitionType = ref<'category' | 'entry'>('category')
+const transitionType = ref<'category' | 'entry-next' | 'entry-prev'>('category')
 const { onLeave, onEnter } = useViewTransition(transitionType, {
   category: { enter: vortexRevealIn, leave: blurDissolveOut },
-  entry: { enter: slideInFromRight, leave: slidePushOut }
+  'entry-next': { enter: slideInFromRight, leave: slidePushOut },
+  'entry-prev': { enter: slideInFromLeft, leave: slidePushOutRight }
 })
+
+/* 分类切换时触发内容框脉冲 */
+const categorySwitching = ref(false)
 
 function selectCategory(id: string) {
   if (id === currentCategory.value.id) return
   transitionType.value = 'category'
+  categorySwitching.value = true
+  setTimeout(() => (categorySwitching.value = false), 600)
   router.replace({
     name: 'section',
     params: { sectionId: props.sectionId, categoryId: id, entryIndex: 0 }
@@ -102,7 +100,7 @@ function selectCategory(id: string) {
 
 function next() {
   if (!canNext.value) return
-  transitionType.value = 'entry'
+  transitionType.value = 'entry-next'
   const len = total.value
   const ni = (props.entryIndex + 1) % len
   router.replace({
@@ -113,7 +111,7 @@ function next() {
 
 function prev() {
   if (!canPrev.value) return
-  transitionType.value = 'entry'
+  transitionType.value = 'entry-prev'
   const len = total.value
   const ni = (props.entryIndex - 1 + len) % len
   router.replace({
@@ -126,26 +124,27 @@ function home() {
   leaveTo({ name: 'home' })
 }
 
-/* 自动轮播：同分类内逐张推进，到末尾跳下一分类首张，循环 */
+/* 自动轮播：同分类内逐张推进；多分类时到末尾跳下一分类首张 */
 useAutoplay(
   () => [props.categoryId, props.entryIndex] as const,
   () => {
     const cats = section.value.categories
-    const curCatIdx = cats.findIndex((c) => c.id === currentCategory.value.id)
     const len = total.value
     const isLastEntry = props.entryIndex >= len - 1
+    const hasMultipleCats = cats.length > 1
 
-    if (!isLastEntry) {
-      transitionType.value = 'entry'
+    if (!isLastEntry || !hasMultipleCats) {
+      transitionType.value = 'entry-next'
       router.replace({
         name: 'section',
         params: {
           sectionId: props.sectionId,
           categoryId: currentCategory.value.id,
-          entryIndex: props.entryIndex + 1
+          entryIndex: (props.entryIndex + 1) % len
         }
       })
     } else {
+      const curCatIdx = cats.findIndex((c) => c.id === currentCategory.value.id)
       const nextCat = cats[(curCatIdx + 1) % cats.length]
       transitionType.value = 'category'
       router.replace({
@@ -194,9 +193,18 @@ watch(
 
     <!-- 顶部 banner：装饰底图 + 居中标题（揭幕扫光动画） -->
     <header class="banner">
-      <img class="banner__frame" :src="bannerFrameUrl" alt="" />
-      <div class="banner__title-wrap">
-        <img class="banner__title" :src="bannerTitleUrl" :alt="section.tagline" />
+      <img
+        v-if="section.bannerFrameImage"
+        class="banner__frame"
+        :src="resolvePkgUrl(section.bannerFrameImage)"
+        alt=""
+      />
+      <div v-if="section.bannerTitleImage" class="banner__title-wrap">
+        <img
+          class="banner__title"
+          :src="resolvePkgUrl(section.bannerTitleImage)"
+          :alt="section.tagline ?? ''"
+        />
       </div>
     </header>
 
@@ -204,11 +212,11 @@ watch(
       中部内容区：三层叠框结构（双外框交叉 + 内框填充）
       外框 A 宽矮露左右，外框 B 窄高露上下，内框盖住交叉角
     -->
-    <section class="content-frame">
+    <section class="content-frame" :class="{ 'content-frame--pulse': categorySwitching }">
       <div class="content-frame__outer content-frame__outer--a" />
       <div class="content-frame__outer content-frame__outer--b" />
 
-      <div class="content-frame__inner">
+      <div class="content-frame__inner" :style="{ backgroundColor: section.contentBgColor }">
         <!-- 内容画布：key 变化触发 GSAP 转场（光圈展开 / 景深滑入） -->
         <div class="canvas">
           <Transition :css="false" @enter="onEnter" @leave="onLeave">
@@ -217,10 +225,10 @@ watch(
                 v-if="stageImageUrl"
                 class="canvas__image"
                 :src="stageImageUrl"
-                :alt="currentEntry.title"
+                :alt="currentEntry.title ?? ''"
               />
               <div v-else class="canvas__placeholder">
-                <p class="canvas__placeholder-title">{{ currentEntry.title }}</p>
+                <p class="canvas__placeholder-title">{{ currentEntry.title ?? '' }}</p>
                 <p class="canvas__placeholder-hint">资源待补充</p>
               </div>
             </div>
@@ -240,7 +248,7 @@ watch(
           :btn-home-active-url="btnHomeActiveUrl"
           :can-prev="canPrev"
           :can-next="canNext"
-          :caption="currentEntry.caption ?? currentEntry.title"
+          :caption="currentEntry.caption ?? currentEntry.title ?? ''"
           @prev="prev"
           @next="next"
           @home="home"
@@ -248,22 +256,22 @@ watch(
       </div>
     </section>
 
-    <!-- 右侧分类菜单：贴 section-view 右侧边框，偏下排列 -->
-    <nav class="menu" aria-label="分类">
+    <!-- 右侧分类菜单：多分类时才展示 -->
+    <nav v-if="section.categories.length > 1" class="menu" aria-label="分类">
       <div
         v-for="(cat, i) in section.categories"
         :key="cat.id"
         class="menu__slot"
-        :style="{ '--enter-delay': `${0.4 + i * 0.2}s` }"
+        :style="{ '--enter-delay': `${0.35 + i * 0.28}s` }"
       >
         <button
           class="menu__item"
           :class="{ 'menu__item--active': cat.id === currentCategory.id }"
-          :aria-label="cat.title"
+          :aria-label="cat.title ?? ''"
           :aria-pressed="cat.id === currentCategory.id"
           @click="selectCategory(cat.id)"
         >
-          <img class="menu__img" :src="tabAssets[cat.id]" :alt="cat.title" />
+          <img class="menu__img" :src="tabAssets[cat.id]" :alt="cat.title ?? ''" />
         </button>
       </div>
     </nav>
@@ -271,9 +279,6 @@ watch(
 </template>
 
 <style scoped lang="scss">
-/* @use '@shared/styles/tokens' as t;
-@use '@shared/styles/transitions' as fx; */
-
 /* 根容器：absolute 层叠布局，banner 浮于顶部不占流 */
 .section-view {
   position: relative;
@@ -364,7 +369,7 @@ watch(
   z-index: 2;
   display: flex;
   flex-direction: column;
-  animation: content-frame-fade-in 0.5s 0.2s ease-out both;
+  animation: content-frame-fade-in 1.1s 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .content-frame__outer {
@@ -391,13 +396,12 @@ watch(
   bottom: d.h(-54);
 }
 
-/* 内框：蓝黑填充，盖住两外框交叉角 */
+/* 内框：盖住两外框交叉角，背景色由 section.contentBgColor 动态绑定 */
 .content-frame__inner {
   position: relative;
   z-index: 1;
   flex: 1 1 auto;
   min-height: 0;
-  background: #121822;
   border: none;
   overflow: hidden;
 }
@@ -405,11 +409,13 @@ watch(
 @keyframes content-frame-fade-in {
   from {
     opacity: 0;
-    transform: scale(0.985);
+    transform: scale(0.1) rotate(45deg);
+    filter: blur(22px) brightness(2.2);
   }
   to {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(1) rotate(0deg);
+    filter: blur(0px) brightness(1);
   }
 }
 
@@ -438,6 +444,8 @@ watch(
   width: 100%;
   height: 100%;
   object-fit: cover;
+  opacity: 0;
+  animation: image-fade-in 0.6s ease 0.15s forwards;
 }
 
 .canvas__placeholder {
@@ -482,7 +490,7 @@ watch(
 
 /* 外层 slot：承担入场动画（错峰从右滑入） */
 .menu__slot {
-  @include fx.enter-from-right($duration: 0.5s, $delay: 0.3s);
+  @include fx.enter-from-right($duration: 0.6s);
   animation-delay: var(--enter-delay, 0.3s);
 }
 
@@ -554,6 +562,38 @@ watch(
     transform: scale(0.97);
   }
 }
+/* 内容框脉冲：分类切换时边框闪烁 */
+.content-frame--pulse .content-frame__outer {
+  animation: frame-pulse 0.6s ease-out;
+}
+
+@keyframes frame-pulse {
+  0% {
+    border-color: rgba(0, 229, 212, 0.5);
+    box-shadow: 0 0 0 rgba(0, 229, 212, 0);
+  }
+  40% {
+    border-color: rgba(0, 229, 212, 1);
+    box-shadow: 0 0 20px rgba(0, 229, 212, 0.4);
+  }
+  100% {
+    border-color: rgba(0, 229, 212, 0.5);
+    box-shadow: 0 0 0 rgba(0, 229, 212, 0);
+  }
+}
+
+/* 图片淡入 */
+@keyframes image-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(1.02);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 @keyframes sec-menu-leave {
   from {
     opacity: 1;
@@ -565,7 +605,7 @@ watch(
   }
 }
 
-/* 菜单项：未选中 opacity 0.4，hover 高亮左移，选中态常亮 */
+/* 菜单项：未选中缩小+暗淡，hover 高亮左移，选中态放大+光条+强发光 */
 .menu__item {
   position: relative;
   background: transparent;
@@ -575,23 +615,36 @@ watch(
   outline: none;
   -webkit-tap-highlight-color: transparent;
   display: inline-block;
-  opacity: 0.4;
-  transition:
-    transform t.$dur-base t.$ease-base,
-    opacity t.$dur-base t.$ease-base,
-    filter t.$dur-base t.$ease-base;
+  opacity: 0.35;
+  transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1);
 
-  &:hover {
-    opacity: 1;
-    transform: translateX(-12px);
-    filter: drop-shadow(0 0 12px rgba(0, 229, 212, 0.5));
+  /* hover 左移效果仅在支持 hover 的设备生效 */
+  @media (hover: hover) {
+    &:hover {
+      opacity: 0.8;
+
+      .menu__img {
+        transform: translateX(-16px) scale(0.96);
+      }
+    }
   }
+
+  /* 按下状态：button 和 img 都要设 transform 才生效 */
   &:active {
-    transform: scale(0.96);
+    .menu__img {
+      opacity: 0.8;
+      filter: brightness(1.3);
+      transform: translateX(d.w(-8)) scale(0.95);
+      transition-duration: 0.25s;
+    }
   }
+
   &--active {
     opacity: 1;
-    filter: drop-shadow(0 0 14px rgba(0, 229, 212, 0.6));
+
+    .menu__img {
+      transform: scale(1.06);
+    }
   }
 }
 
@@ -602,5 +655,11 @@ watch(
   pointer-events: none;
   user-select: none;
   -webkit-user-drag: none;
+  /* 必须有初始 transform，transition 才能正确计算差值 */
+  transform: translateY(0) scale(1);
+  /* 平滑回弹曲线 */
+  transition:
+    transform 0.35s cubic-bezier(0.25, 1, 0.5, 1),
+    filter 0.35s cubic-bezier(0.25, 1, 0.5, 1);
 }
 </style>

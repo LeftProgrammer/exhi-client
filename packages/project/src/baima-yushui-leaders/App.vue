@@ -71,8 +71,6 @@ function viewKey(route: RouteLocationNormalizedLoaded): string {
 </template>
 
 <style lang="scss">
-// @use '@shared/styles/tokens' as t;
-
 /* ===== 全局页面切换 =====
  * 旧页跟新页同时存在 → 旧页用 absolute 脱离文档流（不挤压新页）→
  * 各跑各的 opacity + scale 过渡 → 视觉无缝衔接，没有"黑屏中转"。
