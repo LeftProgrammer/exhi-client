@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { getSection, type Category, type SectionId } from '@baima-yushui/data/sections'
 import { resolvePkgUrl } from '@shared/utils/url'
 import { useViewTransition } from '@shared/composables/useViewTransition'
-import { useAutoplay } from '@baima-yushui/composables/useAutoplay'
+import { useAutoplay } from '@shared/composables/useAutoplay'
 import { usePageLeave } from '@shared/composables/usePageLeave'
 import StageFooter from '@baima-yushui/components/StageFooter.vue'
 import {

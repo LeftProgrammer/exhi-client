@@ -1,0 +1,40 @@
+// ===== 品牌色 token（可被各项目覆盖） =====
+// 全部用 !default 声明：项目可通过
+//   @use '@shared/styles/tokens-brand' with ($color-accent: #xxx, ...);
+// 在引入前覆盖默认值，实现一套 shared 多套主题。
+// 默认值为「白马渝水」青色主题。
+
+// 背景
+$color-bg-primary: #050b1a !default; // 主体深色背景
+$color-bg-secondary: #0a1a2e !default; // 次级背景（卡片底）
+$color-bg-elevated: rgba(15, 35, 60, 0.7) !default; // 抬升层（卡片/浮层）
+$color-bg-overlay: rgba(5, 11, 26, 0.92) !default; // 遮罩
+
+// 强调（青色辉光）
+$color-accent: #00e5d4 !default; // 主强调（按钮/边框/标题点缀）
+$color-accent-soft: rgba(0, 229, 212, 0.18) !default;
+$color-accent-glow: rgba(0, 229, 212, 0.5) !default;
+$color-accent-dim: rgba(0, 229, 212, 0.35) !default;
+
+// 文字
+$color-text-primary: #e8f5ff !default;
+$color-text-secondary: #a8c5d8 !default;
+$color-text-muted: #6b8da3 !default;
+$color-text-disabled: rgba(180, 200, 230, 0.4) !default;
+
+// 状态
+$color-success: #4ade80 !default;
+$color-warning: #fbbf24 !default;
+$color-danger: #ef4444 !default;
+
+// 边框
+$color-border-soft: rgba(0, 229, 212, 0.15) !default;
+$color-border-strong: rgba(0, 229, 212, 0.5) !default;
+$color-border-glow: rgba(0, 229, 212, 0.8) !default;
+
+// ===== 阴影 / 辉光（依赖品牌色） =====
+$shadow-card: 0 4px 24px rgba(0, 0, 0, 0.6) !default;
+$glow-accent: 0 0 12px $color-accent-glow !default;
+$glow-accent-strong:
+  0 0 24px $color-accent-glow,
+  0 0 4px $color-accent !default;
