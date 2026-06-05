@@ -102,7 +102,13 @@ async function assembleProject(project) {
     await copyDir(distAssets, path.join(contentsOut, 'assets'))
   }
 
-  // 4. 复制该项目包的静态素材：deploy/<project>/contents/（Route B：各包自包含）
+  // 4a. 复制全项目共享素材：deploy/shared/contents/ → contents/（作为默认）
+  const sharedContentsDir = path.join(DEPLOY_DIR, 'shared', 'contents')
+  if (await exists(sharedContentsDir)) {
+    await copyDir(sharedContentsDir, contentsOut)
+  }
+
+  // 4b. 复制该项目包的静态素材：deploy/<project>/contents/（覆盖共享，项目优先）
   const pkgContentsDir = path.join(deployDir, 'contents')
   if (await exists(pkgContentsDir)) {
     for (const entry of await fs.readdir(pkgContentsDir, { withFileTypes: true })) {

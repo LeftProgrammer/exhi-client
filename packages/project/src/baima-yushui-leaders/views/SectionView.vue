@@ -6,6 +6,7 @@ import { resolvePkgUrl } from '@shared/utils/url'
 import { useViewTransition } from '@shared/composables/useViewTransition'
 import { useAutoplay } from '@shared/composables/useAutoplay'
 import { usePageLeave } from '@shared/composables/usePageLeave'
+import { useProjectSfx } from '@shared/composables/useProjectSfx'
 import StageFooter from '@baima-yushui/components/StageFooter.vue'
 import {
   blurDissolveOut,
@@ -87,8 +88,11 @@ const { onLeave, onEnter } = useViewTransition(transitionType, {
 /* 分类切换时触发内容框脉冲 */
 const categorySwitching = ref(false)
 
+const sfx = useProjectSfx()
+
 function selectCategory(id: string) {
   if (id === currentCategory.value.id) return
+  sfx.play('tab')
   transitionType.value = 'category'
   categorySwitching.value = true
   setTimeout(() => (categorySwitching.value = false), 600)
@@ -100,6 +104,7 @@ function selectCategory(id: string) {
 
 function next() {
   if (!canNext.value) return
+  sfx.play('page')
   transitionType.value = 'entry-next'
   const len = total.value
   const ni = (props.entryIndex + 1) % len
@@ -111,6 +116,7 @@ function next() {
 
 function prev() {
   if (!canPrev.value) return
+  sfx.play('page')
   transitionType.value = 'entry-prev'
   const len = total.value
   const ni = (props.entryIndex - 1 + len) % len
@@ -121,6 +127,7 @@ function prev() {
 }
 
 function home() {
+  sfx.play('back')
   leaveTo({ name: 'home' })
 }
 
@@ -310,7 +317,7 @@ watch(
   top: 0;
   left: 0;
   right: 0;
-  height: d.h(185); /* 2 倍图，设计图标注高度 185px */
+  height: d.h(185);
   z-index: 4;
   pointer-events: none;
 }
@@ -319,7 +326,7 @@ watch(
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: fill;
   pointer-events: none;
   user-select: none;
   -webkit-user-drag: none;
@@ -335,18 +342,19 @@ watch(
 /* 标题图：外层 wrap 居中定位，内层 img 从左到右揭幕，两层 transform 互不冲突 */
 .banner__title-wrap {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  height: 100%;
+  top: d.h(22);
+  left: d.w(1424);
+  right: d.w(1424);
+  height: d.h(152);
   z-index: 1;
   pointer-events: none;
 }
 
 .banner__title {
   display: block;
-  height: 100%; /* 继承 .banner 的 d.h(185) */
-  width: auto;
+  height: 100%;
+  width: 100%;
+  object-fit: fill;
   pointer-events: none;
   user-select: none;
   -webkit-user-drag: none;

@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
 import { useRouter } from 'vue-router'
 import { useBridge } from '@shared/composables/useBridge'
 import { useIdleReset } from '@shared/composables/useIdleReset'
+import { useProjectSfx } from '@shared/composables/useProjectSfx'
 
 /**
  * 应用根。
@@ -15,6 +17,10 @@ import { useIdleReset } from '@shared/composables/useIdleReset'
 
 const router = useRouter()
 const { on } = useBridge()
+
+// 首次用户手势后解锁音频上下文 + 注册项目音效文件
+const { unlock } = useProjectSfx()
+onMounted(() => unlock())
 
 // TODO: 20 秒无交互回首页
 // useIdleReset(() => {

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import EntryCard from '@baima-yushui/components/EntryCard.vue'
 import { usePageLeave } from '@shared/composables/usePageLeave'
+import { useProjectSfx } from '@shared/composables/useProjectSfx'
 import { resolvePkgUrl } from '@shared/utils/url'
 
 const bgVideoUrl = resolvePkgUrl('common/bg.mp4')
@@ -12,7 +13,10 @@ const cardBgLeaders = resolvePkgUrl('home/card-bg-leaders.png')
 // 500ms 让离场动画完整跑完再切路由
 const { leaving, leaveTo } = usePageLeave({ duration: 500 })
 
+const sfx = useProjectSfx()
+
 function enterSection(sectionId: 'yushui' | 'leaders') {
+  sfx.play('nav')
   leaveTo({ name: 'section', params: { sectionId } })
 }
 </script>
@@ -127,8 +131,8 @@ function enterSection(sectionId: 'yushui' | 'leaders') {
   left: 0;
   z-index: 1;
   width: 100%;
-  height: auto;
-  object-fit: contain;
+  height: d.h(185);
+  object-fit: fill;
   pointer-events: none;
   user-select: none;
   -webkit-user-drag: none;
@@ -146,8 +150,9 @@ function enterSection(sectionId: 'yushui' | 'leaders') {
   position: relative;
   z-index: 2;
   width: 100%;
-  height: auto;
-  object-fit: contain;
+  height: d.h(143);
+  margin-top: d.h(27);
+  object-fit: fill;
   pointer-events: none;
   user-select: none;
   -webkit-user-drag: none;

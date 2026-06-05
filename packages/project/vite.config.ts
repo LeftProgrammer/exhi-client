@@ -8,7 +8,7 @@ import path from 'node:path'
 const DEV_PORT = 5174
 
 const DEPLOY_DIR = resolve(__dirname, 'deploy')
-const ASSET_RE = /\.(png|jpe?g|gif|svg|webp|avif|mp4|webm|ico|woff2?)$/i
+const ASSET_RE = /\.(png|jpe?g|gif|svg|webp|avif|mp4|webm|ico|woff2?|mp3|wav)$/i
 const MIME: Record<string, string> = {
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
@@ -21,7 +21,9 @@ const MIME: Record<string, string> = {
   '.webm': 'video/webm',
   '.ico': 'image/x-icon',
   '.woff': 'font/woff',
-  '.woff2': 'font/woff2'
+  '.woff2': 'font/woff2',
+  '.mp3': 'audio/mpeg',
+  '.wav': 'audio/wav'
 }
 
 const MPA_ENTRIES = [
@@ -84,6 +86,16 @@ function serveDeployContents(): Plugin {
             fs.createReadStream(file).pipe(res)
             return
           }
+        }
+
+        // fallback：共享素材目录（deploy/shared/contents/）
+        const sharedFile = path.join(DEPLOY_DIR, 'shared', 'contents', url)
+        if (fs.existsSync(sharedFile)) {
+          const ext = path.extname(sharedFile).toLowerCase()
+          res.setHeader('Content-Type', MIME[ext] ?? 'application/octet-stream')
+          res.setHeader('Content-Length', fs.statSync(sharedFile).size)
+          fs.createReadStream(sharedFile).pipe(res)
+          return
         }
         next()
       })
