@@ -5,6 +5,7 @@ import { getSection, type Category, type SectionId } from '@baima-yushui/data/se
 import { resolvePkgUrl } from '@shared/utils/url'
 import { useViewTransition } from '@shared/composables/useViewTransition'
 import { useAutoplay } from '@baima-yushui/composables/useAutoplay'
+import { usePageLeave } from '@shared/composables/usePageLeave'
 import StageFooter from '@baima-yushui/components/StageFooter.vue'
 import {
   blurDissolveOut,
@@ -20,6 +21,9 @@ const props = defineProps<{
 }>()
 
 const router = useRouter()
+
+// 500ms 离场动画完整跑完再返回首页
+const { leaving, leaveTo } = usePageLeave({ duration: 500 })
 
 const section = computed(() => {
   const id = props.sectionId as SectionId
@@ -119,7 +123,7 @@ function prev() {
 }
 
 function home() {
-  router.push({ name: 'home' })
+  leaveTo({ name: 'home' })
 }
 
 /* 自动轮播：同分类内逐张推进，到末尾跳下一分类首张，循环 */
@@ -173,7 +177,7 @@ watch(
 </script>
 
 <template>
-  <main class="section-view">
+  <main class="section-view" :class="{ leaving }">
     <!-- 全屏背景视频 -->
     <video
       class="section-view__bg"
@@ -190,7 +194,7 @@ watch(
 
     <!-- 顶部 banner：装饰底图 + 居中标题（揭幕扫光动画） -->
     <header class="banner">
-      <img class="banner__frame" :src="bannerFrameUrl" alt="" aria-hidden="true" />
+      <img class="banner__frame" :src="bannerFrameUrl" alt="" />
       <div class="banner__title-wrap">
         <img class="banner__title" :src="bannerTitleUrl" :alt="section.tagline" />
       </div>
@@ -201,8 +205,8 @@ watch(
       外框 A 宽矮露左右，外框 B 窄高露上下，内框盖住交叉角
     -->
     <section class="content-frame">
-      <div class="content-frame__outer content-frame__outer--a" aria-hidden="true" />
-      <div class="content-frame__outer content-frame__outer--b" aria-hidden="true" />
+      <div class="content-frame__outer content-frame__outer--a" />
+      <div class="content-frame__outer content-frame__outer--b" />
 
       <div class="content-frame__inner">
         <!-- 内容画布：key 变化触发 GSAP 转场（光圈展开 / 景深滑入） -->
@@ -314,10 +318,16 @@ watch(
   pointer-events: none;
   user-select: none;
   -webkit-user-drag: none;
-  @include fx.enter-fade-down($duration: 0.8s, $delay: 0s);
+  opacity: 0;
+  animation: sec-banner-enter 0.6s ease 0.1s forwards;
 }
 
-/* 标题图：外层 wrap 居中定位，内层 img 跑揭幕扫光动画，两层 transform 互不冲突 */
+/* 底纹离场 */
+.section-view.leaving .banner__frame {
+  animation: sec-banner-leave 0.5s cubic-bezier(0.55, 0, 1, 1) forwards;
+}
+
+/* 标题图：外层 wrap 居中定位，内层 img 从左到右揭幕，两层 transform 互不冲突 */
 .banner__title-wrap {
   position: absolute;
   top: 50%;
@@ -335,8 +345,10 @@ watch(
   pointer-events: none;
   user-select: none;
   -webkit-user-drag: none;
-  /* delay 0.9s：等整页淡入完成后再开始揭幕 */
-  @include fx.reveal-shine-lr($duration: 1.4s, $delay: 0.9s);
+  /* 标题从左到右揭幕显示 */
+  opacity: 1;
+  clip-path: inset(0 100% 0 0);
+  animation: sec-title-reveal 0.8s cubic-bezier(0.25, 1, 0.5, 1) 0.5s forwards;
 }
 
 /*
@@ -352,7 +364,7 @@ watch(
   z-index: 2;
   display: flex;
   flex-direction: column;
-  animation: content-frame-fade-in 0.6s 0.5s ease-out both;
+  animation: content-frame-fade-in 0.5s 0.2s ease-out both;
 }
 
 .content-frame__outer {
@@ -470,8 +482,87 @@ watch(
 
 /* 外层 slot：承担入场动画（错峰从右滑入） */
 .menu__slot {
-  @include fx.enter-from-right($duration: 0.6s, $delay: 0.4s);
-  animation-delay: var(--enter-delay, 0.4s);
+  @include fx.enter-from-right($duration: 0.5s, $delay: 0.3s);
+  animation-delay: var(--enter-delay, 0.3s);
+}
+
+/* ===== 离场动画 ===== */
+.section-view.leaving .banner__frame {
+  animation: sec-banner-leave 0.5s cubic-bezier(0.55, 0, 1, 1) forwards;
+}
+.section-view.leaving .banner__title {
+  animation: sec-title-hide 0.5s cubic-bezier(0.55, 0, 1, 1) forwards;
+}
+.section-view.leaving .content-frame {
+  animation: sec-frame-leave 0.5s cubic-bezier(0.55, 0, 1, 1) forwards;
+}
+.section-view.leaving .menu__slot {
+  animation: sec-menu-leave 0.5s cubic-bezier(0.55, 0, 1, 1) forwards;
+}
+
+/* 背景图入场：淡入+微缩放 */
+@keyframes sec-banner-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 标题揭幕入场：从左到右展开 */
+@keyframes sec-title-reveal {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* 背景图离场：上滑淡出 */
+@keyframes sec-banner-leave {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(d.h(-30));
+  }
+}
+
+/* 标题离场：从右到左反向收起 */
+@keyframes sec-title-hide {
+  from {
+    clip-path: inset(0 0 0 0);
+  }
+  to {
+    clip-path: inset(0 100% 0 0);
+  }
+}
+
+@keyframes sec-frame-leave {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+@keyframes sec-menu-leave {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(d.w(60));
+  }
 }
 
 /* 菜单项：未选中 opacity 0.4，hover 高亮左移，选中态常亮 */

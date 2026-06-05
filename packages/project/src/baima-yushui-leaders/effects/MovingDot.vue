@@ -643,7 +643,7 @@ watch([() => props.speed, () => props.tailLength, () => props.direction], recomp
       d 属性不走 Vue binding，由 measure()/applyPath() 同步写入；
       viewBox 也不需要 reactive 绑定，path 坐标已经是绝对像素。
     -->
-    <svg class="moving-dot-probe" aria-hidden="true">
+    <svg class="moving-dot-probe">
       <path ref="probe" fill="none" stroke="none" />
     </svg>
   </div>

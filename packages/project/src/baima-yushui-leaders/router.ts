@@ -1,4 +1,9 @@
-import { createRouter, createMemoryHistory, createWebHashHistory, type RouteRecordRaw } from 'vue-router'
+import {
+  createRouter,
+  createMemoryHistory,
+  createWebHashHistory,
+  type RouteRecordRaw
+} from 'vue-router'
 import HomeView from './views/HomeView.vue'
 import SectionView from './views/SectionView.vue'
 

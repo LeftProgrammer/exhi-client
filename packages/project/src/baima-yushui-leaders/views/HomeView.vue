@@ -9,8 +9,8 @@ const headerTextUrl = resolvePkgUrl('home/header-title.png')
 const cardBgYushui = resolvePkgUrl('home/card-bg-yushui.png')
 const cardBgLeaders = resolvePkgUrl('home/card-bg-leaders.png')
 
-// 180ms 让卡片先动起来再切路由，避免中间黑屏
-const { leaving, leaveTo } = usePageLeave({ duration: 180 })
+// 500ms 让离场动画完整跑完再切路由
+const { leaving, leaveTo } = usePageLeave({ duration: 500 })
 
 function enterSection(sectionId: 'yushui' | 'leaders') {
   leaveTo({ name: 'section', params: { sectionId } })
@@ -18,7 +18,7 @@ function enterSection(sectionId: 'yushui' | 'leaders') {
 </script>
 
 <template>
-  <main class="home">
+  <main class="home" :class="{ leaving }">
     <!-- 背景视频 -->
     <video
       class="home__bg-video"
@@ -35,11 +35,10 @@ function enterSection(sectionId: 'yushui' | 'leaders') {
     <!-- 暗角遮罩：突出前景元素 -->
     <div class="home__bg-veil" />
 
-    <!-- 顶部装饰栏：底纹 + 文字标题 + 扫光特效 -->
+    <!-- 顶部装饰栏：底纹 + 文字标题 -->
     <header class="home__header">
-      <img class="home__header-bg" :src="headerBgUrl" alt="" aria-hidden="true" />
+      <img class="home__header-bg" :src="headerBgUrl" alt="" />
       <img class="home__header-text" :src="headerTextUrl" alt="情系白马 力通江海" />
-      <div class="home__header-shine" aria-hidden="true" />
     </header>
 
     <!--
@@ -124,7 +123,7 @@ function enterSection(sectionId: 'yushui' | 'leaders') {
   pointer-events: none;
 }
 
-/* 底纹图：通栏横向铺满，淡入 */
+/* 底纹图：通栏横向铺满，从上轻滑淡入 */
 .home__header-bg {
   position: absolute;
   top: 0;
@@ -136,10 +135,16 @@ function enterSection(sectionId: 'yushui' | 'leaders') {
   pointer-events: none;
   user-select: none;
   -webkit-user-drag: none;
-  @include fx.enter-fade-in($duration: 0.8s, $delay: 0.1s);
+  opacity: 0;
+  animation: home-bg-enter 0.8s cubic-bezier(0.25, 1, 0.5, 1) 0.15s both;
 }
 
-/* 文字标题图：居中，从上滑下淡入 */
+/* 底纹离场：轻滑淡出 */
+.home.leaving .home__header-bg {
+  animation: home-bg-leave 0.5s cubic-bezier(0.55, 0, 1, 1) forwards;
+}
+
+/* 文字标题图：居中，淡入+下滑+微缩放，0.6s 延迟 */
 .home__header-text {
   position: relative;
   z-index: 2;
@@ -149,20 +154,21 @@ function enterSection(sectionId: 'yushui' | 'leaders') {
   pointer-events: none;
   user-select: none;
   -webkit-user-drag: none;
-  @include fx.enter-fade-down($duration: 0.9s, $delay: 0.4s);
+  opacity: 0;
+  animation: home-title-enter 0.8s cubic-bezier(0.25, 1, 0.5, 1) 0.4s both;
 }
 
 /* 扫光特效层：从中心向两侧扫过，半透明掠过文字 */
-.home__header-shine {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 100%;
-  z-index: 3;
-  pointer-events: none;
-  @include fx.auto-shine-from-center($duration: 1.4s, $interval: 5s, $width: 25%);
-}
+// .home__header-shine {
+//   position: absolute;
+//   top: 0;
+//   left: 0;
+//   right: 0;
+//   height: 100%;
+//   z-index: 3;
+//   pointer-events: none;
+//   @include fx.auto-shine-from-center($duration: 1.4s, $interval: 5s, $width: 25%);
+// }
 
 /* 卡片容器：flex 居中布局 */
 .home__cards {
@@ -176,12 +182,14 @@ function enterSection(sectionId: 'yushui' | 'leaders') {
   gap: 9vw;
 }
 
-/* 进场动画：左卡从左侧滑入，右卡从右侧滑入 */
+/* 进场动画：左右卡片与标题同时开始，持续时间稍长 */
 .home__card-wrap--left {
-  @include fx.enter-from-left;
+  opacity: 0;
+  animation: fx-enter-from-left 1s cubic-bezier(0.25, 1, 0.5, 1) 0.4s both;
 }
 .home__card-wrap--right {
-  @include fx.enter-from-right;
+  opacity: 0;
+  animation: fx-enter-from-right 1s cubic-bezier(0.25, 1, 0.5, 1) 0.4s both;
 }
 
 /* 悬浮呼吸微动：缓慢上下浮动 + 微缩放 */
@@ -191,9 +199,62 @@ function enterSection(sectionId: 'yushui' | 'leaders') {
 
 /* 离场动画：左卡飞回左侧，右卡飞回右侧 */
 .home__cards.leaving .home__card-wrap--left {
-  @include fx.exit-to-left;
+  @include fx.exit-to-left($duration: 0.5s);
 }
 .home__cards.leaving .home__card-wrap--right {
-  @include fx.exit-to-right;
+  @include fx.exit-to-right($duration: 0.5s);
+}
+
+/* 标题离场：与入场相反，淡出+上滑+微缩放 */
+.home.leaving .home__header-text {
+  animation: home-title-leave 0.5s cubic-bezier(0.55, 0, 1, 1) forwards;
+}
+
+/* 标题入场：淡入+下滑+微缩放 */
+@keyframes home-title-enter {
+  from {
+    opacity: 0;
+    transform: translateY(d.h(-60)) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 标题离场：淡出+上滑+微缩放 */
+@keyframes home-title-leave {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(d.h(-60)) scale(0.92);
+  }
+}
+
+/* 底纹入场：从上轻滑淡入 */
+@keyframes home-bg-enter {
+  from {
+    opacity: 0;
+    transform: translateY(d.h(-40));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 底纹离场：从下轻滑淡出 */
+@keyframes home-bg-leave {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(d.h(-40));
+  }
 }
 </style>

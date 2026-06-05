@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite --open /baima-yushui-leaders/",
+    "dev:yushui": "vite --open /baima-yushui-leaders/",
     "dev:milestone": "vite --open /baima-milestone/",
+    "dev:duowei": "vite --open /baima-duowei/",
     "dev:research": "vite --open /baima-research/",
     "dev:zhineng": "vite --open /baima-zhineng/",
     "build": "vite build",

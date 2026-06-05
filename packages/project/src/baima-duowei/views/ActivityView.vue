@@ -196,18 +196,18 @@ onBeforeUnmount(stopA6AutoPlay)
         @prev="goPrev"
         @next="goNext"
       >
-        <div
-          class="a6"
-          @mouseenter="stopA6AutoPlay"
-          @mouseleave="startA6AutoPlay"
-        >
+        <div class="a6" @mouseenter="stopA6AutoPlay" @mouseleave="startA6AutoPlay">
           <div class="a6__sub-title"><img :src="a6.subTitle" alt="" /></div>
           <div class="a6__left-img"><img :src="a6.leftImgs[activeIndex]" alt="" /></div>
           <div class="a6__right-text"><img :src="a6.rightText" alt="" /></div>
           <div
             v-for="(src, i) in a6.rightLines"
             :key="i"
-            :class="['a6__right-line', `a6__right-line--${i + 1}`, { 'is-active': activeIndex === i }]"
+            :class="[
+              'a6__right-line',
+              `a6__right-line--${i + 1}`,
+              { 'is-active': activeIndex === i }
+            ]"
             @mouseenter="activeIndex = i"
           >
             <img :src="src" alt="" />

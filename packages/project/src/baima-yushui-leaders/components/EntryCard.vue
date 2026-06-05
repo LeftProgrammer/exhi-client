@@ -62,7 +62,7 @@ function onUp() {
     @click="$emit('enter')"
   >
     <!-- 底图：所有静态视觉（边框、角标、装饰）-->
-    <img class="entry-card__bg" :src="bgUrl" alt="" aria-hidden="true" />
+    <img class="entry-card__bg" :src="bgUrl" alt="" />
 
     <!-- 边框流光：内置圆角矩形，传 dot-inset 即可贴边走 -->
     <MovingDot
@@ -76,11 +76,7 @@ function onUp() {
     />
 
     <!-- 扫光层：hover 时一道斜向高光，方向由 shineDirection 决定 -->
-    <div
-      class="entry-card__shine"
-      :class="`entry-card__shine--${props.shineDirection}`"
-      aria-hidden="true"
-    />
+    <div class="entry-card__shine" :class="`entry-card__shine--${props.shineDirection}`" />
 
     <!-- 内容层完全交给调用方（标题、图标等都通过 slot 自由摆放） -->
     <div class="entry-card__content">

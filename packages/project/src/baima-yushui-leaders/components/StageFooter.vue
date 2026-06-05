@@ -42,20 +42,10 @@ defineEmits<{
         aria-label="上一页"
         @click="$emit('prev')"
       >
-        <img class="footer__btn-bg" :src="btnBgUrl" alt="" aria-hidden="true" />
-        <img
-          class="footer__btn-bg footer__btn-bg--active"
-          :src="btnBgActiveUrl"
-          alt=""
-          aria-hidden="true"
-        />
-        <img class="footer__btn-icon" :src="btnPrevUrl" alt="" aria-hidden="true" />
-        <img
-          class="footer__btn-icon footer__btn-icon--active"
-          :src="btnPrevActiveUrl"
-          alt=""
-          aria-hidden="true"
-        />
+        <img class="footer__btn-bg" :src="btnBgUrl" alt="" />
+        <img class="footer__btn-bg footer__btn-bg--active" :src="btnBgActiveUrl" alt="" />
+        <img class="footer__btn-icon" :src="btnPrevUrl" alt="" />
+        <img class="footer__btn-icon footer__btn-icon--active" :src="btnPrevActiveUrl" alt="" />
       </button>
       <button
         class="footer__btn"
@@ -64,36 +54,16 @@ defineEmits<{
         aria-label="下一页"
         @click="$emit('next')"
       >
-        <img class="footer__btn-bg" :src="btnBgUrl" alt="" aria-hidden="true" />
-        <img
-          class="footer__btn-bg footer__btn-bg--active"
-          :src="btnBgActiveUrl"
-          alt=""
-          aria-hidden="true"
-        />
-        <img class="footer__btn-icon" :src="btnNextUrl" alt="" aria-hidden="true" />
-        <img
-          class="footer__btn-icon footer__btn-icon--active"
-          :src="btnNextActiveUrl"
-          alt=""
-          aria-hidden="true"
-        />
+        <img class="footer__btn-bg" :src="btnBgUrl" alt="" />
+        <img class="footer__btn-bg footer__btn-bg--active" :src="btnBgActiveUrl" alt="" />
+        <img class="footer__btn-icon" :src="btnNextUrl" alt="" />
+        <img class="footer__btn-icon footer__btn-icon--active" :src="btnNextActiveUrl" alt="" />
       </button>
       <button class="footer__btn" aria-label="返回首页" @click="$emit('home')">
-        <img class="footer__btn-bg" :src="btnBgUrl" alt="" aria-hidden="true" />
-        <img
-          class="footer__btn-bg footer__btn-bg--active"
-          :src="btnBgActiveUrl"
-          alt=""
-          aria-hidden="true"
-        />
-        <img class="footer__btn-icon" :src="btnHomeUrl" alt="" aria-hidden="true" />
-        <img
-          class="footer__btn-icon footer__btn-icon--active"
-          :src="btnHomeActiveUrl"
-          alt=""
-          aria-hidden="true"
-        />
+        <img class="footer__btn-bg" :src="btnBgUrl" alt="" />
+        <img class="footer__btn-bg footer__btn-bg--active" :src="btnBgActiveUrl" alt="" />
+        <img class="footer__btn-icon" :src="btnHomeUrl" alt="" />
+        <img class="footer__btn-icon footer__btn-icon--active" :src="btnHomeActiveUrl" alt="" />
       </button>
     </div>
   </footer>

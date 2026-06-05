@@ -55,13 +55,12 @@ function goHome() {
   <div class="content-area__wrapper">
     <!-- 背景层 -->
     <div class="content-area">
-      <img class="content-area__bg" :src="props.contentBg" alt="" aria-hidden="true" />
+      <img class="content-area__bg" :src="props.contentBg" alt="" />
       <img
         v-if="props.contentOverlay"
         class="content-area__overlay"
         :src="props.contentOverlay"
         alt=""
-        aria-hidden="true"
       />
     </div>
 

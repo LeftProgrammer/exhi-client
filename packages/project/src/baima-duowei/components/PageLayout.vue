@@ -43,13 +43,7 @@ const props = withDefaults(
     <div class="sec-page__veil" />
 
     <!-- 全屏装饰图（可选） -->
-    <img
-      v-if="props.bgOverlay"
-      class="sec-page__overlay"
-      :src="props.bgOverlay"
-      alt=""
-      aria-hidden="true"
-    />
+    <img v-if="props.bgOverlay" class="sec-page__overlay" :src="props.bgOverlay" alt="" />
 
     <!-- 顶部标题：有 titleSrc 则显示图片，否则渲染 #header slot -->
     <header class="sec-page__header">
@@ -60,7 +54,7 @@ const props = withDefaults(
         :alt="props.titleAlt ?? ''"
       />
       <slot v-else name="header" />
-      <div class="sec-page__shine" aria-hidden="true" />
+      <div class="sec-page__shine" />
     </header>
 
     <!-- 页面内容区 -->

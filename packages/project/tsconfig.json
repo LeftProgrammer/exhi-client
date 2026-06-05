@@ -18,6 +18,7 @@
       "@shared/*": ["src/shared/*"],
       "@baima-yushui/*": ["src/baima-yushui-leaders/*"],
       "@baima-milestone/*": ["src/baima-milestone/*"],
+      "@baima-duowei/*": ["src/baima-duowei/*"],
       "@baima-research/*": ["src/baima-research/*"],
       "@baima-zhineng/*": ["src/baima-zhineng/*"],
       "@assets/*": ["contents/*"]
