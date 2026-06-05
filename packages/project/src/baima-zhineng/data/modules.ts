@@ -85,8 +85,7 @@ function makeTab(id: string, title: string, pages: ContentPage[] = []): TabDef {
 // ── 制度机制 ──
 // 已有素材：tab「工作室管理制度和工作职责」首页（标题 + 上下两段内容）。
 // 其余 tab 标题暂复用首个 tab 标题，待补充对应素材后替换。
-const ZHIDU_TITLE_GZSGL = url('modules/zhidu/title-gzsgl.png')
-const ZHIDU_TITLE_GZZ = url('modules/zhidu/gzz-title.png')
+const ZHIDU_TITLE_GZSGL = url('modules/zhidu/gzsgl-title.png')
 const zhidu: ModuleDef = {
   id: 'zhidu',
   name: '制度机制',
@@ -114,7 +113,7 @@ const zhidu: ModuleDef = {
         ]
       }
     ]),
-    makeTab('zhidu-gzz', ZHIDU_TITLE_GZZ, [
+    makeTab('zhidu-gzz', url('modules/zhidu/gzz-title.png'), [
       {
         blocks: [
           {
@@ -243,7 +242,7 @@ const zhidu: ModuleDef = {
 
 // ── 规划安排 ──
 // 标题为模块级（副标题固定列出两个 tab）；内容为表格，待补充。
-const GUIHUA_TITLE = url('modules/guihua/title.png')
+const GUIHUA_TITLE = url('modules/guihua/gzjh-title.png')
 const guihua: ModuleDef = {
   id: 'guihua',
   name: '规划安排',
@@ -255,7 +254,7 @@ const guihua: ModuleDef = {
       {
         blocks: [
           {
-            src: url('modules/zhidu/gzsgl-p1-a.png'),
+            src: url('modules/guihua/gzjh-p1.png'),
             left: 173,
             top: 1151,
             width: 1814,
@@ -264,13 +263,25 @@ const guihua: ModuleDef = {
         ]
       }
     ]),
-    makeTab('guihua-kygh', GUIHUA_TITLE)
+    makeTab('guihua-kygh', url('modules/guihua/kygh-title.png'), [
+      {
+        blocks: [
+          {
+            src: url('modules/guihua/kygh-p1.png'),
+            left: 173,
+            top: 1151,
+            width: 1814,
+            height: 890
+          }
+        ]
+      }
+    ])
   ]
 }
 
 // ── 行动举措 ──
 // 已有素材：tab「先锋引领 攻坚克难」首页（两段：标题 + 文字 + 照片墙）。
-const XINGDONG_TITLE_XFYL = url('modules/xingdong/title-xfyl.png')
+const XINGDONG_TITLE_XFYL = url('modules/xingdong/xfyl-title.png')
 const xingdong: ModuleDef = {
   id: 'xingdong',
   name: '行动举措',
@@ -278,10 +289,6 @@ const xingdong: ModuleDef = {
   icon: url('home/icon-xingdong.png'),
   layout: { left: 831, top: 2427, width: 1193, height: 828 },
   tabs: [
-    makeTab('xingdong-aqhh', XINGDONG_TITLE_XFYL),
-    makeTab('xingdong-jnqq', XINGDONG_TITLE_XFYL),
-    makeTab('xingdong-kycx', XINGDONG_TITLE_XFYL),
-    makeTab('xingdong-ljgj', XINGDONG_TITLE_XFYL),
     makeTab('xingdong-xfyl', XINGDONG_TITLE_XFYL, [
       {
         blocks: [
@@ -351,7 +358,11 @@ const xingdong: ModuleDef = {
         ]
       }
     ]),
-    makeTab('xingdong-xssw', XINGDONG_TITLE_XFYL)
+    makeTab('xingdong-xsjw', XINGDONG_TITLE_XFYL),
+    makeTab('xingdong-jnqq', XINGDONG_TITLE_XFYL),
+    makeTab('xingdong-aqhh', XINGDONG_TITLE_XFYL),
+    makeTab('xingdong-ljgj', XINGDONG_TITLE_XFYL),
+    makeTab('xingdong-kycx', XINGDONG_TITLE_XFYL)
   ]
 }
 
