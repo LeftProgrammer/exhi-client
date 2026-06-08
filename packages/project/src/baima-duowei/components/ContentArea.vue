@@ -218,10 +218,10 @@ const overlayComputedStyle = computed(() => {
 /* 内容区上层覆盖：基于 content-area__wrapper（页面级）独立定位 */
 .content-area__overlay {
   position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  top: d.h(302);
+  left: d.w(191);
+  width: d.w(3458);
+  height: d.h(1762);
   object-fit: fill;
   z-index: 0;
   pointer-events: none;

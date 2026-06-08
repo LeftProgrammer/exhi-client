@@ -27,9 +27,12 @@ const a1 = {
 // Activity 2
 const a2 = {
   blockTitle: resolvePkgUrl('activity/activity2/block-title.png'),
+  overlay: resolvePkgUrl('activity/activity2/content-overlay.png'),
   subTitle: resolvePkgUrl('activity/activity2/sub-title.png'),
   textImg: resolvePkgUrl('activity/activity2/text-img.png'),
-  bottomImg: resolvePkgUrl('activity/activity2/bottom-img.png')
+  bottomImg1: resolvePkgUrl('activity/activity2/bottom-img-1.png'),
+  bottomImg2: resolvePkgUrl('activity/activity2/bottom-img-2.png'),
+  bottomImg3: resolvePkgUrl('activity/activity2/bottom-img-3.png')
 }
 
 // Activity 3
@@ -61,6 +64,12 @@ const a5 = {
 const a6 = {
   blockTitle: resolvePkgUrl('activity/activity6/block-title.png'),
   overlay: resolvePkgUrl('activity/activity6/content-overlay.png'),
+  overlayStyle: {
+    top: 'd.h(693)',
+    left: 'd.w(330)',
+    width: 'd.w(1334)',
+    height: 'd.h(477)'
+  },
   subTitle: resolvePkgUrl('activity/activity6/sub-title.png'),
   leftImgs: [1, 2, 3, 4, 5].map((n) => resolvePkgUrl(`activity/activity6/left-img-${n}.png`)),
   rightText: resolvePkgUrl('activity/activity6/right-text.png'),
@@ -121,6 +130,7 @@ onBeforeUnmount(stopA6AutoPlay)
         v-else-if="page === 1"
         key="activity2"
         :content-bg="contentBg"
+        :content-overlay="a2.overlay"
         :block-title="a2.blockTitle"
         :show-page-nav="true"
         @prev="goPrev"
@@ -129,7 +139,9 @@ onBeforeUnmount(stopA6AutoPlay)
         <div class="a2">
           <div class="a2__sub-title"><img :src="a2.subTitle" alt="" /></div>
           <div class="a2__text-img"><img :src="a2.textImg" alt="" /></div>
-          <div class="a2__bottom-img"><img :src="a2.bottomImg" alt="" /></div>
+          <div class="a2__bottom-img1"><img :src="a2.bottomImg1" alt="" /></div>
+          <div class="a2__bottom-img2"><img :src="a2.bottomImg2" alt="" /></div>
+          <div class="a2__bottom-img3"><img :src="a2.bottomImg3" alt="" /></div>
         </div>
       </ContentArea>
 
@@ -144,6 +156,7 @@ onBeforeUnmount(stopA6AutoPlay)
         @next="goNext"
       >
         <div class="a3">
+          <div class="a3__bg"></div>
           <div class="a3__sub-title"><img :src="a3.subTitle" alt="" /></div>
           <div class="a3__left-text"><img :src="a3.leftText" alt="" /></div>
           <div class="a3__right-img"><img :src="a3.rightImg" alt="" /></div>
@@ -162,6 +175,7 @@ onBeforeUnmount(stopA6AutoPlay)
         @next="goNext"
       >
         <div class="a4">
+          <div class="a4__bg"></div>
           <div class="a4__left-title"><img :src="a4.leftTitle" alt="" /></div>
           <div class="a4__left-text"><img :src="a4.leftText" alt="" /></div>
           <div class="a4__right-img"><img :src="a4.rightImg" alt="" /></div>
@@ -179,6 +193,7 @@ onBeforeUnmount(stopA6AutoPlay)
         @next="goNext"
       >
         <div class="a5">
+          <div class="a5__bg"></div>
           <div class="a5__left-img"><img :src="a5.leftImg" alt="" /></div>
           <div class="a5__right-title"><img :src="a5.rightTitle" alt="" /></div>
           <div class="a5__right-text"><img :src="a5.rightText" alt="" /></div>
@@ -191,12 +206,14 @@ onBeforeUnmount(stopA6AutoPlay)
         key="activity6"
         :content-bg="contentBg"
         :content-overlay="a6.overlay"
+        :content-overlay-style="a6.overlayStyle"
         :block-title="a6.blockTitle"
         :show-page-nav="true"
         @prev="goPrev"
         @next="goNext"
       >
         <div class="a6" @mouseenter="stopA6AutoPlay" @mouseleave="startA6AutoPlay">
+          <div class="a6__bg"></div>
           <div class="a6__sub-title"><img :src="a6.subTitle" alt="" /></div>
           <div class="a6__left-img"><img :src="a6.leftImgs[activeIndex]" alt="" /></div>
           <div class="a6__right-text"><img :src="a6.rightText" alt="" /></div>
@@ -339,17 +356,45 @@ onBeforeUnmount(stopA6AutoPlay)
     }
   }
 
-  &__bottom-img {
+  &__bottom-img1 {
     position: absolute;
-    top: d.h(1225);
-    right: d.w(356);
-    bottom: d.h(369);
-    left: d.w(356);
+    top: d.h(1226);
+    left: d.w(682);
+    width: d.w(750);
+    height: d.h(385);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 1s);
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
+    }
+  }
+
+  &__bottom-img2 {
+    position: absolute;
+    top: d.h(1225);
+    left: d.w(1545);
+    width: d.w(750);
+    height: d.h(386);
+    @include fx.enter-fade-in($duration: 0.7s, $delay: 1.1s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: fill;
+    }
+  }
+
+  &__bottom-img3 {
+    position: absolute;
+    top: d.h(1225);
+    left: d.w(2409);
+    width: d.w(752);
+    height: d.h(386);
+    @include fx.enter-fade-in($duration: 0.7s, $delay: 1.2s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: fill;
     }
   }
 }
@@ -358,6 +403,16 @@ onBeforeUnmount(stopA6AutoPlay)
 .a3 {
   position: absolute;
   inset: 0;
+
+  &__bg {
+    position: absolute;
+    top: d.h(1172);
+    left: d.w(358);
+    width: d.w(1913);
+    height: d.h(590);
+    background: radial-gradient(circle at 0% 0%, #0042B0, #000000);
+    opacity: 0.5;
+  }
 
   &__sub-title {
     position: absolute;
@@ -407,6 +462,16 @@ onBeforeUnmount(stopA6AutoPlay)
   position: absolute;
   inset: 0;
 
+  &__bg {
+    position: absolute;
+    top: d.h(852);
+    left: d.w(358);
+    width: d.w(3120);
+    height: d.h(910);
+    background: radial-gradient(circle at 0% 0%, #0042B0, #000000);
+    opacity: 0.5;
+  }
+
   &__left-title {
     position: absolute;
     top: d.h(778);
@@ -455,6 +520,16 @@ onBeforeUnmount(stopA6AutoPlay)
   position: absolute;
   inset: 0;
 
+  &__bg {
+    position: absolute;
+    top: d.h(994);
+    left: d.w(1571);
+    width: d.w(1914);
+    height: d.h(590);
+    background: radial-gradient(circle at 0% 0%, #0042B0, #000000);
+    opacity: 0.5;
+  }
+
   &__left-img {
     position: absolute;
     top: d.h(802);
@@ -502,6 +577,16 @@ onBeforeUnmount(stopA6AutoPlay)
 .a6 {
   position: absolute;
   inset: 0;
+
+  &__bg {
+    position: absolute;
+    top: d.h(1177);
+    left: d.w(1721);
+    width: d.w(1765);
+    height: d.h(591);
+    background: radial-gradient(circle at 0% 0%, #0042B0, #000000);
+    opacity: 0.5;
+  }
 
   &__sub-title {
     position: absolute;

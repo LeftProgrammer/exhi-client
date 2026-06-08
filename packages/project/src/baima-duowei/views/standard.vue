@@ -13,6 +13,7 @@ const contentBg = resolvePkgUrl('shared/content-bg.png')
 // Standard 1
 const s1 = {
   blockTitle: resolvePkgUrl('standard/standard1/block-title.png'),
+  overlay: resolvePkgUrl('standard/standard1/content-overlay.png'),
   topLeftText: resolvePkgUrl('standard/standard1/top-left-text.png'),
   topRightImg1: resolvePkgUrl('standard/standard1/top-right-img1.png'),
   topRightImg2: resolvePkgUrl('standard/standard1/top-right-img2.png'),
@@ -31,7 +32,8 @@ const s3 = {
   blockTitle: resolvePkgUrl('standard/standard3/block-title.png'),
   topText: resolvePkgUrl('standard/standard3/top-text.png'),
   bottomLeftImg: resolvePkgUrl('standard/standard3/bottom-left-img.png'),
-  bottomRightImg: resolvePkgUrl('standard/standard3/bottom-right-img.png')
+  bottomRightText: resolvePkgUrl('standard/standard3/bottom-right-text.png'),
+  bottomRightBg: resolvePkgUrl('standard/standard3/bottom-right-bg.png')
 }
 
 // Standard 4
@@ -50,6 +52,7 @@ const s4 = {
         v-if="page === 0"
         key="standard1"
         :content-bg="contentBg"
+        :content-overlay="s1.overlay"
         :block-title="s1.blockTitle"
         :show-page-nav="true"
         @prev="goPrev"
@@ -100,7 +103,8 @@ const s4 = {
         <div class="s3">
           <div class="s3__top-text"><img :src="s3.topText" alt="" /></div>
           <div class="s3__bl-img"><img :src="s3.bottomLeftImg" alt="" /></div>
-          <div class="s3__br-img"><img :src="s3.bottomRightImg" alt="" /></div>
+          <div class="s3__br-bg"><img :src="s3.bottomRightBg" alt="" /></div>
+          <div class="s3__br-text"><img :src="s3.bottomRightText" alt="" /></div>
         </div>
       </ContentArea>
 
@@ -142,15 +146,15 @@ const s4 = {
 
   &__top-left-text {
     position: absolute;
-    top: d.h(722);
-    right: d.w(1283);
-    bottom: d.h(952);
-    left: d.w(403);
+    top: d.h(875);
+    right: d.w(1331);
+    bottom: d.h(1134);
+    left: d.w(449);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.6s);
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -164,7 +168,7 @@ const s4 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -178,7 +182,7 @@ const s4 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -199,7 +203,7 @@ const s4 = {
       img {
         width: 100%;
         height: 100%;
-        object-fit: contain;
+        object-fit: fill;
       }
     }
   }
@@ -220,7 +224,7 @@ const s4 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -244,7 +248,7 @@ const s4 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
       @include fx.enter-fade-in($duration: 0.7s, $delay: 0.8s);
     }
   }
@@ -265,7 +269,7 @@ const s4 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -279,21 +283,35 @@ const s4 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
-  &__br-img {
+  &__br-bg {
+    position: absolute;
+    top: d.h(1058);
+    left: d.w(2651);
+    width: d.w(964);
+    height: d.h(599);
+    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.8s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: fill;
+    }
+  }
+
+  &__br-text {
     position: absolute;
     top: d.h(1176);
-    right: d.w(395);
-    bottom: d.h(654);
     left: d.w(2792);
+    width: d.w(653);
+    height: d.h(330);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.9s);
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 }
@@ -313,7 +331,7 @@ const s4 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -327,7 +345,7 @@ const s4 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 }
