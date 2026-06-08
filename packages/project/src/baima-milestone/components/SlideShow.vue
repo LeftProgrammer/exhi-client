@@ -11,7 +11,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, type Component } from 'vue'
 import { slides, IDLE_MS } from '@baima-milestone/data/slides'
-import { slideFadeOut, slideFadeIn } from '@baima-milestone/effects/gsapPresets'
+import { slideFadeOut, slideFadeIn, type SlideDir } from '@baima-milestone/effects/gsapPresets'
 import Page1 from './Page1.vue'
 import Page2 from './Page2.vue'
 import Page3 from './Page3.vue'
@@ -28,6 +28,7 @@ const COMPONENT_MAP: Record<string, Component | null> = {
 
 const currentIndex = ref(0)
 const pageRef = ref<{ play: () => void; reset: () => void } | null>(null)
+let lastDir: SlideDir = 'next'
 
 const currentComponent = computed(() => {
   const id = slides[currentIndex.value]?.id ?? ''
@@ -37,6 +38,7 @@ const currentComponent = computed(() => {
 function goto(i: number) {
   if (i < 0 || i >= slides.length) return
   if (i === currentIndex.value) return
+  lastDir = i > currentIndex.value ? 'next' : 'prev'
   currentIndex.value = i
   resetIdle()
 }
@@ -83,15 +85,19 @@ onBeforeUnmount(() => {
 })
 
 function onLeave(el: Element, done: () => void) {
-  slideFadeOut(el, done)
+  slideFadeOut(el, done, lastDir)
 }
 
 function onEnter(el: Element, done: () => void) {
   pageRef.value?.reset()
-  slideFadeIn(el, () => {
-    pageRef.value?.play()
-    done()
-  })
+  slideFadeIn(
+    el,
+    () => {
+      pageRef.value?.play()
+      done()
+    },
+    lastDir
+  )
 }
 </script>
 

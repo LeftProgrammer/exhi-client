@@ -17,9 +17,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import gsap from 'gsap'
 import { resolvePkgUrl } from '@shared/utils/url'
-import { playEnterSequence } from '@baima-milestone/effects/gsapPresets'
+import { useTimelinePage } from '@baima-milestone/composables/useTimelinePage'
 import PageLayout from './PageLayout.vue'
 
 const url = resolvePkgUrl
@@ -33,28 +32,7 @@ function setItemRef(el: unknown, i: number) {
   if (el instanceof HTMLImageElement) itemRefs[i] = el
 }
 
-let tl: gsap.core.Timeline | null = null
-
-function play() {
-  tl?.kill()
-  layoutRef.value?.resetScroll()
-  const headers = [layoutRef.value?.bgEl, topBarRef.value, titleRef.value].filter(
-    Boolean
-  ) as Element[]
-  const rows = itemRefs.filter(Boolean) as Element[]
-  tl = playEnterSequence(headers, rows)
-  tl.then(() => layoutRef.value?.scheduleAutoScroll())
-}
-
-function reset() {
-  tl?.kill()
-  tl = null
-  layoutRef.value?.resetScroll()
-  const headers = [layoutRef.value?.bgEl, topBarRef.value, titleRef.value].filter(Boolean)
-  const rows = itemRefs.filter(Boolean)
-  gsap.set(headers, { opacity: 0 })
-  gsap.set(rows, { opacity: 0, x: 0 })
-}
+const { play, reset } = useTimelinePage(layoutRef, topBarRef, titleRef, itemRefs)
 
 defineExpose({ play, reset })
 </script>

@@ -1,11 +1,14 @@
 import { gsap } from 'gsap'
 
-export function slideFadeOut(el: Element, done: () => void) {
-  gsap.to(el, { duration: 0.5, ease: 'power2.in', x: -80, opacity: 0, onComplete: done })
+export type SlideDir = 'next' | 'prev'
+
+export function slideFadeOut(el: Element, done: () => void, dir: SlideDir = 'next') {
+  const x = dir === 'next' ? -80 : 80
+  gsap.to(el, { duration: 0.5, ease: 'power2.in', x, opacity: 0, onComplete: done })
 }
 
-export function slideFadeIn(el: Element, done: () => void) {
-  gsap.set(el, { x: 80, opacity: 0 })
+export function slideFadeIn(el: Element, done: () => void, dir: SlideDir = 'next') {
+  gsap.set(el, { x: dir === 'next' ? 80 : -80, opacity: 0 })
   gsap.to(el, { delay: 0.05, duration: 0.65, ease: 'expo.out', x: 0, opacity: 1, onComplete: done })
 }
 

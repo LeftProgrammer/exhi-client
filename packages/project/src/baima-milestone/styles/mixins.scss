@@ -1,0 +1,62 @@
+@use "@shared/styles/design" as d;
+
+@mixin timeline-entry($dot-top, $line-top, $line-left: d.w(135)) {
+  .entry-wrapper {
+    position: relative;
+    width: 100%;
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+
+  .entry-item {
+    position: relative;
+    z-index: 0;
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .breath-dot {
+    position: absolute;
+    top: $dot-top;
+    left: d.w(110);
+    width: d.w(50);
+    aspect-ratio: 1;
+    will-change: transform;
+    border-radius: 50%;
+    background: #65e6e1;
+    box-shadow:
+      0 0 d.w(8) rgba(101, 230, 225, 0.85),
+      0 0 d.w(20) rgba(101, 230, 225, 0.55);
+    z-index: 10;
+    animation: breathe 2.2s ease-in-out infinite;
+  }
+
+  .breath-line {
+    position: absolute;
+    top: $line-top;
+    left: $line-left;
+    width: d.w(4);
+    will-change: transform;
+    height: calc(100% + var(--content-gap));
+    background: #65e6e1;
+    z-index: 5;
+  }
+
+  @keyframes breathe {
+    0%,
+    100% {
+      transform: scale(1);
+      box-shadow:
+        0 0 d.w(4) rgba(101, 230, 225, 0.5),
+        0 0 d.w(10) rgba(101, 230, 225, 0.2);
+    }
+    50% {
+      transform: scale(1.5);
+      box-shadow:
+        0 0 d.w(12) rgba(200, 255, 252, 0.9),
+        0 0 d.w(28) rgba(101, 230, 225, 0.8),
+        0 0 d.w(48) rgba(101, 230, 225, 0.3);
+    }
+  }
+}

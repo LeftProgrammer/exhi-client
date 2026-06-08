@@ -23,9 +23,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import gsap from 'gsap'
 import { resolvePkgUrl } from '@shared/utils/url'
-import { playEnterSequence } from '@baima-milestone/effects/gsapPresets'
+import { useTimelinePage } from '@baima-milestone/composables/useTimelinePage'
 import PageLayout from './PageLayout.vue'
 
 const url = resolvePkgUrl
@@ -40,100 +39,15 @@ function setWrapperRef(el: unknown, i: number) {
   if (el instanceof HTMLElement) wrapperRefs[i] = el
 }
 
-let tl: gsap.core.Timeline | null = null
-
-function play() {
-  tl?.kill()
-  layoutRef.value?.resetScroll()
-
-  const headers = [layoutRef.value?.bgEl, topBarRef.value, titleRef.value].filter(
-    Boolean
-  ) as Element[]
-  const rows = wrapperRefs.filter(Boolean) as Element[]
-
-  const dots = wrapperRefs.map((w) => w.querySelector('.breath-dot')).filter(Boolean)
-  const lines = wrapperRefs.map((w) => w.querySelector('.breath-line')).filter(Boolean)
-  gsap.set(dots, { opacity: 1, scale: 1 })
-
-  tl = playEnterSequence(headers, rows, lines)
-  if (!tl) return
-
-  tl.call(() => layoutRef.value?.scheduleAutoScroll(), undefined, 1.8)
-}
-
-function reset() {
-  tl?.kill()
-  tl = null
-  layoutRef.value?.resetScroll()
-
-  const headers = [layoutRef.value?.bgEl, topBarRef.value, titleRef.value].filter(Boolean)
-  gsap.set(headers, { opacity: 0 })
-  gsap.set(wrapperRefs.filter(Boolean), { opacity: 0, x: 0 })
-
-  const dots = wrapperRefs.map((w) => w.querySelector('.breath-dot')).filter(Boolean)
-  const lines = wrapperRefs.map((w) => w.querySelector('.breath-line')).filter(Boolean)
-  gsap.set(dots, { opacity: 1, scale: 1 })
-  gsap.set(lines, { opacity: 0, scaleY: 0, transformOrigin: 'top center' })
-}
+const { play, reset } = useTimelinePage(layoutRef, topBarRef, titleRef, wrapperRefs, {
+  timeline: true
+})
 
 defineExpose({ play, reset })
 </script>
 
 <style lang="scss" scoped>
-.entry-wrapper {
-  position: relative;
-  width: 100%;
-  opacity: 0;
-  will-change: transform, opacity;
-}
+@use '@baima-milestone/styles/mixins' as local;
 
-.entry-item {
-  position: relative;
-  z-index: 0;
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-.breath-dot {
-  position: absolute;
-  top: d.h(76);
-  left: d.w(110);
-  width: d.w(50);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: #65e6e1;
-  box-shadow:
-    0 0 d.w(8) rgba(101, 230, 225, 0.85),
-    0 0 d.w(20) rgba(101, 230, 225, 0.55);
-  z-index: 10;
-  animation: breathe 2.2s ease-in-out infinite;
-}
-
-.breath-line {
-  position: absolute;
-  top: d.h(130);
-  left: d.w(135);
-  width: d.w(4);
-  height: calc(100% + var(--content-gap));
-  background: #65e6e1;
-  z-index: 5;
-}
-
-@keyframes breathe {
-  0%,
-  100% {
-    transform: scale(1);
-    box-shadow:
-      0 0 d.w(4) rgba(101, 230, 225, 0.5),
-      0 0 d.w(10) rgba(101, 230, 225, 0.2);
-  }
-  50% {
-    transform: scale(1.5);
-    box-shadow:
-      0 0 d.w(12) rgba(200, 255, 252, 0.9),
-      0 0 d.w(28) rgba(101, 230, 225, 0.8),
-      0 0 d.w(48) rgba(101, 230, 225, 0.3);
-  }
-}
+@include local.timeline-entry(d.h(76), d.h(130));
 </style>
