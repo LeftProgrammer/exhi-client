@@ -83,18 +83,35 @@ defineExpose({ bgEl: bgRef, decoEl: decoRef, scheduleAutoScroll, resetScroll })
   flex-shrink: 0;
 }
 
+:slotted(.header-bg) {
+  width: 100%;
+  height: d.h(330);
+  display: block;
+  opacity: 0;
+}
+
+:slotted(.header-title) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: d.h(228);
+  opacity: 0;
+}
+
 .scroll-wrapper {
   position: relative;
   z-index: 2;
   flex: 1;
   overflow: hidden;
-  margin: 6% 10% 12% 10%;
+  margin: d.h(150) d.w(178) d.h(400) d.w(174);
 }
 
 .scroll-content {
   display: flex;
   flex-direction: column;
-  gap: var(--content-gap, 56px);
+  --content-gap: #{d.h(56)};
+  gap: var(--content-gap);
   will-change: transform;
 }
 </style>

@@ -48,8 +48,8 @@ export function usePageScroll(
   function startAutoScroll() {
     if (!canScroll() || !contentRef.value) return
     const max = maxScroll()
-    // 每 100px 约 2s，最少 8s
-    const duration = Math.max(8, (max / 100) * 2)
+    // 每 100px 约 3.5s，最少 12s（整体慢速、和缓）
+    const duration = Math.max(12, (max / 100) * 3.5)
     scrollTween = gsap.to(contentRef.value, {
       y: -max,
       duration,

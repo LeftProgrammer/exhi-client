@@ -60,20 +60,6 @@ defineExpose({ play, reset })
 </script>
 
 <style lang="scss" scoped>
-.header-bg {
-  width: 100%;
-  display: block;
-  opacity: 0;
-}
-
-.header-title {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  opacity: 0;
-}
-
 .row-item {
   width: 100%;
   height: auto;

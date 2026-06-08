@@ -15,9 +15,8 @@
         :src="url(`page2/entry-${String(i + 1).padStart(2, '0')}.png`)"
         alt=""
       />
-      <div :ref="(el) => setHighlightRef(el, i)" class="date-highlight">
-        <div class="date-scan" :class="{ scanning: scanActive }" :style="{ '--i': i }" />
-      </div>
+      <div class="breath-line" v-if="i < ENTRY_COUNT - 1" />
+      <div class="breath-dot" />
     </div>
   </PageLayout>
 </template>
@@ -37,22 +36,15 @@ const layoutRef = ref<InstanceType<typeof PageLayout> | null>(null)
 const topBarRef = ref<HTMLImageElement | null>(null)
 const titleRef = ref<HTMLImageElement | null>(null)
 const wrapperRefs: HTMLElement[] = []
-const highlightRefs: HTMLElement[] = []
-const scanActive = ref(false)
 
 function setWrapperRef(el: unknown, i: number) {
   if (el instanceof HTMLElement) wrapperRefs[i] = el
-}
-
-function setHighlightRef(el: unknown, i: number) {
-  if (el instanceof HTMLElement) highlightRefs[i] = el
 }
 
 let tl: gsap.core.Timeline | null = null
 
 function play() {
   tl?.kill()
-  scanActive.value = false
   layoutRef.value?.resetScroll()
 
   const headers = [
@@ -62,15 +54,15 @@ function play() {
     titleRef.value
   ].filter(Boolean) as Element[]
   const rows = wrapperRefs.filter(Boolean) as Element[]
-  const highlights = highlightRefs.filter(Boolean) as Element[]
 
-  gsap.set(highlights, { opacity: 0 })
+  const dots = wrapperRefs.map((w) => w.querySelector('.breath-dot')).filter(Boolean)
+  const lines = wrapperRefs.map((w) => w.querySelector('.breath-line')).filter(Boolean)
+  // 圆点入场即显示，直接开始呼吸；线段由 playEnterSequence 内部同步生长
+  gsap.set(dots, { opacity: 1, scale: 1 })
 
-  tl = playEnterSequence(headers, rows)
-  tl.to(highlights, { opacity: 1, duration: 0.4, ease: 'power2.out', stagger: 0.06 }, '>')
-  tl.call(() => {
-    scanActive.value = true
-  })
+  tl = playEnterSequence(headers, rows, lines)
+  if (!tl) return
+
   // 用「绝对时刻」安排自动滚动：从入场开始固定 SCROLL_ARM_AT 秒后触发，
   // 与行数/数据量解耦——首屏可见的前几行此时已入场完，后续行随滚动再补入即可。
   // 这样无论多少条数据，滚动启动时刻恒定，不会数据越多等越久。
@@ -80,7 +72,6 @@ function play() {
 function reset() {
   tl?.kill()
   tl = null
-  scanActive.value = false
   layoutRef.value?.resetScroll()
 
   const headers = [
@@ -91,53 +82,17 @@ function reset() {
   ].filter(Boolean)
   gsap.set(headers, { opacity: 0 })
   gsap.set(wrapperRefs.filter(Boolean), { opacity: 0, x: 0 })
-  gsap.set(highlightRefs.filter(Boolean), { opacity: 0 })
+
+  const dots = wrapperRefs.map((w) => w.querySelector('.breath-dot')).filter(Boolean)
+  const lines = wrapperRefs.map((w) => w.querySelector('.breath-line')).filter(Boolean)
+  gsap.set(dots, { opacity: 1, scale: 1 })
+  gsap.set(lines, { opacity: 0, scaleY: 0, transformOrigin: 'top center' })
 }
 
 defineExpose({ play, reset })
 </script>
 
 <style lang="scss" scoped>
-@keyframes scan-sweep {
-  0% {
-    transform: translateX(-160%);
-    opacity: 1;
-  }
-
-  60% {
-    transform: translateX(210%);
-    opacity: 1;
-  }
-
-  61% {
-    opacity: 0;
-  }
-
-  99% {
-    transform: translateX(-160%);
-    opacity: 0;
-  }
-
-  100% {
-    transform: translateX(-160%);
-    opacity: 1;
-  }
-}
-
-.header-bg {
-  width: 100%;
-  display: block;
-  opacity: 0;
-}
-
-.header-title {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  opacity: 0;
-}
-
 .entry-wrapper {
   position: relative;
   width: 100%;
@@ -146,49 +101,52 @@ defineExpose({ play, reset })
 }
 
 .entry-item {
+  position: relative;
+  z-index: 0;
   width: 100%;
-  height: auto;
+  height: d.h(652);
   display: block;
 }
 
-/* 无边框无背景，仅裁剪扫光不溢出 */
-.date-highlight {
+.breath-dot {
   position: absolute;
-  top: 20%;
-  left: 3%;
-  width: 45%;
-  height: 18%;
-  // overflow: hidden;
-  pointer-events: none;
-  opacity: 0;
+  top: d.h(185);
+  left: d.w(110);
+  width: d.w(50);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #65e6e1;
+  box-shadow:
+    0 0 d.w(8) rgba(101, 230, 225, 0.85),
+    0 0 d.w(20) rgba(101, 230, 225, 0.55);
+  z-index: 10;
+  animation: breathe 2.2s ease-in-out infinite;
 }
 
-.date-scan {
+.breath-line {
   position: absolute;
-  left: 0;
-  width: 50%;
-  height: 120%;
-  opacity: 0;
-  background: linear-gradient(
-    108deg,
-    transparent 0%,
-    rgba(100, 210, 255, 0.05) 18%,
-    rgba(160, 235, 255, 0.3) 32%,
-    rgba(210, 248, 255, 0.7) 44%,
-    rgba(255, 255, 255, 0.95) 50%,
-    rgba(210, 248, 255, 0.7) 56%,
-    rgba(160, 235, 255, 0.3) 68%,
-    rgba(100, 210, 255, 0.05) 82%,
-    transparent 100%
-  );
-  filter: blur(2px);
+  top: d.h(195);
+  left: d.w(135);
+  width: d.w(4);
+  height: calc(100% + var(--content-gap));
+  background: #65e6e1;
+  z-index: 5;
+}
 
-  &.scanning {
-    // 周期5s，扫光占38%≈1.9s，相邻错开1.25s → 相邻卡片有0.65s重叠，形成飘带感
-    // delay = i*1.25 - 5  → 负延迟让动画立即从对应相位开始，顺序1→2→3→4
-    // 正延迟：入场时严格从 card 0 开始，每张错开 0.3s 向下级联
-    animation: scan-sweep 2s linear infinite;
-    animation-delay: calc(var(--i) * 0.3s);
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow:
+      0 0 d.w(4) rgba(101, 230, 225, 0.5),
+      0 0 d.w(10) rgba(101, 230, 225, 0.2);
+  }
+  50% {
+    transform: scale(1.5);
+    box-shadow:
+      0 0 d.w(12) rgba(200, 255, 252, 0.9),
+      0 0 d.w(28) rgba(101, 230, 225, 0.8),
+      0 0 d.w(48) rgba(101, 230, 225, 0.3);
   }
 }
 </style>
