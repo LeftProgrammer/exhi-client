@@ -26,8 +26,8 @@ const props = defineProps<{
   contentBg: string
   /** 内容区上层装饰覆盖图（可选，基于页面级定位，不随 contentBg 尺寸） */
   contentOverlay?: string
-  /** overlay 定位样式：{ top, left, width, height }（默认 inset:0 填满） */
-  contentOverlayStyle?: { top?: string; left?: string; width?: string; height?: string }
+  /** overlay 定位样式：{ top, right, bottom, left, width, height }（默认 inset:0 填满） */
+  contentOverlayStyle?: { top?: string; right?: string; bottom?: string; left?: string; width?: string; height?: string }
   /** 顶部标题块图片（背景+文字合一） */
   blockTitle: string
   /** 是否显示上一页/下一页导航按钮 */
@@ -67,14 +67,17 @@ const overlayComputedStyle = computed(() => {
   if (!props.contentOverlayStyle) return undefined
   const s = props.contentOverlayStyle
   const style: Record<string, string> = {}
-  if (s.top) style.top = resolveDesignValue(s.top)!
-  if (s.left) style.left = resolveDesignValue(s.left)!
-  if (s.width) style.width = resolveDesignValue(s.width)!
-  if (s.height) style.height = resolveDesignValue(s.height)!
-  // 一旦自定义了定位/大小，取消 inset:0 的 right/bottom 约束
+  const keys = ['top', 'right', 'bottom', 'left', 'width', 'height'] as const
+  for (const k of keys) {
+    const v = s[k]
+    if (v) style[k] = resolveDesignValue(v)!
+  }
+  // 一旦自定义了定位/大小，取消默认 inset:0 的约束
   if (Object.keys(style).length > 0) {
-    style.right = 'auto'
-    style.bottom = 'auto'
+    if (!style.top) style.top = 'auto'
+    if (!style.right) style.right = 'auto'
+    if (!style.bottom) style.bottom = 'auto'
+    if (!style.left) style.left = 'auto'
   }
   return style
 })
@@ -215,10 +218,10 @@ const overlayComputedStyle = computed(() => {
 /* 内容区上层覆盖：基于 content-area__wrapper（页面级）独立定位 */
 .content-area__overlay {
   position: absolute;
-  top: d.h(302);
-  right: d.w(191);
-  bottom: d.h(96);
-  left: d.w(191);
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   object-fit: fill;
   z-index: 0;
   pointer-events: none;

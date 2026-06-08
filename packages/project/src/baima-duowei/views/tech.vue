@@ -16,6 +16,12 @@ const contentBg = resolvePkgUrl('shared/content-bg.png')
 const t1 = {
   blockTitle: resolvePkgUrl('tech/tech1/block-title.png'),
   overlay: resolvePkgUrl('tech/tech1/content-overlay.png'),
+  overlayStyle: {
+    top: 'd.h(302)',
+    left: 'd.w(191)',
+    width: 'd.w(3458)',
+    height: 'd.h(1762)'
+  },
   leftTop: resolvePkgUrl('tech/tech1/left-top.png'),
   leftBottom: resolvePkgUrl('tech/tech1/left-bottom.png'),
   rightText: resolvePkgUrl('tech/tech1/right-text.png')
@@ -65,6 +71,12 @@ const t4 = {
 const t5 = {
   blockTitle: resolvePkgUrl('tech/tech5/block-title.png'),
   overlay: resolvePkgUrl('tech/tech5/content-overlay.png'),
+  overlayStyle: {
+    top: 'd.h(302)',
+    left: 'd.w(191)',
+    width: 'd.w(3458)',
+    height: 'd.h(1762)'
+  },
   leftTitle: resolvePkgUrl('tech/tech5/left-title.png'),
   leftImg: resolvePkgUrl('tech/tech5/left-img.png'),
   leftText: resolvePkgUrl('tech/tech5/left-text.png'),
@@ -77,6 +89,12 @@ const t5 = {
 const t6 = {
   blockTitle: resolvePkgUrl('tech/tech6/block-title.png'),
   overlay: resolvePkgUrl('tech/tech6/content-overlay.png'),
+  overlayStyle: {
+    top: 'd.h(302)',
+    left: 'd.w(191)',
+    width: 'd.w(3458)',
+    height: 'd.h(1762)'
+  },
   topText: resolvePkgUrl('tech/tech6/top-text.png'),
   bottomLeftImg: resolvePkgUrl('tech/tech6/bottom-left-img.png'),
   bottomRightImg: resolvePkgUrl('tech/tech6/bottom-right-img.png')
@@ -97,6 +115,12 @@ const t7 = {
 const t8 = {
   blockTitle: resolvePkgUrl('tech/tech8/block-title.png'),
   overlay: resolvePkgUrl('tech/tech8/content-overlay.png'),
+  overlayStyle: {
+    top: 'd.h(302)',
+    left: 'd.w(191)',
+    width: 'd.w(3458)',
+    height: 'd.h(1762)'
+  },
   topText: resolvePkgUrl('tech/tech8/top-text.png'),
   bottomLeftImg: resolvePkgUrl('tech/tech8/bottom-left-img.png'),
   bottomRightImg: resolvePkgUrl('tech/tech8/bottom-right-img.png')
@@ -106,6 +130,12 @@ const t8 = {
 const t9 = {
   blockTitle: resolvePkgUrl('tech/tech9/block-title.png'),
   overlay: resolvePkgUrl('tech/tech9/content-overlay.png'),
+  overlayStyle: {
+    top: 'd.h(302)',
+    left: 'd.w(191)',
+    width: 'd.w(3458)',
+    height: 'd.h(1762)'
+  },
   topText: resolvePkgUrl('tech/tech9/top-text.png'),
   bottomLeftImg: resolvePkgUrl('tech/tech9/bottom-left-img.png'),
   bottomRightImg: resolvePkgUrl('tech/tech9/bottom-right-img.png')
@@ -121,6 +151,7 @@ const t9 = {
         key="tech1"
         :content-bg="contentBg"
         :content-overlay="t1.overlay"
+        :content-overlay-style="t1.overlayStyle"
         :block-title="t1.blockTitle"
         :show-page-nav="true"
         @prev="goPrev"
@@ -207,12 +238,15 @@ const t9 = {
         key="tech5"
         :content-bg="contentBg"
         :content-overlay="t5.overlay"
+        :content-overlay-style="t5.overlayStyle"
         :block-title="t5.blockTitle"
         :show-page-nav="true"
         @prev="goPrev"
         @next="goNext"
       >
         <div class="t5">
+          <div class="t5__left-bg"></div>
+          <div class="t5__right-bg"></div>
           <div class="t5__left-title"><img :src="t5.leftTitle" alt="" /></div>
           <div class="t5__left-img"><img :src="t5.leftImg" alt="" /></div>
           <div class="t5__left-text"><img :src="t5.leftText" alt="" /></div>
@@ -228,6 +262,7 @@ const t9 = {
         key="tech6"
         :content-bg="contentBg"
         :content-overlay="t6.overlay"
+        :content-overlay-style="t6.overlayStyle"
         :block-title="t6.blockTitle"
         :show-page-nav="true"
         @prev="goPrev"
@@ -251,6 +286,8 @@ const t9 = {
         @next="goNext"
       >
         <div class="t7">
+          <div class="t7__left-bg"></div>
+          <div class="t7__right-bg"></div>
           <div class="t7__left-title"><img :src="t7.leftTitle" alt="" /></div>
           <div class="t7__left-text"><img :src="t7.leftText" alt="" /></div>
           <div class="t7__left-img"><img :src="t7.leftImg" alt="" /></div>
@@ -266,6 +303,7 @@ const t9 = {
         key="tech8"
         :content-bg="contentBg"
         :content-overlay="t8.overlay"
+        :content-overlay-style="t8.overlayStyle"
         :block-title="t8.blockTitle"
         :show-page-nav="true"
         @prev="goPrev"
@@ -284,6 +322,7 @@ const t9 = {
         key="tech9"
         :content-bg="contentBg"
         :content-overlay="t9.overlay"
+        :content-overlay-style="t9.overlayStyle"
         :block-title="t9.blockTitle"
         :show-page-nav="true"
         @prev="goPrev"
@@ -647,6 +686,27 @@ const t9 = {
   position: absolute;
   inset: 0;
 
+  /* 左右两栏背景底图 */
+  &__left-bg {
+    position: absolute;
+    top: d.h(777);
+    left: d.w(361);
+    width: d.w(1510);
+    height: d.h(985);
+    background: radial-gradient(circle at 0% 0%, #0042B0, #000000);
+    opacity: 0.5;
+  }
+
+  &__right-bg {
+    position: absolute;
+    top: d.h(777);
+    left: d.w(1973);
+    width: d.w(1510);
+    height: d.h(985);
+    background: radial-gradient(circle at 0% 0%, #0042B0, #000000);
+    opacity: 0.5;
+  }
+
   &__left-title {
     position: absolute;
     top: d.h(675);
@@ -784,6 +844,27 @@ const t9 = {
 .t7 {
   position: absolute;
   inset: 0;
+
+  /* 左右两栏背景底图 */
+  &__left-bg {
+    position: absolute;
+    top: d.h(777);
+    left: d.w(361);
+    width: d.w(1488);
+    height: d.h(985);
+    background: radial-gradient(circle at 0% 0%, #0042B0, #000000);
+    opacity: 0.5;
+  }
+
+  &__right-bg {
+    position: absolute;
+    top: d.h(777);
+    left: d.w(1996);
+    width: d.w(1487);
+    height: d.h(985);
+    background: radial-gradient(circle at 0% 0%, #0042B0, #000000);
+    opacity: 0.5;
+  }
 
   &__left-title {
     position: absolute;
