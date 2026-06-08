@@ -4,7 +4,7 @@ import { usePageFlip } from '@baima-duowei/composables/usePageFlip'
 import PageLayout from '../components/PageLayout.vue'
 import ContentArea from '../components/ContentArea.vue'
 
-const { page, prev: goPrev, next: goNext } = usePageFlip(9)
+const { page, prev: goPrev, next: goNext, isFirst, isLast } = usePageFlip(9)
 
 const headerBg = resolvePkgUrl('shared/header-bg.png')
 const headerTitle = resolvePkgUrl('tech/header-title.png')
@@ -123,6 +123,8 @@ const t9 = {
         :content-overlay="t1.overlay"
         :block-title="t1.blockTitle"
         :show-page-nav="true"
+        :is-first="isFirst"
+        :is-last="isLast"
         @prev="goPrev"
         @next="goNext"
       >
@@ -142,6 +144,8 @@ const t9 = {
         :content-overlay-style="t2.overlayStyle"
         :block-title="t2.blockTitle"
         :show-page-nav="true"
+        :is-first="isFirst"
+        :is-last="isLast"
         @prev="goPrev"
         @next="goNext"
       >
@@ -160,6 +164,8 @@ const t9 = {
         :content-bg="contentBg"
         :block-title="t3.blockTitle"
         :show-page-nav="true"
+        :is-first="isFirst"
+        :is-last="isLast"
         @prev="goPrev"
         @next="goNext"
       >
@@ -185,6 +191,8 @@ const t9 = {
         :content-bg="contentBg"
         :block-title="t4.blockTitle"
         :show-page-nav="true"
+        :is-first="isFirst"
+        :is-last="isLast"
         @prev="goPrev"
         @next="goNext"
       >
@@ -209,6 +217,8 @@ const t9 = {
         :content-overlay="t5.overlay"
         :block-title="t5.blockTitle"
         :show-page-nav="true"
+        :is-first="isFirst"
+        :is-last="isLast"
         @prev="goPrev"
         @next="goNext"
       >
@@ -232,6 +242,8 @@ const t9 = {
         :content-overlay="t6.overlay"
         :block-title="t6.blockTitle"
         :show-page-nav="true"
+        :is-first="isFirst"
+        :is-last="isLast"
         @prev="goPrev"
         @next="goNext"
       >
@@ -249,6 +261,8 @@ const t9 = {
         :content-bg="contentBg"
         :block-title="t7.blockTitle"
         :show-page-nav="true"
+        :is-first="isFirst"
+        :is-last="isLast"
         @prev="goPrev"
         @next="goNext"
       >
@@ -272,6 +286,8 @@ const t9 = {
         :content-overlay="t8.overlay"
         :block-title="t8.blockTitle"
         :show-page-nav="true"
+        :is-first="isFirst"
+        :is-last="isLast"
         @prev="goPrev"
         @next="goNext"
       >
@@ -290,6 +306,8 @@ const t9 = {
         :content-overlay="t9.overlay"
         :block-title="t9.blockTitle"
         :show-page-nav="true"
+        :is-first="isFirst"
+        :is-last="isLast"
         @prev="goPrev"
         @next="goNext"
       >
@@ -306,14 +324,24 @@ const t9 = {
 <style scoped lang="scss">
 /* @use '@shared/styles/transitions' as fx; */
 
-/* 页切换淡入淡出 */
-.page-fade-enter-active,
-.page-fade-leave-active {
-  transition: opacity 0.3s ease;
+/* 页切换：淡入 + 轻微上移滑入，离场略微下沉淡出 */
+.page-fade-enter-active {
+  transition:
+    opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.page-fade-enter-from,
+.page-fade-leave-active {
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+.page-fade-enter-from {
+  opacity: 0;
+  transform: translateY(3vh);
+}
 .page-fade-leave-to {
   opacity: 0;
+  transform: translateY(-2vh);
 }
 
 /* ── Tech 1 ── */
@@ -327,7 +355,7 @@ const t9 = {
     right: d.w(1290);
     bottom: d.h(355);
     left: d.w(325);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.6s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 0.75s);
 
     img {
       width: 100%;
@@ -342,7 +370,7 @@ const t9 = {
     right: d.w(1321);
     bottom: d.h(211);
     left: d.w(276);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.9s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 1.05s);
 
     img {
       width: 100%;
@@ -357,7 +385,7 @@ const t9 = {
     right: d.w(356);
     bottom: d.h(563);
     left: d.w(2592);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.8s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 0.95s);
 
     img {
       width: 100%;
@@ -378,7 +406,7 @@ const t9 = {
     right: d.w(1401);
     bottom: d.h(927);
     left: d.w(358);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.6s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 0.75s);
 
     img {
       width: 100%;
@@ -393,7 +421,7 @@ const t9 = {
     right: d.w(2831);
     bottom: d.h(396);
     left: d.w(358);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.9s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 1.05s);
 
     img {
       width: 100%;
@@ -408,7 +436,7 @@ const t9 = {
     right: d.w(1343);
     bottom: d.h(397);
     left: d.w(1025);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 1s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 1.15s);
 
     img {
       width: 100%;
@@ -423,7 +451,7 @@ const t9 = {
     right: d.w(355);
     bottom: d.h(393);
     left: d.w(2517);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.7s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 0.85s);
 
     img {
       width: 100%;
@@ -445,7 +473,7 @@ const t9 = {
     right: d.w(1346);
     bottom: d.h(1175);
     left: d.w(358);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.6s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 0.75s);
     img {
       width: 100%;
       height: 100%;
@@ -459,7 +487,7 @@ const t9 = {
     right: d.w(1072);
     bottom: d.h(1210);
     left: d.w(2533);
-    @include fx.enter-fade-in($duration: 0.5s, $delay: 0.8s);
+    @include fx.enter-fade-in($duration: 0.9s, $delay: 0.95s);
     img {
       width: 100%;
       height: 100%;
@@ -473,7 +501,7 @@ const t9 = {
     right: d.w(448);
     bottom: d.h(1174);
     left: d.w(2797);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.7s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 0.85s);
     img {
       width: 100%;
       height: 100%;
@@ -488,7 +516,7 @@ const t9 = {
     right: d.w(1559);
     bottom: d.h(433);
     left: d.w(249);
-    @include fx.enter-fade-in($duration: 0.6s, $delay: 0.8s);
+    @include fx.enter-fade-in($duration: 0.9s, $delay: 0.95s);
     img {
       width: 100%;
       height: 100%;
@@ -504,7 +532,7 @@ const t9 = {
     bottom: d.h(605);
     left: d.w(1284);
     z-index: 1;
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 1s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 1.15s);
     img {
       width: 100%;
       height: 100%;
@@ -518,7 +546,7 @@ const t9 = {
     right: d.w(1617);
     bottom: d.h(395);
     left: d.w(1557);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 1.1s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 1.25s);
     img {
       width: 100%;
       height: 100%;
@@ -533,7 +561,7 @@ const t9 = {
     right: d.w(300);
     bottom: d.h(436);
     left: d.w(2380);
-    @include fx.enter-fade-in($duration: 0.6s, $delay: 0.8s);
+    @include fx.enter-fade-in($duration: 0.9s, $delay: 0.95s);
     img {
       width: 100%;
       height: 100%;
@@ -547,7 +575,7 @@ const t9 = {
     right: d.w(421);
     bottom: d.h(437);
     left: d.w(3073);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 1s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 1.15s);
     img {
       width: 100%;
       height: 100%;
@@ -567,7 +595,7 @@ const t9 = {
     right: d.w(366);
     bottom: d.h(1266);
     left: d.w(361);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.6s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 0.75s);
     img {
       width: 100%;
       height: 100%;
@@ -581,7 +609,7 @@ const t9 = {
     right: d.w(2118);
     bottom: d.h(399);
     left: d.w(365);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.8s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 0.95s);
     img {
       width: 100%;
       height: 100%;
@@ -595,7 +623,7 @@ const t9 = {
     right: d.w(1220);
     bottom: d.h(1108);
     left: d.w(1766);
-    @include fx.enter-fade-in($duration: 0.6s, $delay: 0.7s);
+    @include fx.enter-fade-in($duration: 0.9s, $delay: 0.85s);
     img {
       width: 100%;
       height: 100%;
@@ -609,7 +637,7 @@ const t9 = {
     right: d.w(357);
     bottom: d.h(869);
     left: d.w(1798);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.8s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 0.95s);
     img {
       width: 100%;
       height: 100%;
@@ -623,7 +651,7 @@ const t9 = {
     right: d.w(1220);
     bottom: d.h(738);
     left: d.w(1766);
-    @include fx.enter-fade-in($duration: 0.6s, $delay: 0.9s);
+    @include fx.enter-fade-in($duration: 0.9s, $delay: 1.05s);
     img {
       width: 100%;
       height: 100%;
@@ -637,7 +665,7 @@ const t9 = {
     right: d.w(368);
     bottom: d.h(422);
     left: d.w(1797);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 1s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 1.15s);
     img {
       width: 100%;
       height: 100%;
@@ -678,7 +706,7 @@ const t9 = {
     right: d.w(2297);
     bottom: d.h(1385);
     left: d.w(689);
-    @include fx.enter-fade-in($duration: 0.6s, $delay: 0.6s);
+    @include fx.enter-fade-in($duration: 0.9s, $delay: 0.75s);
     img {
       width: 100%;
       height: 100%;
@@ -692,7 +720,7 @@ const t9 = {
     right: d.w(2160);
     bottom: d.h(753);
     left: d.w(552);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.8s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 0.95s);
     img {
       width: 100%;
       height: 100%;
@@ -706,7 +734,7 @@ const t9 = {
     right: d.w(2046);
     bottom: d.h(460);
     left: d.w(439);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 1s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 1.15s);
     img {
       width: 100%;
       height: 100%;
@@ -720,7 +748,7 @@ const t9 = {
     right: d.w(684);
     bottom: d.h(1384);
     left: d.w(2302);
-    @include fx.enter-fade-in($duration: 0.6s, $delay: 0.7s);
+    @include fx.enter-fade-in($duration: 0.9s, $delay: 0.85s);
     img {
       width: 100%;
       height: 100%;
@@ -734,7 +762,7 @@ const t9 = {
     right: d.w(548);
     bottom: d.h(753);
     left: d.w(2165);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.9s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 1.05s);
     img {
       width: 100%;
       height: 100%;
@@ -748,7 +776,7 @@ const t9 = {
     right: d.w(437);
     bottom: d.h(457);
     left: d.w(2052);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 1.1s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 1.25s);
     img {
       width: 100%;
       height: 100%;
@@ -768,7 +796,7 @@ const t9 = {
     right: d.w(360);
     bottom: d.h(1168);
     left: d.w(358);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.6s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 0.75s);
     img {
       width: 100%;
       height: 100%;
@@ -782,7 +810,7 @@ const t9 = {
     right: d.w(2257);
     bottom: d.h(398);
     left: d.w(427);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.8s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 0.95s);
     img {
       width: 100%;
       height: 100%;
@@ -796,7 +824,7 @@ const t9 = {
     right: d.w(421);
     bottom: d.h(258);
     left: d.w(1737);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.9s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 1.05s);
     img {
       width: 100%;
       height: 100%;
@@ -837,7 +865,7 @@ const t9 = {
     right: d.w(2363);
     bottom: d.h(1307);
     left: d.w(729);
-    @include fx.enter-fade-in($duration: 0.6s, $delay: 0.6s);
+    @include fx.enter-fade-in($duration: 0.9s, $delay: 0.75s);
     img {
       width: 100%;
       height: 100%;
@@ -851,7 +879,7 @@ const t9 = {
     right: d.w(2010);
     bottom: d.h(539);
     left: d.w(453);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.8s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 0.95s);
     img {
       width: 100%;
       height: 100%;
@@ -865,7 +893,7 @@ const t9 = {
     right: d.w(2029);
     bottom: d.h(705);
     left: d.w(1257);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.9s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 1.05s);
     img {
       width: 100%;
       height: 100%;
@@ -879,7 +907,7 @@ const t9 = {
     right: d.w(673);
     bottom: d.h(1307);
     left: d.w(2313);
-    @include fx.enter-fade-in($duration: 0.6s, $delay: 0.7s);
+    @include fx.enter-fade-in($duration: 0.9s, $delay: 0.85s);
     img {
       width: 100%;
       height: 100%;
@@ -893,7 +921,7 @@ const t9 = {
     right: d.w(527);
     bottom: d.h(966);
     left: d.w(2205);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.9s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 1.05s);
     img {
       width: 100%;
       height: 100%;
@@ -907,7 +935,7 @@ const t9 = {
     right: d.w(523);
     bottom: d.h(490);
     left: d.w(2246);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 1s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 1.15s);
     img {
       width: 100%;
       height: 100%;
@@ -927,7 +955,7 @@ const t9 = {
     right: d.w(726);
     bottom: d.h(1138);
     left: d.w(737);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.6s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 0.75s);
     img {
       width: 100%;
       height: 100%;
@@ -941,7 +969,7 @@ const t9 = {
     right: d.w(2048);
     bottom: d.h(397);
     left: d.w(729);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.8s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 0.95s);
     img {
       width: 100%;
       height: 100%;
@@ -955,7 +983,7 @@ const t9 = {
     right: d.w(728);
     bottom: d.h(397);
     left: d.w(1834);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.9s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 1.05s);
     img {
       width: 100%;
       height: 100%;
@@ -975,7 +1003,7 @@ const t9 = {
     right: d.w(1298);
     bottom: d.h(1150);
     left: d.w(382);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.6s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 0.75s);
     img {
       width: 100%;
       height: 100%;
@@ -989,7 +1017,7 @@ const t9 = {
     right: d.w(2498);
     bottom: d.h(400);
     left: d.w(359);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.8s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 0.95s);
     img {
       width: 100%;
       height: 100%;
@@ -1003,7 +1031,7 @@ const t9 = {
     right: d.w(1278);
     bottom: d.h(400);
     left: d.w(1381);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.9s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 1.05s);
     img {
       width: 100%;
       height: 100%;

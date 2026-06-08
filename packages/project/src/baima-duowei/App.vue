@@ -1,10 +1,34 @@
 <script setup lang="ts">
+import { onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useBridge } from '@shared/composables/useBridge'
-import { useIdleReset } from '@shared/composables/useIdleReset'
+import { useProjectSfx } from '@shared/composables/useProjectSfx'
+// import { useIdleReset } from '@shared/composables/useIdleReset'
 
 const router = useRouter()
 const { on } = useBridge()
+
+// 注册并预加载项目音效；首次用户手势时解锁 AudioContext（自动播放策略要求）
+const { unlock } = useProjectSfx()
+
+function unlockAudio() {
+  unlock()
+  window.removeEventListener('pointerdown', unlockAudio)
+  window.removeEventListener('touchstart', unlockAudio)
+  window.removeEventListener('keydown', unlockAudio)
+}
+
+onMounted(() => {
+  window.addEventListener('pointerdown', unlockAudio, { once: false })
+  window.addEventListener('touchstart', unlockAudio, { once: false })
+  window.addEventListener('keydown', unlockAudio, { once: false })
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('pointerdown', unlockAudio)
+  window.removeEventListener('touchstart', unlockAudio)
+  window.removeEventListener('keydown', unlockAudio)
+})
 
 // TODO
 // useIdleReset(() => {

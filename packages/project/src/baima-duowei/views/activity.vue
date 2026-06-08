@@ -5,7 +5,7 @@ import { usePageFlip } from '@baima-duowei/composables/usePageFlip'
 import PageLayout from '../components/PageLayout.vue'
 import ContentArea from '../components/ContentArea.vue'
 
-const { page, prev: goPrev, next: goNext } = usePageFlip(6)
+const { page, prev: goPrev, next: goNext, isFirst, isLast } = usePageFlip(6)
 
 const activeIndex = ref(0)
 
@@ -113,6 +113,8 @@ onBeforeUnmount(stopA6AutoPlay)
         :content-overlay="a1.overlay"
         :block-title="a1.blockTitle"
         :show-page-nav="true"
+        :is-first="isFirst"
+        :is-last="isLast"
         @prev="goPrev"
         @next="goNext"
       >
@@ -133,6 +135,8 @@ onBeforeUnmount(stopA6AutoPlay)
         :content-overlay="a2.overlay"
         :block-title="a2.blockTitle"
         :show-page-nav="true"
+        :is-first="isFirst"
+        :is-last="isLast"
         @prev="goPrev"
         @next="goNext"
       >
@@ -152,6 +156,8 @@ onBeforeUnmount(stopA6AutoPlay)
         :content-bg="contentBg"
         :block-title="a3.blockTitle"
         :show-page-nav="true"
+        :is-first="isFirst"
+        :is-last="isLast"
         @prev="goPrev"
         @next="goNext"
       >
@@ -171,6 +177,8 @@ onBeforeUnmount(stopA6AutoPlay)
         :content-overlay="a4.overlay"
         :block-title="a4.blockTitle"
         :show-page-nav="true"
+        :is-first="isFirst"
+        :is-last="isLast"
         @prev="goPrev"
         @next="goNext"
       >
@@ -189,6 +197,8 @@ onBeforeUnmount(stopA6AutoPlay)
         :content-bg="contentBg"
         :block-title="a5.blockTitle"
         :show-page-nav="true"
+        :is-first="isFirst"
+        :is-last="isLast"
         @prev="goPrev"
         @next="goNext"
       >
@@ -209,6 +219,8 @@ onBeforeUnmount(stopA6AutoPlay)
         :content-overlay-style="a6.overlayStyle"
         :block-title="a6.blockTitle"
         :show-page-nav="true"
+        :is-first="isFirst"
+        :is-last="isLast"
         @prev="goPrev"
         @next="goNext"
       >
@@ -238,13 +250,65 @@ onBeforeUnmount(stopA6AutoPlay)
 <style scoped lang="scss">
 /* @use '@shared/styles/transitions' as fx; */
 
-.page-fade-enter-active,
-.page-fade-leave-active {
-  transition: opacity 0.3s ease;
+/* 页切换：淡入 + 轻微上移滑入，离场略微下沉淡出 */
+.page-fade-enter-active {
+  transition:
+    opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.page-fade-enter-from,
+.page-fade-leave-active {
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+.page-fade-enter-from {
+  opacity: 0;
+  transform: translateY(3vh);
+}
 .page-fade-leave-to {
   opacity: 0;
+  transform: translateY(-2vh);
+}
+
+/* ── 内容入场方向性动效：左/右两侧滑入、底部上浮 ── */
+@keyframes a-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-8vw);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes a-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(8vw);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes a-in-bottom {
+  from {
+    opacity: 0;
+    transform: translateY(6vh);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@mixin a-from-left($duration: 0.7s, $delay: 0.75s) {
+  animation: a-in-left $duration $delay cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@mixin a-from-right($duration: 0.7s, $delay: 0.75s) {
+  animation: a-in-right $duration $delay cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@mixin a-from-bottom($duration: 0.7s, $delay: 0.75s) {
+  animation: a-in-bottom $duration $delay cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* ── Activity 1：左文字+右图片 ── */
@@ -258,7 +322,7 @@ onBeforeUnmount(stopA6AutoPlay)
     right: d.w(2066);
     bottom: d.h(1071);
     left: d.w(689);
-    @include fx.enter-fade-in($duration: 0.6s, $delay: 0.6s);
+    @include a-from-left($duration: 0.9s, $delay: 0.75s);
     img {
       width: 100%;
       height: 100%;
@@ -272,7 +336,7 @@ onBeforeUnmount(stopA6AutoPlay)
     right: d.w(1759);
     bottom: d.h(587);
     left: d.w(381);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.8s);
+    @include a-from-left($duration: 1s, $delay: 0.95s);
     img {
       width: 100%;
       height: 100%;
@@ -286,7 +350,7 @@ onBeforeUnmount(stopA6AutoPlay)
     right: d.w(871);
     bottom: d.h(1063);
     left: d.w(2217);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.7s);
+    @include a-from-right($duration: 1s, $delay: 0.85s);
     img {
       width: 100%;
       height: 100%;
@@ -300,7 +364,7 @@ onBeforeUnmount(stopA6AutoPlay)
     right: d.w(619);
     bottom: d.h(761);
     left: d.w(2469);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.9s);
+    @include a-from-right($duration: 1s, $delay: 1.05s);
     img {
       width: 100%;
       height: 100%;
@@ -314,7 +378,7 @@ onBeforeUnmount(stopA6AutoPlay)
     right: d.w(355);
     bottom: d.h(459);
     left: d.w(2733);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 1s);
+    @include a-from-right($duration: 1s, $delay: 1.15s);
     img {
       width: 100%;
       height: 100%;
@@ -334,7 +398,7 @@ onBeforeUnmount(stopA6AutoPlay)
     right: d.w(1136);
     bottom: d.h(1314);
     left: d.w(1148);
-    @include fx.enter-fade-in($duration: 0.6s, $delay: 0.6s);
+    @include fx.enter-fade-in($duration: 0.9s, $delay: 0.75s);
     img {
       width: 100%;
       height: 100%;
@@ -348,7 +412,7 @@ onBeforeUnmount(stopA6AutoPlay)
     right: d.w(358);
     bottom: d.h(1017);
     left: d.w(368);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.8s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 0.95s);
     img {
       width: 100%;
       height: 100%;
@@ -362,7 +426,7 @@ onBeforeUnmount(stopA6AutoPlay)
     left: d.w(682);
     width: d.w(750);
     height: d.h(385);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 1s);
+    @include a-from-bottom($duration: 1s, $delay: 1.15s);
     img {
       width: 100%;
       height: 100%;
@@ -376,7 +440,7 @@ onBeforeUnmount(stopA6AutoPlay)
     left: d.w(1545);
     width: d.w(750);
     height: d.h(386);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 1.1s);
+    @include a-from-bottom($duration: 1s, $delay: 1.25s);
     img {
       width: 100%;
       height: 100%;
@@ -390,7 +454,7 @@ onBeforeUnmount(stopA6AutoPlay)
     left: d.w(2409);
     width: d.w(752);
     height: d.h(386);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 1.2s);
+    @include a-from-bottom($duration: 1s, $delay: 1.35s);
     img {
       width: 100%;
       height: 100%;
@@ -420,7 +484,7 @@ onBeforeUnmount(stopA6AutoPlay)
     right: d.w(2054);
     bottom: d.h(1214);
     left: d.w(843);
-    @include fx.enter-fade-in($duration: 0.6s, $delay: 0.6s);
+    @include fx.enter-fade-in($duration: 0.9s, $delay: 0.75s);
     img {
       width: 100%;
       height: 100%;
@@ -434,7 +498,7 @@ onBeforeUnmount(stopA6AutoPlay)
     right: d.w(1670);
     bottom: d.h(550);
     left: d.w(458);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.8s);
+    @include a-from-left($duration: 1s, $delay: 0.95s);
     img {
       width: 100%;
       height: 100%;
@@ -448,7 +512,7 @@ onBeforeUnmount(stopA6AutoPlay)
     right: d.w(214);
     bottom: d.h(258);
     left: d.w(2154);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.7s);
+    @include a-from-right($duration: 1s, $delay: 0.85s);
     img {
       width: 100%;
       height: 100%;
@@ -478,7 +542,7 @@ onBeforeUnmount(stopA6AutoPlay)
     right: d.w(2244);
     bottom: d.h(1290);
     left: d.w(653);
-    @include fx.enter-fade-in($duration: 0.6s, $delay: 0.6s);
+    @include a-from-left($duration: 0.9s, $delay: 0.75s);
     img {
       width: 100%;
       height: 100%;
@@ -492,7 +556,7 @@ onBeforeUnmount(stopA6AutoPlay)
     right: d.w(1985);
     bottom: d.h(521);
     left: d.w(412);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.6s);
+    @include a-from-left($duration: 1s, $delay: 0.75s);
     img {
       width: 100%;
       height: 100%;
@@ -506,7 +570,7 @@ onBeforeUnmount(stopA6AutoPlay)
     right: d.w(295);
     bottom: d.h(544);
     left: d.w(1890);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.8s);
+    @include a-from-right($duration: 1s, $delay: 0.95s);
     img {
       width: 100%;
       height: 100%;
@@ -536,7 +600,7 @@ onBeforeUnmount(stopA6AutoPlay)
     right: d.w(2284);
     bottom: d.h(358);
     left: d.w(319);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.6s);
+    @include a-from-left($duration: 1s, $delay: 0.75s);
     img {
       width: 100%;
       height: 100%;
@@ -550,7 +614,7 @@ onBeforeUnmount(stopA6AutoPlay)
     right: d.w(821);
     bottom: d.h(1170);
     left: d.w(2076);
-    @include fx.enter-fade-in($duration: 0.6s, $delay: 0.7s);
+    @include a-from-right($duration: 0.9s, $delay: 0.85s);
     img {
       width: 100%;
       height: 100%;
@@ -564,7 +628,7 @@ onBeforeUnmount(stopA6AutoPlay)
     right: d.w(479);
     bottom: d.h(678);
     left: d.w(1695);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.9s);
+    @include a-from-right($duration: 1s, $delay: 1.05s);
     img {
       width: 100%;
       height: 100%;
@@ -594,7 +658,7 @@ onBeforeUnmount(stopA6AutoPlay)
     right: d.w(1192);
     bottom: d.h(1271);
     left: d.w(1705);
-    @include fx.enter-fade-in($duration: 0.6s, $delay: 0.6s);
+    @include fx.enter-fade-in($duration: 0.9s, $delay: 0.75s);
     img {
       width: 100%;
       height: 100%;
@@ -608,7 +672,7 @@ onBeforeUnmount(stopA6AutoPlay)
     right: d.w(2170);
     bottom: d.h(370);
     left: d.w(320);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.7s);
+    @include a-from-left($duration: 1s, $delay: 0.85s);
     img {
       width: 100%;
       height: 100%;
@@ -622,7 +686,7 @@ onBeforeUnmount(stopA6AutoPlay)
     right: d.w(404);
     bottom: d.h(515);
     left: d.w(1785);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.8s);
+    @include a-from-right($duration: 1s, $delay: 0.95s);
     img {
       width: 100%;
       height: 100%;
@@ -633,7 +697,7 @@ onBeforeUnmount(stopA6AutoPlay)
   &__right-line {
     position: absolute;
     cursor: pointer;
-    @include fx.enter-fade-in($duration: 0.5s, $delay: 0.9s);
+    @include a-from-right($duration: 0.9s, $delay: 1.05s);
 
     img {
       width: 100%;

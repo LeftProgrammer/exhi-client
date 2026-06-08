@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { resolvePkgUrl } from '@shared/utils/url'
+import { useProjectSfx } from '@shared/composables/useProjectSfx'
 
 /** 把 d.h(N) / d.w(N) 字符串转为 CSS calc()
  *  公式：设计稿像素 / designBase × 100vw/vh（与 design.scss 的 d.w()/d.h() 等价）
@@ -32,6 +33,10 @@ const props = defineProps<{
   blockTitle: string
   /** 是否显示上一页/下一页导航按钮 */
   showPageNav?: boolean
+  /** 是否在第一页（上一页按钮置灰禁用） */
+  isFirst?: boolean
+  /** 是否在最后一页（下一页按钮置灰禁用） */
+  isLast?: boolean
   /** 中间内容区边距（默认 title 下方全铺满） */
   mainInset?: { top?: string; left?: string; right?: string; bottom?: string }
 }>()
@@ -44,6 +49,32 @@ const emit = defineEmits<{
 }>()
 
 const router = useRouter()
+const { play: playSfx } = useProjectSfx()
+
+function goHome() {
+  playSfx('back')
+  router.push({ name: 'home' })
+}
+
+/** 上一页：边界时给出"到头"反馈，否则播放翻页音并触发翻页 */
+function onPrev() {
+  if (props.isFirst) {
+    playSfx('tap')
+    return
+  }
+  playSfx('page')
+  emit('prev')
+}
+
+/** 下一页：边界时给出"到头"反馈，否则播放翻页音并触发翻页 */
+function onNext() {
+  if (props.isLast) {
+    playSfx('tap')
+    return
+  }
+  playSfx('page')
+  emit('next')
+}
 
 const btnOuterNormal = resolvePkgUrl('shared/btn-outer-normal.png')
 const btnOuterActive = resolvePkgUrl('shared/btn-outer-active.png')
@@ -57,10 +88,6 @@ const btnPrevActive = resolvePkgUrl('shared/btn-prev-active.png')
 const homeHover = ref(false)
 const prevHover = ref(false)
 const nextHover = ref(false)
-
-function goHome() {
-  router.push({ name: 'home' })
-}
 
 /** overlay 计算后的行内样式：自动解析 d.h() / d.w() */
 const overlayComputedStyle = computed(() => {
@@ -114,11 +141,13 @@ const overlayComputedStyle = computed(() => {
         <button
           v-if="props.showPageNav"
           class="content-area__nav-btn"
-          @mouseenter="prevHover = true"
+          :class="{ 'is-disabled': props.isFirst }"
+          :disabled="props.isFirst"
+          @mouseenter="!props.isFirst && (prevHover = true)"
           @mouseleave="prevHover = false"
-          @touchstart="prevHover = true"
+          @touchstart="!props.isFirst && (prevHover = true)"
           @touchend="prevHover = false"
-          @click="emit('prev')"
+          @click="onPrev"
         >
           <img :src="btnOuterNormal" class="btn-layer btn-outer--normal" alt="" />
           <img :src="btnOuterActive" class="btn-layer btn-outer--active" alt="" />
@@ -137,11 +166,13 @@ const overlayComputedStyle = computed(() => {
         <button
           v-if="props.showPageNav"
           class="content-area__nav-btn"
-          @mouseenter="nextHover = true"
+          :class="{ 'is-disabled': props.isLast }"
+          :disabled="props.isLast"
+          @mouseenter="!props.isLast && (nextHover = true)"
           @mouseleave="nextHover = false"
-          @touchstart="nextHover = true"
+          @touchstart="!props.isLast && (nextHover = true)"
           @touchend="nextHover = false"
-          @click="emit('next')"
+          @click="onNext"
         >
           <img :src="btnOuterNormal" class="btn-layer btn-outer--normal" alt="" />
           <img :src="btnOuterActive" class="btn-layer btn-outer--active" alt="" />
@@ -236,7 +267,19 @@ const overlayComputedStyle = computed(() => {
   display: block;
   width: auto;
   height: d.h(305);
-  @include fx.enter-fade-in($duration: 0.8s, $delay: 0.5s);
+  animation: block-title-in 1.5s 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* 二级标题块：从右侧滑入 + 淡入 */
+@keyframes block-title-in {
+  from {
+    opacity: 0;
+    transform: translateX(60vw);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 /* 底部区 */
@@ -266,12 +309,39 @@ const overlayComputedStyle = computed(() => {
   border: none;
   padding: 0;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.18s ease,
+    opacity 0.3s ease;
 
-  /* 点击：整体压缩 */
+  /* 点击/触屏按压：整体压缩 + 提亮，触屏也能感知 */
   &:active {
+    transform: scale(0.9);
+    filter: brightness(1.2);
+    transition:
+      transform 0.08s ease,
+      filter 0.08s ease;
+
     .btn-inner,
     .btn-icon {
       transform: scale(0.88);
+    }
+
+    .btn-icon--flip {
+      transform: scaleX(-1) scale(0.88);
+    }
+  }
+
+  /* 边界禁用：置灰半透明、停转、不可点 */
+  &.is-disabled {
+    cursor: not-allowed;
+    opacity: 0.32;
+    filter: grayscale(0.6);
+    pointer-events: none;
+
+    .btn-spin-wrap {
+      animation-play-state: paused;
     }
   }
 

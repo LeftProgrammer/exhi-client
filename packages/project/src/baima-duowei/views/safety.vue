@@ -36,6 +36,47 @@ const rightItems = [1, 2, 3, 4, 5, 6].map((n) => resolvePkgUrl(`safety/right-${n
 <style scoped lang="scss">
 /* @use '@shared/styles/transitions' as fx; */
 
+/* ── 内容入场方向性动效：左/右两侧滑入、底部上浮 ── */
+@keyframes sf-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-7vw);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes sf-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(7vw);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes sf-in-bottom {
+  from {
+    opacity: 0;
+    transform: translateY(6vh);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@mixin sf-from-left($duration: 0.9s, $delay: 0.75s) {
+  animation: sf-in-left $duration $delay cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@mixin sf-from-right($duration: 0.9s, $delay: 0.75s) {
+  animation: sf-in-right $duration $delay cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@mixin sf-from-bottom($duration: 0.9s, $delay: 0.75s) {
+  animation: sf-in-bottom $duration $delay cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 .safety__body {
   position: absolute;
   top: d.h(790);
@@ -59,7 +100,14 @@ const rightItems = [1, 2, 3, 4, 5, 6].map((n) => resolvePkgUrl(`safety/right-${n
     width: d.w(843);
     height: d.h(190);
     object-fit: contain;
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.9s);
+    @include sf-from-left($duration: 0.9s, $delay: 0.75s);
+
+    &:nth-child(2) {
+      animation-delay: 0.9s;
+    }
+    &:nth-child(3) {
+      animation-delay: 1.05s;
+    }
   }
 }
 
@@ -78,7 +126,23 @@ const rightItems = [1, 2, 3, 4, 5, 6].map((n) => resolvePkgUrl(`safety/right-${n
     display: block;
     height: d.h(129);
     width: auto;
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 1.1s);
+    @include sf-from-right($duration: 0.9s, $delay: 0.85s);
+
+    &:nth-child(2) {
+      animation-delay: 0.97s;
+    }
+    &:nth-child(3) {
+      animation-delay: 1.09s;
+    }
+    &:nth-child(4) {
+      animation-delay: 1.21s;
+    }
+    &:nth-child(5) {
+      animation-delay: 1.33s;
+    }
+    &:nth-child(6) {
+      animation-delay: 1.45s;
+    }
   }
 }
 
@@ -88,7 +152,7 @@ const rightItems = [1, 2, 3, 4, 5, 6].map((n) => resolvePkgUrl(`safety/right-${n
   right: d.w(1440);
   bottom: d.h(159);
   left: d.w(1440);
-  @include fx.enter-fade-in($duration: 0.8s, $delay: 1.3s);
+  @include sf-from-bottom($duration: 0.9s, $delay: 1.6s);
 
   img {
     width: 100%;

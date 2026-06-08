@@ -4,7 +4,7 @@ import { usePageFlip } from '@baima-duowei/composables/usePageFlip'
 import PageLayout from '../components/PageLayout.vue'
 import ContentArea from '../components/ContentArea.vue'
 
-const { page, prev: goPrev, next: goNext } = usePageFlip(4)
+const { page, prev: goPrev, next: goNext, isFirst, isLast } = usePageFlip(4)
 
 const headerBg = resolvePkgUrl('shared/header-bg.png')
 const headerTitle = resolvePkgUrl('standard/header-title.png')
@@ -55,6 +55,8 @@ const s4 = {
         :content-overlay="s1.overlay"
         :block-title="s1.blockTitle"
         :show-page-nav="true"
+        :is-first="isFirst"
+        :is-last="isLast"
         @prev="goPrev"
         @next="goNext"
       >
@@ -77,6 +79,8 @@ const s4 = {
         :content-bg="contentBg"
         :block-title="s2.blockTitle"
         :show-page-nav="true"
+        :is-first="isFirst"
+        :is-last="isLast"
         @prev="goPrev"
         @next="goNext"
       >
@@ -97,6 +101,8 @@ const s4 = {
         :content-bg="contentBg"
         :block-title="s3.blockTitle"
         :show-page-nav="true"
+        :is-first="isFirst"
+        :is-last="isLast"
         @prev="goPrev"
         @next="goNext"
       >
@@ -115,6 +121,8 @@ const s4 = {
         :content-bg="contentBg"
         :block-title="s4.blockTitle"
         :show-page-nav="true"
+        :is-first="isFirst"
+        :is-last="isLast"
         @prev="goPrev"
         @next="goNext"
       >
@@ -130,13 +138,24 @@ const s4 = {
 <style scoped lang="scss">
 /* @use '@shared/styles/transitions' as fx; */
 
-.page-fade-enter-active,
-.page-fade-leave-active {
-  transition: opacity 0.3s ease;
+/* 页切换：淡入 + 轻微上移滑入，离场略微下沉淡出 */
+.page-fade-enter-active {
+  transition:
+    opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.page-fade-enter-from,
+.page-fade-leave-active {
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
+}
+.page-fade-enter-from {
+  opacity: 0;
+  transform: translateY(3vh);
+}
 .page-fade-leave-to {
   opacity: 0;
+  transform: translateY(-2vh);
 }
 
 /* ── Standard 1：施工标准化 ── */
@@ -150,7 +169,7 @@ const s4 = {
     right: d.w(1331);
     bottom: d.h(1134);
     left: d.w(449);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.6s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 0.75s);
     img {
       width: 100%;
       height: 100%;
@@ -164,7 +183,7 @@ const s4 = {
     right: d.w(774);
     bottom: d.h(913);
     left: d.w(2680);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.7s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 0.85s);
     img {
       width: 100%;
       height: 100%;
@@ -178,7 +197,7 @@ const s4 = {
     right: d.w(355);
     bottom: d.h(912);
     left: d.w(3099);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.8s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 0.95s);
     img {
       width: 100%;
       height: 100%;
@@ -198,7 +217,7 @@ const s4 = {
     &-item {
       flex: 1;
       overflow: hidden;
-      @include fx.enter-fade-in($duration: 0.7s, $delay: 0.9s);
+      @include fx.enter-fade-in($duration: 1s, $delay: 1.05s);
 
       img {
         width: 100%;
@@ -220,7 +239,7 @@ const s4 = {
     right: d.w(2818);
     bottom: d.h(542);
     left: d.w(413);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.6s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 0.75s);
     img {
       width: 100%;
       height: 100%;
@@ -249,7 +268,7 @@ const s4 = {
       width: 100%;
       height: 100%;
       object-fit: fill;
-      @include fx.enter-fade-in($duration: 0.7s, $delay: 0.8s);
+      @include fx.enter-fade-in($duration: 1s, $delay: 0.95s);
     }
   }
 }
@@ -265,7 +284,7 @@ const s4 = {
     right: d.w(359);
     bottom: d.h(1252);
     left: d.w(361);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.6s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 0.75s);
     img {
       width: 100%;
       height: 100%;
@@ -279,7 +298,7 @@ const s4 = {
     right: d.w(1142);
     bottom: d.h(400);
     left: d.w(389);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.8s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 0.95s);
     img {
       width: 100%;
       height: 100%;
@@ -293,7 +312,7 @@ const s4 = {
     left: d.w(2651);
     width: d.w(964);
     height: d.h(599);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.8s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 0.95s);
     img {
       width: 100%;
       height: 100%;
@@ -307,7 +326,7 @@ const s4 = {
     left: d.w(2792);
     width: d.w(653);
     height: d.h(330);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.9s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 1.05s);
     img {
       width: 100%;
       height: 100%;
@@ -327,7 +346,7 @@ const s4 = {
     right: d.w(2645);
     bottom: d.h(394);
     left: d.w(359);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.6s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 0.75s);
     img {
       width: 100%;
       height: 100%;
@@ -341,7 +360,7 @@ const s4 = {
     right: d.w(388);
     bottom: d.h(489);
     left: d.w(1656);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.8s);
+    @include fx.enter-fade-in($duration: 1s, $delay: 0.95s);
     img {
       width: 100%;
       height: 100%;

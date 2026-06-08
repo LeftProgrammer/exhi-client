@@ -140,7 +140,19 @@ const props = withDefaults(
   display: block;
   width: d.w(889);
   height: d.h(230);
-  @include fx.enter-fade-in($duration: 0.9s, $delay: 0.2s);
+  animation: sec-title-in 0.9s 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* 头部标题：从右侧滑入 + 淡入 */
+@keyframes sec-title-in {
+  from {
+    opacity: 0;
+    transform: translateX(10vw);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 /* 内容区：剩余高度 */
