@@ -14,9 +14,6 @@ export const slides: SlideConfig[] = [
 /** 无操作多少毫秒后回到首页（一级待机） */
 export const IDLE_MS = 20_000
 
-/** 行与行之间入场错峰间隔（毫秒） */
-export const STAGGER_MS = 300
-
 /**
  * 自动滚动「停顿时长」：安排滚动后，再静止多少毫秒才真正开始滚动。
  * 给用户一个静止阅读的瞬间。

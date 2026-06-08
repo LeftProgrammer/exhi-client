@@ -3,20 +3,23 @@ import { resolvePkgUrl } from '@shared/utils/url'
 
 /**
  * 二级页面通用容器。
- * - bgVideo:    背景视频路径（默认 shared/line-flow.mp4）
- * - bgOverlay:  全屏装饰图路径（默认 safety/header-bg.png，各页面替换）
- * - titleSrc:   顶部标题图片路径
- * - titleAlt:   标题 alt 文字
+ * - bgVideo:        背景视频路径（默认 shared/line-flow.mp4）
+ * - bgVideoPoster:  视频封面图（可选）
+ * - bgOverlay:      全屏装饰图路径（默认 safety/header-bg.png，各页面替换）
+ * - titleSrc:       顶部标题图片路径
+ * - titleAlt:       标题 alt 文字
  */
 const props = withDefaults(
   defineProps<{
     bgVideo?: string
+    bgVideoPoster?: string
     bgOverlay?: string
     titleSrc?: string
     titleAlt?: string
   }>(),
   {
     bgVideo: () => resolvePkgUrl('shared/line-flow.mp4'),
+    bgVideoPoster: undefined,
     bgOverlay: undefined,
     titleSrc: undefined
   }
@@ -29,6 +32,7 @@ const props = withDefaults(
     <video
       class="sec-page__video"
       :src="props.bgVideo"
+      :poster="props.bgVideoPoster"
       autoplay
       muted
       loop
@@ -54,7 +58,6 @@ const props = withDefaults(
         :alt="props.titleAlt ?? ''"
       />
       <slot v-else name="header" />
-      <div class="sec-page__shine" />
     </header>
 
     <!-- 页面内容区 -->
@@ -138,15 +141,6 @@ const props = withDefaults(
   width: d.w(889);
   height: d.h(230);
   @include fx.enter-fade-in($duration: 0.9s, $delay: 0.2s);
-}
-
-/* 扫光限定在 header 内 */
-.sec-page__shine {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-  @include fx.auto-shine-from-center($duration: 1.2s, $interval: 6s, $width: 30%);
 }
 
 /* 内容区：剩余高度 */

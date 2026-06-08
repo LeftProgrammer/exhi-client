@@ -12,6 +12,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, type Component } from 'vue'
 import { slides, IDLE_MS } from '@baima-milestone/data/slides'
 import { slideFadeOut, slideFadeIn, type SlideDir } from '@baima-milestone/effects/gsapPresets'
+import { useProjectSfx } from '@shared/composables/useProjectSfx'
 import Page1 from './Page1.vue'
 import Page2 from './Page2.vue'
 import Page3 from './Page3.vue'
@@ -29,6 +30,7 @@ const COMPONENT_MAP: Record<string, Component | null> = {
 const currentIndex = ref(0)
 const pageRef = ref<{ play: () => void; reset: () => void } | null>(null)
 let lastDir: SlideDir = 'next'
+const sfx = useProjectSfx()
 
 const currentComponent = computed(() => {
   const id = slides[currentIndex.value]?.id ?? ''
@@ -40,6 +42,7 @@ function goto(i: number) {
   if (i === currentIndex.value) return
   lastDir = i > currentIndex.value ? 'next' : 'prev'
   currentIndex.value = i
+  sfx.play('nav')
   resetIdle()
 }
 
@@ -76,6 +79,7 @@ onMounted(() => {
   resetIdle()
   window.addEventListener('keydown', onKeyDown)
   nextTick(() => pageRef.value?.play())
+  sfx.unlock()
 })
 
 onBeforeUnmount(() => {

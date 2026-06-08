@@ -25,35 +25,26 @@ on('app:home', () => router.push({ name: 'home' }))
 </template>
 
 <style lang="scss">
-// @use '@shared/styles/tokens' as t;
-
 * {
   box-sizing: border-box;
 }
 
+/* 全局页面过渡只做 opacity 淡入淡出，不施加 transform，
+   由各页面内部元素自行控制方向性动画 */
 .page-enter-active {
-  transition:
-    opacity 600ms t.$ease-base,
-    transform 600ms t.$ease-base;
+  transition: opacity 800ms t.$ease-base;
 }
 
 .page-leave-active {
-  transition:
-    opacity 400ms t.$ease-base,
-    transform 400ms t.$ease-base;
+  transition: opacity 800ms t.$ease-base;
   position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
 }
 
-.page-enter-from {
-  opacity: 0;
-  transform: scale(1.03);
-}
-
+.page-enter-from,
 .page-leave-to {
   opacity: 0;
-  transform: scale(0.97);
 }
 </style>

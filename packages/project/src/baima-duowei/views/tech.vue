@@ -25,8 +25,15 @@ const t1 = {
 const t2 = {
   blockTitle: resolvePkgUrl('tech/tech2/block-title.png'),
   overlay: resolvePkgUrl('tech/tech2/content-overlay.png'),
+  overlayStyle: {
+    top: 'd.h(428)',
+    left: 'd.w(2645)',
+    width: 'd.w(810)',
+    height: 'd.h(652)'
+  },
   leftText: resolvePkgUrl('tech/tech2/left-text.png'),
-  leftImg: resolvePkgUrl('tech/tech2/left-img.png'),
+  leftImg1: resolvePkgUrl('tech/tech2/left-img-1.png'),
+  leftImg2: resolvePkgUrl('tech/tech2/left-img-2.png'),
   rightImg: resolvePkgUrl('tech/tech2/right-img.png')
 }
 
@@ -37,11 +44,9 @@ const t3 = {
   topArrow: resolvePkgUrl('tech/tech3/top-arrow.png'),
   topRightImg: resolvePkgUrl('tech/tech3/top-right-img.png'),
   bottomLeftTitle: resolvePkgUrl('tech/tech3/bottom-left-title.png'),
-  bottomLeftText: resolvePkgUrl('tech/tech3/bottom-left-text.png'),
   bottomLeftImg1: resolvePkgUrl('tech/tech3/bottom-left-img1.png'),
   bottomLeftImg2: resolvePkgUrl('tech/tech3/bottom-left-img2.png'),
   bottomRightTitle: resolvePkgUrl('tech/tech3/bottom-right-title.png'),
-  bottomRightText: resolvePkgUrl('tech/tech3/bottom-right-text.png'),
   bottomRightImg: resolvePkgUrl('tech/tech3/bottom-right-img.png')
 }
 
@@ -134,6 +139,7 @@ const t9 = {
         key="tech2"
         :content-bg="contentBg"
         :content-overlay="t2.overlay"
+        :content-overlay-style="t2.overlayStyle"
         :block-title="t2.blockTitle"
         :show-page-nav="true"
         @prev="goPrev"
@@ -141,7 +147,8 @@ const t9 = {
       >
         <div class="t2">
           <div class="t2__left-text"><img :src="t2.leftText" alt="" /></div>
-          <div class="t2__left-img"><img :src="t2.leftImg" alt="" /></div>
+          <div class="t2__left-img1"><img :src="t2.leftImg1" alt="" /></div>
+          <div class="t2__left-img2"><img :src="t2.leftImg2" alt="" /></div>
           <div class="t2__right-img"><img :src="t2.rightImg" alt="" /></div>
         </div>
       </ContentArea>
@@ -163,12 +170,10 @@ const t9 = {
           <div class="t3__top-right-img"><img :src="t3.topRightImg" alt="" /></div>
           <!-- 下左卡片：薄层岩体深台阶预裂爆破施工 -->
           <div class="t3__bl-title"><img :src="t3.bottomLeftTitle" alt="" /></div>
-          <div class="t3__bl-text"><img :src="t3.bottomLeftText" alt="" /></div>
           <div class="t3__bl-img1"><img :src="t3.bottomLeftImg1" alt="" /></div>
           <div class="t3__bl-img2"><img :src="t3.bottomLeftImg2" alt="" /></div>
           <!-- 下右卡片：边坡支护 -->
           <div class="t3__br-title"><img :src="t3.bottomRightTitle" alt="" /></div>
-          <div class="t3__br-text"><img :src="t3.bottomRightText" alt="" /></div>
           <div class="t3__br-img"><img :src="t3.bottomRightImg" alt="" /></div>
         </div>
       </ContentArea>
@@ -323,22 +328,22 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
   &__left-bottom {
     position: absolute;
     top: d.h(1802);
-    right: d.w(1290);
+    right: d.w(1321);
     bottom: d.h(211);
-    left: d.w(325);
+    left: d.w(276);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.9s);
 
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -353,7 +358,7 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 }
@@ -374,14 +379,14 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
-  &__left-img {
+  &__left-img1 {
     position: absolute;
     top: d.h(1312);
-    right: d.w(1343);
+    right: d.w(2831);
     bottom: d.h(396);
     left: d.w(358);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.9s);
@@ -389,7 +394,22 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
+    }
+  }
+
+  &__left-img2 {
+    position: absolute;
+    top: d.h(1312);
+    right: d.w(1343);
+    bottom: d.h(397);
+    left: d.w(1025);
+    @include fx.enter-fade-in($duration: 0.7s, $delay: 1s);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: fill;
     }
   }
 
@@ -397,14 +417,14 @@ const t9 = {
     position: absolute;
     top: d.h(860);
     right: d.w(355);
-    bottom: d.h(396);
+    bottom: d.h(393);
     left: d.w(2517);
     @include fx.enter-fade-in($duration: 0.7s, $delay: 0.7s);
 
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 }
@@ -425,7 +445,7 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -439,7 +459,7 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -453,52 +473,38 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
   /* 下左卡片：薄层岩体深台阶预裂爆破施工 */
   &__bl-title {
     position: absolute;
-    top: d.h(1039);
+    top: d.h(1038);
     right: d.w(1559);
-    bottom: d.h(395);
-    left: d.w(368);
+    bottom: d.h(433);
+    left: d.w(249);
     @include fx.enter-fade-in($duration: 0.6s, $delay: 0.8s);
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
-    }
-  }
-
-  &__bl-text {
-    position: absolute;
-    top: d.h(1189);
-    right: d.w(2646);
-    bottom: d.h(434);
-    left: d.w(451);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.9s);
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
   /* 两张图角叠加：img1 在上，img2 左上角叠在 img1 右下角 */
   &__bl-img1 {
     position: absolute;
-    top: d.h(1184);
+    top: d.h(1182);
     right: d.w(1814);
-    bottom: d.h(606);
+    bottom: d.h(605);
     left: d.w(1284);
     z-index: 1;
     @include fx.enter-fade-in($duration: 0.7s, $delay: 1s);
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -512,7 +518,7 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -520,28 +526,14 @@ const t9 = {
   &__br-title {
     position: absolute;
     top: d.h(1038);
-    right: d.w(357);
-    bottom: d.h(395);
+    right: d.w(300);
+    bottom: d.h(436);
     left: d.w(2380);
     @include fx.enter-fade-in($duration: 0.6s, $delay: 0.8s);
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
-    }
-  }
-
-  &__br-text {
-    position: absolute;
-    top: d.h(1186);
-    right: d.w(822);
-    bottom: d.h(437);
-    left: d.w(2450);
-    @include fx.enter-fade-in($duration: 0.7s, $delay: 0.9s);
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -555,7 +547,7 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 }
@@ -575,7 +567,7 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -589,7 +581,7 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -603,7 +595,7 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -617,7 +609,7 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -631,7 +623,7 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -645,7 +637,7 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 }
@@ -665,7 +657,7 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -679,7 +671,7 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -693,7 +685,7 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -707,7 +699,7 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -721,7 +713,7 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -735,7 +727,7 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 }
@@ -755,7 +747,7 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -769,7 +761,7 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -783,7 +775,7 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 }
@@ -803,7 +795,7 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -817,7 +809,7 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -831,7 +823,7 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -845,7 +837,7 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -859,7 +851,7 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -873,7 +865,7 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 }
@@ -893,7 +885,7 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -907,7 +899,7 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -921,7 +913,7 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 }
@@ -941,7 +933,7 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -955,7 +947,7 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -969,7 +961,7 @@ const t9 = {
     img {
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 }

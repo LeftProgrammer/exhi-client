@@ -4,19 +4,19 @@ import {
   createWebHashHistory,
   type RouteRecordRaw
 } from 'vue-router'
-import HomeView from './views/HomeView.vue'
-import SectionView from './views/SectionView.vue'
+import home from './views/home.vue'
+import section from './views/section.vue'
 
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'home',
-    component: HomeView
+    component: home
   },
   {
     path: '/section/:sectionId/:categoryId?/:entryIndex?',
     name: 'section',
-    component: SectionView,
+    component: section,
     props: (route) => ({
       sectionId: route.params.sectionId as string,
       categoryId: (route.params.categoryId as string) || undefined,

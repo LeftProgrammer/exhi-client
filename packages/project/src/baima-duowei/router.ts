@@ -4,18 +4,18 @@ import {
   createWebHashHistory,
   type RouteRecordRaw
 } from 'vue-router'
-import HomeView from './views/HomeView.vue'
-import SafetyView from './views/SafetyView.vue'
-import TechView from './views/TechView.vue'
-import StandardView from './views/StandardView.vue'
-import ActivityView from './views/ActivityView.vue'
+import home from './views/home.vue'
+import safety from './views/safety.vue'
+import tech from './views/tech.vue'
+import standard from './views/standard.vue'
+import activity from './views/activity.vue'
 
 const routes: RouteRecordRaw[] = [
-  { path: '/', name: 'home', component: HomeView },
-  { path: '/safety', name: 'safety', component: SafetyView },
-  { path: '/tech', name: 'tech', component: TechView },
-  { path: '/activity', name: 'activity', component: ActivityView },
-  { path: '/standard', name: 'standard', component: StandardView },
+  { path: '/', name: 'home', component: home },
+  { path: '/safety', name: 'safety', component: safety },
+  { path: '/tech', name: 'tech', component: tech },
+  { path: '/activity', name: 'activity', component: activity },
+  { path: '/standard', name: 'standard', component: standard },
   { path: '/:pathMatch(.*)*', redirect: '/' }
 ]
 

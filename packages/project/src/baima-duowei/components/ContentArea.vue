@@ -1,7 +1,17 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { resolvePkgUrl } from '@shared/utils/url'
+
+/** 把 d.h(N) / d.w(N) 字符串转为 CSS calc()
+ *  公式：设计稿像素 / designBase × 100vw/vh（与 design.scss 的 d.w()/d.h() 等价）
+ */
+function resolveDesignValue(val: string | undefined): string | undefined {
+  if (!val) return undefined
+  return val
+    .replace(/d\.h\((\d+(?:\.\d+)?)\)/g, 'calc($1 / var(--design-h) * 100vh)')
+    .replace(/d\.w\((\d+(?:\.\d+)?)\)/g, 'calc($1 / var(--design-w) * 100vw)')
+}
 
 /**
  * 二级页面内容区容器。
@@ -14,8 +24,10 @@ import { resolvePkgUrl } from '@shared/utils/url'
 const props = defineProps<{
   /** 内容区底层背景图 */
   contentBg: string
-  /** 内容区上层装饰覆盖图（可选，与 contentBg 同尺寸，叠在其上） */
+  /** 内容区上层装饰覆盖图（可选，基于页面级定位，不随 contentBg 尺寸） */
   contentOverlay?: string
+  /** overlay 定位样式：{ top, left, width, height }（默认 inset:0 填满） */
+  contentOverlayStyle?: { top?: string; left?: string; width?: string; height?: string }
   /** 顶部标题块图片（背景+文字合一） */
   blockTitle: string
   /** 是否显示上一页/下一页导航按钮 */
@@ -49,6 +61,23 @@ const nextHover = ref(false)
 function goHome() {
   router.push({ name: 'home' })
 }
+
+/** overlay 计算后的行内样式：自动解析 d.h() / d.w() */
+const overlayComputedStyle = computed(() => {
+  if (!props.contentOverlayStyle) return undefined
+  const s = props.contentOverlayStyle
+  const style: Record<string, string> = {}
+  if (s.top) style.top = resolveDesignValue(s.top)!
+  if (s.left) style.left = resolveDesignValue(s.left)!
+  if (s.width) style.width = resolveDesignValue(s.width)!
+  if (s.height) style.height = resolveDesignValue(s.height)!
+  // 一旦自定义了定位/大小，取消 inset:0 的 right/bottom 约束
+  if (Object.keys(style).length > 0) {
+    style.right = 'auto'
+    style.bottom = 'auto'
+  }
+  return style
+})
 </script>
 
 <template>
@@ -56,13 +85,16 @@ function goHome() {
     <!-- 背景层 -->
     <div class="content-area">
       <img class="content-area__bg" :src="props.contentBg" alt="" />
-      <img
-        v-if="props.contentOverlay"
-        class="content-area__overlay"
-        :src="props.contentOverlay"
-        alt=""
-      />
     </div>
+
+    <!-- overlay：基于 content-area__wrapper（页面级）独立定位 -->
+    <img
+      v-if="props.contentOverlay"
+      class="content-area__overlay"
+      :src="props.contentOverlay"
+      :style="overlayComputedStyle"
+      alt=""
+    />
 
     <!-- 顶部标题块（基于 sec-page__body 定位） -->
     <img class="content-area__block-title" :src="props.blockTitle" alt="" />
@@ -158,7 +190,7 @@ function goHome() {
 }
 
 .content-area__wrapper {
-  position: static;
+  position: relative;
   width: 100%;
   height: 100%;
 }
@@ -180,12 +212,13 @@ function goHome() {
   }
 }
 
-/* 内容区上层覆盖 */
+/* 内容区上层覆盖：基于 content-area__wrapper（页面级）独立定位 */
 .content-area__overlay {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  top: d.h(302);
+  right: d.w(191);
+  bottom: d.h(96);
+  left: d.w(191);
   object-fit: fill;
   z-index: 0;
   pointer-events: none;
