@@ -92,7 +92,7 @@ const sfx = useProjectSfx()
 
 function selectCategory(id: string) {
   if (id === currentCategory.value.id) return
-  sfx.play('tab')
+  sfx.play('tap')
   transitionType.value = 'category'
   categorySwitching.value = true
   setTimeout(() => (categorySwitching.value = false), 600)

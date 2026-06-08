@@ -12,8 +12,11 @@
  *   sfx.play('page')  // 内容翻页
  *   sfx.play('tap')   // 普通点击
  *   sfx.play('back')  // 返回/首页
+ *   sfx.play('tap1')  // 自动尝试 audio/tap1.mp3，无需预先 register
  *   sfx.register('nav', url); sfx.preload()  // 换真实音频文件
  */
+
+import { resolvePkgUrl } from '@shared/utils/url'
 
 /** 单个振荡器层：可叠加多层做出丰富音色。 */
 interface OscLayer {
@@ -112,6 +115,7 @@ let masterVolume = 0.6
 
 const fileUrls = new Map<string, string>()
 const fileBuffers = new Map<string, AudioBuffer>()
+const autoTried = new Set<string>() // 已自动尝试但未成功的 name，避免反复 404
 
 function ensureCtx(): AudioContext | null {
   if (ctx) return ctx
@@ -273,7 +277,31 @@ function play(name: string) {
     return
   }
   const preset = SYNTH_PRESETS[name]
-  if (preset) playSynth(preset)
+  if (preset) {
+    playSynth(preset)
+    return
+  }
+
+  // 自动 fallback：按命名约定尝试加载 audio/<name>.mp3（或 .wav）
+  void autoTryFile(name)
+}
+
+/** 按命名约定自动查找并加载文件音。成功即播放，失败不再重试。 */
+async function autoTryFile(name: string) {
+  if (autoTried.has(name)) return
+  autoTried.add(name)
+
+  for (const ext of ['.mp3', '.wav']) {
+    const url = resolvePkgUrl(`audio/${name}${ext}`)
+    register(name, url)
+    const buf = await loadBuffer(name)
+    if (buf) {
+      playBuffer(buf)
+      return
+    }
+    // 清理失败注册，避免下次重复 404
+    fileUrls.delete(name)
+  }
 }
 
 function setVolume(v: number) {
