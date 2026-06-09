@@ -1,4 +1,5 @@
 import { net, protocol } from 'electron'
+import fs from 'node:fs'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { logger } from './logger'
@@ -67,12 +68,21 @@ export function attachProtocolHandler(packageRoot: string) {
         // dev server 没起或路径不存在 → 回退到磁盘
       }
 
-      const full = path.resolve(rootResolved, relPath)
+      let full = path.resolve(rootResolved, relPath)
 
       // 防穿越
       if (!full.startsWith(rootResolved)) {
         logger.warn(`阻止越界访问: ${relPath}`)
         return new Response('Forbidden', { status: 403 })
+      }
+
+      // 开发模式：项目包内找不到时，fallback 到 shared 目录（pkg-assemble 复制前）
+      if (isDev && !fs.existsSync(full)) {
+        const sharedRoot = path.join(path.dirname(rootResolved), 'shared')
+        const sharedFull = path.join(sharedRoot, relPath)
+        if (sharedFull.startsWith(sharedRoot) && fs.existsSync(sharedFull)) {
+          full = sharedFull
+        }
       }
 
       return net.fetch(pathToFileURL(full).toString())

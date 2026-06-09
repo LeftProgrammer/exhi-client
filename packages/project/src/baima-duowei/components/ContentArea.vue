@@ -269,8 +269,8 @@ const overlayComputedStyle = computed(() => {
 /* 内部切换：overlay 离场渐隐 + 入场渐显 + 轻微缩放位移 */
 .overlay-fade-enter-active {
   transition:
-    opacity 1.4s ease 0.5s,
-    transform 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.5s;
+    opacity 0.8s ease 0.15s,
+    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s;
 }
 .overlay-fade-leave-active {
   transition:
@@ -518,6 +518,22 @@ const overlayComputedStyle = computed(() => {
   to {
     opacity: 0;
     transform: translateY(2vh);
+  }
+}
+
+/* 离场：overlay 渐隐 + 缩小上浮 */
+.page-leave-active .content-area__overlay {
+  animation: overlay-fade-out 0.5s ease-in both;
+}
+
+@keyframes overlay-fade-out {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.9) translateY(-4vh);
   }
 }
 </style>
