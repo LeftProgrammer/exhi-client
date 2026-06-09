@@ -127,6 +127,26 @@ export interface BindingsConfig {
   standalone?: StandaloneConfig
 }
 
+// ============ 中控连接配置（项目包级，可被设备 settings.json 覆盖）============
+
+/**
+ * 项目包内可选的 hub.json，用于让"项目自带中控连接配置"。
+ * 运行时合并优先级：环境变量 > 设备 settings.json > 项目包 hub.json > 内置默认。
+ * 所有字段可选；只覆盖填写了的字段。
+ */
+export interface HubConfig {
+  /** 中控服务地址（ws/wss）。为空则该项目不主动连中控 */
+  url?: string
+  /** 传输协议：'native' 直连（默认）| 'uec' 走 UEC 转发中继 */
+  transport?: 'native' | 'uec'
+  /** UEC 模式：本端信箱 id（?id=）；留空回退 deviceId */
+  id?: string
+  /** UEC 模式：中控信箱 id（发送时 { to } 目标） */
+  target?: string
+  /** native 模式：鉴权 token */
+  token?: string
+}
+
 // ============ 协议消息 ============
 
 export interface Command<P = Record<string, unknown>> {

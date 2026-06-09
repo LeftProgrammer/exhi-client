@@ -91,6 +91,27 @@ export class IpcBus {
     ipcMain.on(
       IPC.BRIDGE_EMIT,
       (_e, ev: { name: string; payload?: unknown; fromDisplayId?: string }) => {
+        // hub:send 是应用层→中控/指定设备自定义消息，不走 evt.bridge 框架上报
+        if (ev.name === 'hub:send') {
+          logger.info('[bridge] hub:send', ev.payload)
+          const ws = this.getWsClient()
+          if (!ws) {
+            logger.warn('[bridge] hub:send 失败，WS 未连接')
+            return
+          }
+          // 支持两种格式：
+          // 1. { to: 'xxx', msg: {...} } → 发给指定设备
+          // 2. {...} → 发给默认 target（中控平台）
+          const payload = ev.payload as Record<string, unknown>
+          const hasTo = payload && typeof payload.to === 'string' && payload.to !== ''
+          const hasMsg = payload && Object.prototype.hasOwnProperty.call(payload, 'msg')
+          if (hasTo && hasMsg) {
+            ws.sendApp(payload.msg as object, payload.to as string)
+          } else {
+            ws.sendApp(payload as object)
+          }
+          return
+        }
         // 来自 web 内容的 emit 事件，记录日志 + 上报中控 evt.bridge
         logger.debug(`[bridge] ${ev.fromDisplayId ?? '?'} emit: ${ev.name}`, ev.payload ?? '')
         const ws = this.getWsClient()

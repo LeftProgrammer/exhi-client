@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router'
 import { useBridge } from '@shared/composables/useBridge'
 import { useIdleReset } from '@shared/composables/useIdleReset'
 import { useProjectSfx } from '@shared/composables/useProjectSfx'
+import { useControl } from '@baima-yushui/composables/useControl'
 
 /**
  * 应用根。
@@ -43,6 +44,10 @@ on('app:goto', (payload) => {
     }
   })
 })
+
+// === UEC 中控协议处理 ===
+const control = useControl()
+control.setupCommands(router)
 
 /**
  * 给 <transition> 算 :key——只在"页面级身份"变化时重挂载：

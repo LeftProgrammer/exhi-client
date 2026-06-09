@@ -11,6 +11,7 @@ import {
 import type {
   BindingsConfig,
   DisplaysConfig,
+  HubConfig,
   Manifest,
   ManifestFile,
   ScenesConfig
@@ -34,6 +35,8 @@ export interface LoadedPackage {
   displays: DisplaysConfig
   scenes: ScenesConfig
   bindings: BindingsConfig
+  /** 可选的项目级中控连接配置（hub.json）；不存在则为 null */
+  hub: HubConfig | null
 }
 
 /**
@@ -96,14 +99,16 @@ export class PackageLoader {
     displays: DisplaysConfig
     scenes: ScenesConfig
     bindings: BindingsConfig
+    hub: HubConfig | null
   } {
     const manifest = this.readJson<Manifest>(path.join(rootPath, 'manifest.json'))
     this.checkRuntimeCompatibility(manifest)
     const displays = this.readJson<DisplaysConfig>(path.join(rootPath, 'displays.json'))
     const scenes = this.readJson<ScenesConfig>(path.join(rootPath, 'scenes.json'))
     const bindings = this.readJson<BindingsConfig>(path.join(rootPath, 'bindings.json'))
+    const hub = this.readOptionalJson<HubConfig>(path.join(rootPath, 'hub.json'))
     this.validateBasic(displays, scenes)
-    return { manifest, displays, scenes, bindings }
+    return { manifest, displays, scenes, bindings, hub }
   }
 
   /** 取另一个槽位名（用于切换/回滚） */
@@ -299,6 +304,17 @@ export class PackageLoader {
 
   private isValidPackage(p: string): boolean {
     return fs.existsSync(path.join(p, 'manifest.json'))
+  }
+
+  /** 读取可选 JSON 文件，不存在或解析失败返回 null（不抛错） */
+  private readOptionalJson<T>(filePath: string): T | null {
+    if (!fs.existsSync(filePath)) return null
+    try {
+      return JSON.parse(fs.readFileSync(filePath, 'utf-8')) as T
+    } catch (e) {
+      logger.warn(`可选配置解析失败，忽略 ${filePath}: ${(e as Error).message}`)
+      return null
+    }
   }
 
   private readJson<T>(filePath: string): T {

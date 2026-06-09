@@ -59,6 +59,8 @@ if (!singleInstanceLock) {
 app.commandLine.appendSwitch('disable-background-timer-throttling')
 app.commandLine.appendSwitch('disable-renderer-backgrounding')
 app.commandLine.appendSwitch('disable-backgrounding-occluded-windows')
+// 关闭 Chromium 直接写 stderr 的噪声（DevTools Autofill / Unknown VE context 等）
+app.commandLine.appendSwitch('disable-logging')
 
 // 早期读取 settings 里几个必须在 ready 之前应用的字段
 const earlySettings = loadSettingsEarly()
@@ -82,14 +84,14 @@ app.whenReady().then(async () => {
     const deviceId = await ensureDeviceId()
     logger.info(`deviceId = ${deviceId}`)
 
-    const settings = loadSettings()
-    logger.info(
-      `Settings: hubUrl=${settings.hubUrl ?? '(disabled)'} enableSign=${settings.enableSign}`
-    )
-
     const loader = new PackageLoader()
     const pkg = loader.load()
     logger.info(`项目包加载成功: ${pkg.manifest.name} (${pkg.manifest.projectId})`)
+
+    const settings = loadSettings(pkg.hub)
+    logger.info(
+      `Settings: hubUrl=${settings.hubUrl ?? '(disabled)'} transport=${settings.hubTransport} enableSign=${settings.enableSign}`
+    )
     attachProtocolHandler(pkg.contentRoot)
 
     const updater = new PackageUpdater(loader, deviceId, () => wsClient)
@@ -122,6 +124,10 @@ app.whenReady().then(async () => {
     if (!settings.hubDisabled) {
       wsClient = new WsClient(settings, deviceId, pkg.manifest.version)
       wsClient.on('command', (cmd) => mainBus.emit('command', cmd))
+      // UEC 模式自定义消息 → bridge 事件发到渲染层（原样透传）
+      wsClient.on('hubMessage', (payload) =>
+        mainBus.emit('bridge-event', { name: 'hub:command', payload })
+      )
       wsClient.on('modeChanged', (mode) => logger.info(`WS 模式切换: ${mode}`))
       wsClient.start()
     }

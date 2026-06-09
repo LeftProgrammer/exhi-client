@@ -12,12 +12,6 @@ export const RUNTIME_VERSION = '0.0.0-fallback'
 /** 本地 HTTP 服务端口（exhibitBridge 兜底通道 + 本地代理入口） */
 export const LOCAL_SERVER_PORT = 17600
 
-/** WebSocket 心跳与重连参数 */
-export const WS_HEARTBEAT_INTERVAL_MS = 30_000
-export const WS_HEARTBEAT_TIMEOUT_MS = 60_000
-export const WS_RECONNECT_BASE_MS = 1_000
-export const WS_RECONNECT_MAX_MS = 30_000
-
 /** IPC 通道名 */
 export const IPC = {
   // 主 → 渲染

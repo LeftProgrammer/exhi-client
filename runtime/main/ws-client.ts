@@ -4,22 +4,21 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { app } from 'electron'
 import WebSocket, { type RawData } from 'ws'
-import {
-  WS_HEARTBEAT_INTERVAL_MS,
-  WS_HEARTBEAT_TIMEOUT_MS,
-  WS_RECONNECT_BASE_MS,
-  WS_RECONNECT_MAX_MS,
-  ErrorCode
-} from '@shared/constants'
+import { ErrorCode } from '@shared/constants'
 import type { Command, Event as DomainEvent } from '@shared/types'
 import { logger } from './logger'
 import { stableStringify } from './stable-json'
-import type { Settings } from './settings'
+import { HUB_DEFAULTS, type Settings } from './settings'
 
 export type WsMode = 'online' | 'standalone'
 
+/** UEC 转发服务的应用层心跳字符串（服务端原样回包） */
+const UEC_HEARTBEAT = 'heartbeat'
+
 export interface WsClientEvents {
   command: (cmd: Command) => void
+  /** 收到中控自定义消息（原样透传，不翻译） */
+  hubMessage: (payload: unknown) => void
   modeChanged: (mode: WsMode) => void
 }
 
@@ -36,28 +35,40 @@ export declare interface WsClient {
  *
  * 行为约定：
  *  - 配置缺省/连不上 → 进入 standalone 模式（持续后台重连）
- *  - 指数退避：1s 2s 4s 8s 16s 30s 30s ...
- *  - 30s ping，60s 无 pong 主动断开
- *  - 离线期间 publish 的事件入队，连上后批量补报（最多 500 条）
+ *  - 指数退避：3s 6s 12s 24s 30s 30s ...
+ *  - 20s ping，20s 无 pong 主动断开
+ *  - 离线期间 publish 的事件入队，连上后批量补报
  *  - 收到 cmd 校验签名（开关可控）→ emit('command')
  */
 export class WsClient extends EventEmitter {
   private ws: WebSocket | null = null
-  private reconnectDelay = WS_RECONNECT_BASE_MS
+  private reconnectDelay = HUB_DEFAULTS.reconnectBaseMs
   private reconnectTimer: NodeJS.Timeout | null = null
   private heartbeatTimer: NodeJS.Timeout | null = null
   private pongTimer: NodeJS.Timeout | null = null
   private offlineQueue: DomainEvent[] = []
   /** 内存上限：到顶就开始淘汰最旧的 */
-  private readonly maxQueue = 2000
+  private readonly maxQueue = HUB_DEFAULTS.offlineQueueMax
   /** 文件上限：超过就截断旧部分 */
-  private readonly maxFileBytes = 10 * 1024 * 1024 // 10MB
+  private readonly maxFileBytes = HUB_DEFAULTS.offlineQueueMaxBytes
   /** 持久化文件路径，由 init 设置 */
   private queueFile: string
   /** flush 节流定时器 */
   private flushTimer: NodeJS.Timeout | null = null
   private _mode: WsMode = 'standalone'
   private stopped = false
+  /** 调试字段：连接成功时间戳 */
+  private connectedAt: number | undefined
+  /** 调试字段：最后心跳时间戳 */
+  private lastHeartbeat: number | undefined
+  /** 调试字段：最后收到消息时间戳 */
+  private lastMessageIn: number | undefined
+  /** 调试字段：最后发送消息时间戳 */
+  private lastMessageOut: number | undefined
+  /** 最近收到的消息（最多 10 条） */
+  private recentIn: { ts: number; payload: unknown }[] = []
+  /** 最近发送的消息（最多 10 条） */
+  private recentOut: { ts: number; payload: unknown }[] = []
 
   constructor(
     private settings: Settings,
@@ -100,8 +111,13 @@ export class WsClient extends EventEmitter {
     }
   }
 
-  /** 上报事件，离线入队（带文件持久化） */
+  /**
+   * 上报事件，离线入队（带文件持久化）。
+   * UEC 转发模式下：框架自动事件（metrics/status/错误回执等）不再发向中控，
+   * 只保留本地离线队列用于调试日志；应用层需用 sendApp 向中控发自定义消息。
+   */
   publish(ev: DomainEvent) {
+    if (this.isUec) return
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.send(ev)
     } else {
@@ -111,12 +127,46 @@ export class WsClient extends EventEmitter {
     }
   }
 
+  /**
+   * 应用层主动向中控/指定设备发送自定义消息（仅 UEC 模式有意义）。
+   * payload 会被自动 JSON.stringify 并包裹成 { to, msg } 格式。
+   * @param to 接收方 ID（默认 hub.json 里的 target）
+   */
+  sendApp(payload: object, to?: string): boolean {
+    if (!this.isUec) {
+      logger.warn('WS: sendApp 只在 UEC 模式下有效')
+      return false
+    }
+    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+      logger.warn('WS: sendApp 失败，连接未就绪')
+      return false
+    }
+    try {
+      const recipient = to ?? this.settings.hubTarget ?? ''
+      const wrapped = JSON.stringify({
+        to: recipient,
+        msg: JSON.stringify(payload)
+      })
+      this.ws.send(wrapped)
+      this.lastMessageOut = Date.now()
+      this.recentOut.push({ ts: Date.now(), payload })
+      if (this.recentOut.length > 10) this.recentOut.shift()
+      logger.info('WS: sendApp 已发送 →', recipient, payload)
+      this.writeDebugStatus()
+      return true
+    } catch (e) {
+      logger.warn('WS: sendApp 发送失败', e)
+      return false
+    }
+  }
+
   // ============ 内部 ============
 
   private connect() {
     if (this.stopped) return
 
     const url = this.buildUrl()
+    logger.info('')
     logger.info(`WS: 连接 ${url}`)
     let ws: WebSocket
     try {
@@ -130,7 +180,9 @@ export class WsClient extends EventEmitter {
 
     ws.on('open', () => {
       logger.info('WS: 已连接')
-      this.reconnectDelay = WS_RECONNECT_BASE_MS
+      logger.info('')
+      this.reconnectDelay = HUB_DEFAULTS.reconnectBaseMs
+      this.connectedAt = Date.now()
       this.setMode('online')
       this.startHeartbeat()
       this.flushOfflineQueue()
@@ -140,6 +192,7 @@ export class WsClient extends EventEmitter {
 
     ws.on('pong', () => {
       // 收到 pong，重置 pong 超时计时
+      this.lastHeartbeat = Date.now()
       this.resetPongTimer()
     })
 
@@ -157,9 +210,19 @@ export class WsClient extends EventEmitter {
     })
   }
 
+  /** 是否走 UEC 转发中继传输 */
+  private get isUec(): boolean {
+    return this.settings.hubTransport === 'uec'
+  }
+
   private buildUrl(): string {
     const base = this.settings.hubUrl!
     const sep = base.includes('?') ? '&' : '?'
+    // UEC 转发服务：仅需 ?id=<本端信箱>，不带 deviceId/v/pkgV/token
+    if (this.isUec) {
+      const id = this.settings.hubId || this.deviceId
+      return `${base}${sep}id=${encodeURIComponent(id)}`
+    }
     const params = new URLSearchParams({
       deviceId: this.deviceId,
       v: app.getVersion(),
@@ -171,16 +234,71 @@ export class WsClient extends EventEmitter {
 
   private send(payload: object) {
     try {
-      this.ws!.send(JSON.stringify(payload))
+      if (this.isUec) {
+        // UEC 转发协议：{ to: 中控信箱, msg: 负载字符串 }
+        const wrapped = JSON.stringify({
+          to: this.settings.hubTarget ?? '',
+          msg: JSON.stringify(payload)
+        })
+        this.ws!.send(wrapped)
+      } else {
+        this.ws!.send(JSON.stringify(payload))
+      }
     } catch (e) {
       logger.warn('WS: 发送失败', e)
     }
   }
 
   private onMessage(data: RawData) {
+    const text = data.toString()
+    // UEC 字符串心跳回包：视为连接存活，重置 pong 超时
+    if (this.isUec && text === UEC_HEARTBEAT) {
+      this.resetPongTimer()
+      return
+    }
+
+    // UEC 模式：收到的不是 Command 而是自定义 msg → 双路分发
+    if (this.isUec) {
+      let parsed: unknown
+      try {
+        parsed = JSON.parse(text)
+      } catch (e) {
+        logger.warn('WS: UEC 收到无法解析的消息', e)
+        return
+      }
+      // ① 原样透传渲染层（项目自由解析）
+      this.lastMessageIn = Date.now()
+      this.recentIn.push({ ts: Date.now(), payload: parsed })
+      if (this.recentIn.length > 10) this.recentIn.shift()
+      logger.info('')
+      logger.info('WS: 收到服务端消息', parsed)
+      logger.info('')
+      this.writeDebugStatus()
+      this.emit('hubMessage', parsed)
+      // ② 若包含 cmd.type → 同时走框架 Command 路由（控制类指令）
+      if (parsed && typeof parsed === 'object' && (parsed as Record<string, unknown>).type === 'string') {
+        const p = parsed as { type: string; [key: string]: unknown }
+        const cmd: Command = {
+          id: (p.id as string) ?? randomId(),
+          ts: (p.ts as number) ?? Date.now(),
+          type: p.type,
+          payload: p.payload as Record<string, unknown> | undefined,
+          sig: p.sig as string | undefined,
+          source: 'hub'
+        }
+        if (this.settings.enableSign && !this.verifySig(cmd)) {
+          logger.warn(`WS: 指令签名失败 (${cmd.type})`)
+          return
+        }
+        this.emit('command', cmd)
+      }
+      return
+    }
+
+    // Native 模式：收到的就是框架 Command
     let cmd: Command
     try {
-      cmd = JSON.parse(data.toString()) as Command
+      cmd = JSON.parse(text) as Command
     } catch (e) {
       logger.warn('WS: 收到无法解析的消息', e)
       return
@@ -224,6 +342,33 @@ export class WsClient extends EventEmitter {
     if (this._mode === mode) return
     this._mode = mode
     this.emit('modeChanged', mode)
+    this.writeDebugStatus({ mode, ts: Date.now() })
+  }
+
+  /** 写入调试状态文件，供 dev-helper 实时查看 */
+  private writeDebugStatus(extra?: Record<string, unknown>) {
+    try {
+      const file = path.join(app.getPath('userData'), 'ws-debug.json')
+      const status = {
+        mode: this._mode,
+        url: this.settings.hubUrl,
+        transport: this.settings.hubTransport,
+        id: this.settings.hubId || this.deviceId,
+        target: this.settings.hubTarget,
+        connectedAt: this._mode === 'online' ? (this.connectedAt || Date.now()) : undefined,
+        disconnectedAt: this._mode === 'standalone' ? Date.now() : undefined,
+        lastHeartbeat: this.lastHeartbeat,
+        lastMessageIn: this.lastMessageIn,
+        lastMessageOut: this.lastMessageOut,
+        queueLength: this.offlineQueue.length,
+        recentIn: this.recentIn,
+        recentOut: this.recentOut,
+        ...extra
+      }
+      fs.writeFileSync(file, JSON.stringify(status, null, 2))
+    } catch {
+      /* 调试文件写入失败不影响主逻辑 */
+    }
   }
 
   // ---- 心跳 ----
@@ -233,13 +378,19 @@ export class WsClient extends EventEmitter {
     this.heartbeatTimer = setInterval(() => {
       if (this.ws && this.ws.readyState === WebSocket.OPEN) {
         try {
-          this.ws.ping()
+          // UEC 用应用层字符串心跳；原生用 WS ping 帧
+          if (this.isUec) {
+            this.ws.send(UEC_HEARTBEAT)
+            logger.info('WS: 发送 heartbeat')
+          } else {
+            this.ws.ping()
+          }
         } catch {
           /* noop */
         }
         if (!this.pongTimer) this.resetPongTimer()
       }
-    }, WS_HEARTBEAT_INTERVAL_MS)
+    }, HUB_DEFAULTS.heartbeatIntervalMs)
   }
 
   private resetPongTimer() {
@@ -251,7 +402,7 @@ export class WsClient extends EventEmitter {
       } catch {
         /* noop */
       }
-    }, WS_HEARTBEAT_TIMEOUT_MS)
+    }, HUB_DEFAULTS.heartbeatTimeoutMs)
   }
 
   private clearHeartbeat() {
@@ -270,7 +421,7 @@ export class WsClient extends EventEmitter {
     logger.info(`WS: ${delay}ms 后重连`)
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = null
-      this.reconnectDelay = Math.min(this.reconnectDelay * 2, WS_RECONNECT_MAX_MS)
+      this.reconnectDelay = Math.min(this.reconnectDelay * 2, HUB_DEFAULTS.reconnectMaxMs)
       this.connect()
     }, delay)
   }
@@ -287,6 +438,13 @@ export class WsClient extends EventEmitter {
 
   private flushOfflineQueue() {
     if (this.offlineQueue.length === 0) return
+    // UEC 模式下离线队列存的是原生格式，服务端不认识，直接清空不补报
+    if (this.isUec) {
+      logger.info(`WS: UEC 模式跳过 ${this.offlineQueue.length} 条离线事件`)
+      this.offlineQueue = []
+      try { if (fs.existsSync(this.queueFile)) fs.unlinkSync(this.queueFile) } catch { /* noop */ }
+      return
+    }
     logger.info(`WS: 补报离线事件 ${this.offlineQueue.length} 条`)
     for (const ev of this.offlineQueue) this.send(ev)
     this.offlineQueue = []

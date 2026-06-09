@@ -130,6 +130,59 @@ function showStatus() {
       `  logs:          ${files.length} 个文件，最新: ${files.sort().reverse()[0] ?? '?'}`
     )
   }
+
+  // WS 实时调试状态（ws-client.ts 写入）
+  const wsDebugFile = path.join(USER_DATA, 'ws-debug.json')
+  if (fs.existsSync(wsDebugFile)) {
+    try {
+      const ws = JSON.parse(fs.readFileSync(wsDebugFile, 'utf-8'))
+      console.log('')
+      console.log('  ── WS 调试状态 ──')
+      console.log(`    mode:          ${ws.mode ?? '?'}`)
+      console.log(`    url:           ${ws.url ?? '?'}`)
+      console.log(`    transport:     ${ws.transport ?? '?'}`)
+      console.log(`    id:            ${ws.id ?? '?'}`)
+      console.log(`    target:        ${ws.target ?? '?'}`)
+      if (ws.connectedAt) {
+        const ago = Math.round((Date.now() - ws.connectedAt) / 1000)
+        console.log(`    connectedAt:   ${ago}s 前`)
+      }
+      if (ws.lastHeartbeat) {
+        const ago = Math.round((Date.now() - ws.lastHeartbeat) / 1000)
+        console.log(`    lastHeartbeat: ${ago}s 前`)
+      }
+      if (ws.lastMessageIn) {
+        const ago = Math.round((Date.now() - ws.lastMessageIn) / 1000)
+        console.log(`    lastMessageIn: ${ago}s 前`)
+      }
+      if (ws.lastMessageOut) {
+        const ago = Math.round((Date.now() - ws.lastMessageOut) / 1000)
+        console.log(`    lastMessageOut:${ago}s 前`)
+      }
+      console.log(`    queueLength:   ${ws.queueLength ?? '?'}`)
+
+      if (ws.recentOut && ws.recentOut.length) {
+        console.log('')
+        console.log('  ── 最近发送 ──')
+        for (const m of ws.recentOut.slice(-5)) {
+          const ago = Math.round((Date.now() - m.ts) / 1000)
+          console.log(`    [${ago}s 前] →`, JSON.stringify(m.payload))
+        }
+      }
+      if (ws.recentIn && ws.recentIn.length) {
+        console.log('')
+        console.log('  ── 最近接收 ──')
+        for (const m of ws.recentIn.slice(-5)) {
+          const ago = Math.round((Date.now() - m.ts) / 1000)
+          console.log(`    [${ago}s 前] ←`, JSON.stringify(m.payload))
+        }
+      }
+    } catch {
+      console.log('  ws-debug:      (解析失败)')
+    }
+  } else {
+    console.log('  ws-debug:      无（客户端未运行 / WS 未初始化）')
+  }
 }
 
 // ============ reset ============
@@ -144,7 +197,7 @@ function resetAll(opts) {
     return
   }
 
-  const toRemove = ['packages', 'heartbeat.txt', 'offline-queue.ndjson', 'logs']
+  const toRemove = ['packages', 'heartbeat.txt', 'offline-queue.ndjson', 'logs', 'ws-debug.json']
   if (!keepDevice) toRemove.push('device-id.txt')
   if (!keepSettings) toRemove.push('settings.json')
 

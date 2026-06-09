@@ -16,8 +16,10 @@ const { leaving, leaveTo } = usePageLeave({ duration: 500 })
 const sfx = useProjectSfx()
 
 function enterSection(sectionId: 'yushui' | 'leaders') {
-  sfx.play('nav')
+  console.log('[home] 点击卡片:', sectionId)
+  // 先跳转，音效失败不阻塞
   leaveTo({ name: 'section', params: { sectionId } })
+  try { sfx.play('nav') } catch { /* 音效文件缺失，静默忽略 */ }
 }
 </script>
 
