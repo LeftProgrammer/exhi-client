@@ -198,7 +198,7 @@ watch(
       @contextmenu.prevent
     />
 
-    <!-- 顶部 banner：装饰底图 + 居中标题（揭幕扫光动画） -->
+    <!-- 顶部 banner：装饰底图 + 居中标题 -->
     <header class="banner">
       <img
         v-if="section.bannerFrameImage"

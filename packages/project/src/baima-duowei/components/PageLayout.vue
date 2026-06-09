@@ -140,18 +140,19 @@ const props = withDefaults(
   display: block;
   width: d.w(889);
   height: d.h(230);
-  animation: sec-title-in 0.9s 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+  /* 从左到右揭幕显示 */
+  opacity: 1;
+  clip-path: inset(0 100% 0 0);
+  animation: sec-title-reveal 0.8s cubic-bezier(0.25, 1, 0.5, 1) 0.5s forwards;
 }
 
-/* 头部标题：从右侧滑入 + 淡入 */
-@keyframes sec-title-in {
+/* 头部标题：从左到右揭幕 */
+@keyframes sec-title-reveal {
   from {
-    opacity: 0;
-    transform: translateX(10vw);
+    clip-path: inset(0 100% 0 0);
   }
   to {
-    opacity: 1;
-    transform: translateX(0);
+    clip-path: inset(0 0% 0 0);
   }
 }
 
@@ -164,5 +165,22 @@ const props = withDefaults(
   bottom: 0;
   z-index: 3;
   overflow: hidden;
+}
+</style>
+
+<!-- 离场动画：非 scoped，匹配全局 page-leave-active -->
+<style lang="scss">
+/* 二级标题离场：从右到左反向收起 */
+.page-leave-active .sec-page__title {
+  animation: sec-title-hide 0.6s cubic-bezier(0.55, 0, 1, 1) forwards;
+}
+
+@keyframes sec-title-hide {
+  from {
+    clip-path: inset(0 0% 0 0);
+  }
+  to {
+    clip-path: inset(0 0% 0 100%);
+  }
 }
 </style>

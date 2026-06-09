@@ -42,7 +42,7 @@ on('app:home', () => router.push({ name: 'home' }))
 
 <template>
   <router-view v-slot="{ Component, route }">
-    <transition name="page">
+    <transition name="page" mode="out-in">
       <component :is="Component" :key="route.name" />
     </transition>
   </router-view>
@@ -56,11 +56,11 @@ on('app:home', () => router.push({ name: 'home' }))
 /* 全局页面过渡只做 opacity 淡入淡出，不施加 transform，
    由各页面内部元素自行控制方向性动画 */
 .page-enter-active {
-  transition: opacity 800ms t.$ease-base;
+  transition: opacity 900ms t.$ease-base;
 }
 
 .page-leave-active {
-  transition: opacity 800ms t.$ease-base;
+  transition: opacity 600ms ease-out 500ms;
   position: absolute;
   inset: 0;
   z-index: 0;

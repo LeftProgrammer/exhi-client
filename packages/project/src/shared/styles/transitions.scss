@@ -460,7 +460,7 @@ $ease-leave: cubic-bezier(0.7, 0, 0.84, 0);
 //
 @mixin float-breath($duration: 5s, $delay: 0s, $rise: 12px, $scale: 1.02) {
   animation: fx-float-breath $duration $delay ease-in-out infinite;
-  --float-rise: -#{$rise}; // CSS 变量供 keyframe 取值，方便多组实例传不同幅度
+  --float-rise: calc(-1 * #{$rise}); // 用 calc 包负号，兼容 calc(...) 入参
   --float-scale: #{$scale};
 }
 

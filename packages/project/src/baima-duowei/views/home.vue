@@ -27,6 +27,7 @@ function goTo(name: string) {
 
 <template>
   <PageLayout
+    class="home-page"
     :bg-video="bgVideo"
     :bg-video-poster="bgPoster"
     :bg-overlay="headerBg"
@@ -40,9 +41,11 @@ function goTo(name: string) {
         class="home__btn-wrap"
         :style="{ '--step': i }"
       >
-        <button class="home__btn" @click="goTo(btn.name)">
-          <img :src="btn.img" :alt="btn.label" />
-        </button>
+        <div class="home__btn-float">
+          <button class="home__btn" @click="goTo(btn.name)">
+            <img :src="btn.img" :alt="btn.label" />
+          </button>
+        </div>
       </div>
     </nav>
   </PageLayout>
@@ -64,12 +67,23 @@ function goTo(name: string) {
   margin-left: calc(var(--step, 0) * 5vw);
   animation-name: btn-enter;
   animation-duration: 0.85s;
-  animation-delay: calc(var(--step, 0) * 0.2s + 1s);
+  animation-delay: calc(var(--step, 0) * 0.2s + 0.5s);
   animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
   animation-fill-mode: both;
 }
 
-/* 内层：纯交互，不受 animation fill-mode 影响 */
+/* 呼吸层：专门承担悬浮微动，避免跟入场/离场动画冲突 */
+.home__btn-float {
+  display: block;
+  @include fx.float-breath($duration: 3.8s, $delay: 0s, $rise: d.h(20), $scale: 1.03);
+}
+
+/* nav 内任意按钮 hover → 所有按钮呼吸暂停，避免与 hover 位移叠加 */
+.home__nav:hover .home__btn-float {
+  animation-play-state: paused;
+}
+
+/* 内层：纯交互 */
 .home__btn {
   display: block;
   background: none;
@@ -101,8 +115,10 @@ function goTo(name: string) {
   }
 }
 
-/* 头部标题淡入 */
+/* 头部标题淡入：覆盖 PageLayout 的 clip-path 揭幕，恢复为下滑淡入 */
 :deep(.sec-page__title) {
+  clip-path: inset(0);
+  opacity: 1;
   animation: title-fade-in 1.4s 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
@@ -132,12 +148,12 @@ function goTo(name: string) {
 
 <!-- 离场动画：非 scoped，直接匹配全局 transition class -->
 <style lang="scss">
-/* 提高特异性，确保覆盖 scoped style 中的入场动画 */
+/* 离场：从下到上依次向右飞出（与入场方向相反） */
 .page-leave-active .home__nav .home__btn-wrap {
-  animation: btn-leave 0.8s ease-in both;
+  animation: btn-leave 0.6s ease-in calc((3 - var(--step, 0)) * 0.1s) both;
 }
 
-.page-leave-active .sec-page__title {
+.page-leave-active.home-page .sec-page__title {
   animation: title-leave 0.8s ease-in both;
 }
 
@@ -159,7 +175,7 @@ function goTo(name: string) {
   }
   to {
     opacity: 0;
-    transform: translateX(-10vw) scale(0.9);
+    transform: translateX(12vw) scale(0.85);
   }
 }
 </style>
