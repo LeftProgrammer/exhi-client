@@ -122,8 +122,8 @@ export default defineConfig(({ command }) => ({
   server: {
     port: DEV_PORT,
     strictPort: true,
-    host: '127.0.0.1',
-    hmr: { protocol: 'ws', host: '127.0.0.1', port: DEV_PORT, clientPort: DEV_PORT }
+    host: '0.0.0.0',
+    hmr: { protocol: 'ws', host: '0.0.0.0', port: DEV_PORT, clientPort: DEV_PORT }
   },
   build: {
     outDir: resolve(__dirname, 'dist'),

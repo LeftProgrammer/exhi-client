@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref, computed } from 'vue'
 import { resolvePkgUrl } from '@shared/utils/url'
 import { usePageFlip } from '@baima-duowei/composables/usePageFlip'
 import PageLayout from '../components/PageLayout.vue'
@@ -42,25 +43,40 @@ const s4 = {
   leftImg: resolvePkgUrl('standard/standard4/left-img.png'),
   rightImg: resolvePkgUrl('standard/standard4/right-img.png')
 }
+
+const pageData = [s1, s2, s3, s4]
+
+const currentBlockTitle = computed(() => pageData[page.value].blockTitle)
+const currentOverlay = computed(() => (pageData[page.value] as any).overlay)
+
+/* 内容切换方向：next=向右翻页（内容左滑），prev=向左翻页（内容右滑） */
+const slideDirection = ref<'slide-next' | 'slide-prev'>('slide-next')
+
+function onPrev() {
+  slideDirection.value = 'slide-prev'
+  goPrev()
+}
+function onNext() {
+  slideDirection.value = 'slide-next'
+  goNext()
+}
 </script>
 
 <template>
   <PageLayout :bg-overlay="headerBg" :title-src="headerTitle" title-alt="标准化建设">
-    <Transition name="page-fade" mode="out-in">
-      <!-- ── Standard 1：施工标准化 ── -->
-      <ContentArea
-        v-if="page === 0"
-        key="standard1"
-        :content-bg="contentBg"
-        :content-overlay="s1.overlay"
-        :block-title="s1.blockTitle"
-        :show-page-nav="true"
-        :is-first="isFirst"
-        :is-last="isLast"
-        @prev="goPrev"
-        @next="goNext"
-      >
-        <div class="s1">
+    <ContentArea
+      :content-bg="contentBg"
+      :content-overlay="currentOverlay"
+      :block-title="currentBlockTitle"
+      :show-page-nav="true"
+      :is-first="isFirst"
+      :is-last="isLast"
+      @prev="onPrev"
+      @next="onNext"
+    >
+      <Transition :name="slideDirection" mode="out-in">
+        <!-- ── Standard 1：施工标准化 ── -->
+        <div v-if="page === 0" class="s1" key="standard1">
           <div class="s1__top-left-text"><img :src="s1.topLeftText" alt="" /></div>
           <div class="s1__top-right-img1"><img :src="s1.topRightImg1" alt="" /></div>
           <div class="s1__top-right-img2"><img :src="s1.topRightImg2" alt="" /></div>
@@ -70,21 +86,9 @@ const s4 = {
             </div>
           </div>
         </div>
-      </ContentArea>
 
-      <!-- ── Standard 2：现场布设标准化 ── -->
-      <ContentArea
-        v-else-if="page === 1"
-        key="standard2"
-        :content-bg="contentBg"
-        :block-title="s2.blockTitle"
-        :show-page-nav="true"
-        :is-first="isFirst"
-        :is-last="isLast"
-        @prev="goPrev"
-        @next="goNext"
-      >
-        <div class="s2">
+        <!-- ── Standard 2：现场布设标准化 ── -->
+        <div v-else-if="page === 1" class="s2" key="standard2">
           <div class="s2__left-text"><img :src="s2.leftText" alt="" /></div>
           <div class="s2__right-grid">
             <div v-for="(src, i) in s2.rightImgs" :key="i" class="s2__grid-item">
@@ -92,70 +96,67 @@ const s4 = {
             </div>
           </div>
         </div>
-      </ContentArea>
 
-      <!-- ── Standard 3：施工工艺标准化 ── -->
-      <ContentArea
-        v-else-if="page === 2"
-        key="standard3"
-        :content-bg="contentBg"
-        :block-title="s3.blockTitle"
-        :show-page-nav="true"
-        :is-first="isFirst"
-        :is-last="isLast"
-        @prev="goPrev"
-        @next="goNext"
-      >
-        <div class="s3">
+        <!-- ── Standard 3：施工工艺标准化 ── -->
+        <div v-else-if="page === 2" class="s3" key="standard3">
           <div class="s3__top-text"><img :src="s3.topText" alt="" /></div>
           <div class="s3__bl-img"><img :src="s3.bottomLeftImg" alt="" /></div>
           <div class="s3__br-bg"><img :src="s3.bottomRightBg" alt="" /></div>
           <div class="s3__br-text"><img :src="s3.bottomRightText" alt="" /></div>
         </div>
-      </ContentArea>
 
-      <!-- ── Standard 4：施工工艺标准化（续） ── -->
-      <ContentArea
-        v-else
-        key="standard4"
-        :content-bg="contentBg"
-        :block-title="s4.blockTitle"
-        :show-page-nav="true"
-        :is-first="isFirst"
-        :is-last="isLast"
-        @prev="goPrev"
-        @next="goNext"
-      >
-        <div class="s4">
+        <!-- ── Standard 4：施工工艺标准化（续） ── -->
+        <div v-else class="s4" key="standard4">
           <div class="s4__left-img"><img :src="s4.leftImg" alt="" /></div>
           <div class="s4__right-img"><img :src="s4.rightImg" alt="" /></div>
         </div>
-      </ContentArea>
-    </Transition>
+      </Transition>
+    </ContentArea>
   </PageLayout>
 </template>
 
 <style scoped lang="scss">
 /* @use '@shared/styles/transitions' as fx; */
 
-/* 页切换：淡入 + 轻微上移滑入，离场略微下沉淡出 */
-.page-fade-enter-active {
+/* ── 内容切换方向性过渡 ── */
+/* 点击"下一页"（右按钮）：当前内容向左滑出，新内容从右侧滑入 */
+.slide-next-enter-active {
   transition:
-    opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.page-fade-leave-active {
+.slide-next-leave-active {
   transition:
-    opacity 0.3s ease,
-    transform 0.3s ease;
+    opacity 0.4s ease,
+    transform 0.4s ease;
 }
-.page-fade-enter-from {
+.slide-next-enter-from {
   opacity: 0;
-  transform: translateY(3vh);
+  transform: translateX(4vw);
 }
-.page-fade-leave-to {
+.slide-next-leave-to {
   opacity: 0;
-  transform: translateY(-2vh);
+  transform: translateX(-4vw);
+}
+
+/* 点击"上一页"（左按钮）：当前内容向右滑出，新内容从左侧滑入 */
+.slide-prev-enter-active {
+  transition:
+    opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.slide-prev-leave-active {
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s ease;
+}
+.slide-prev-enter-from {
+  opacity: 0;
+  transform: translateX(-4vw);
+}
+.slide-prev-leave-to {
+  opacity: 0;
+  transform: translateX(4vw);
 }
 
 /* ── Standard 1：施工标准化 ── */

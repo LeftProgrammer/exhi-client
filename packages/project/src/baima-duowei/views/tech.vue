@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref, computed } from 'vue'
 import { resolvePkgUrl } from '@shared/utils/url'
 import { usePageFlip } from '@baima-duowei/composables/usePageFlip'
 import PageLayout from '../components/PageLayout.vue'
@@ -110,66 +111,57 @@ const t9 = {
   bottomLeftImg: resolvePkgUrl('tech/tech9/bottom-left-img.png'),
   bottomRightImg: resolvePkgUrl('tech/tech9/bottom-right-img.png')
 }
+
+const pageData = [t1, t2, t3, t4, t5, t6, t7, t8, t9]
+
+const currentBlockTitle = computed(() => pageData[page.value].blockTitle)
+const currentOverlay = computed(() => (pageData[page.value] as any).overlay)
+const currentOverlayStyle = computed(() => (pageData[page.value] as any).overlayStyle)
+
+/* 内容切换方向：next=向右翻页（内容左滑），prev=向左翻页（内容右滑） */
+const slideDirection = ref<'slide-next' | 'slide-prev'>('slide-next')
+
+function onPrev() {
+  slideDirection.value = 'slide-prev'
+  goPrev()
+}
+function onNext() {
+  slideDirection.value = 'slide-next'
+  goNext()
+}
 </script>
 
 <template>
   <PageLayout :bg-overlay="headerBg" :title-src="headerTitle" title-alt="智慧技术">
-    <Transition name="page-fade" mode="out-in">
-      <!-- ── Tech 1 ── -->
-      <ContentArea
-        v-if="page === 0"
-        key="tech1"
-        :content-bg="contentBg"
-        :content-overlay="t1.overlay"
-        :block-title="t1.blockTitle"
-        :show-page-nav="true"
-        :is-first="isFirst"
-        :is-last="isLast"
-        @prev="goPrev"
-        @next="goNext"
-      >
-        <div class="t1">
+    <ContentArea
+      :content-bg="contentBg"
+      :content-overlay="currentOverlay"
+      :content-overlay-style="currentOverlayStyle"
+      :block-title="currentBlockTitle"
+      :show-page-nav="true"
+      :is-first="isFirst"
+      :is-last="isLast"
+      @prev="onPrev"
+      @next="onNext"
+    >
+      <Transition :name="slideDirection" mode="out-in">
+        <!-- ── Tech 1 ── -->
+        <div v-if="page === 0" class="t1" key="tech1">
           <div class="t1__left-top"><img :src="t1.leftTop" alt="" /></div>
           <div class="t1__left-bottom"><img :src="t1.leftBottom" alt="" /></div>
           <div class="t1__right-text"><img :src="t1.rightText" alt="" /></div>
         </div>
-      </ContentArea>
 
-      <!-- ── Tech 2 ── -->
-      <ContentArea
-        v-else-if="page === 1"
-        key="tech2"
-        :content-bg="contentBg"
-        :content-overlay="t2.overlay"
-        :content-overlay-style="t2.overlayStyle"
-        :block-title="t2.blockTitle"
-        :show-page-nav="true"
-        :is-first="isFirst"
-        :is-last="isLast"
-        @prev="goPrev"
-        @next="goNext"
-      >
-        <div class="t2">
+        <!-- ── Tech 2 ── -->
+        <div v-else-if="page === 1" class="t2" key="tech2">
           <div class="t2__left-text"><img :src="t2.leftText" alt="" /></div>
           <div class="t2__left-img1"><img :src="t2.leftImg1" alt="" /></div>
           <div class="t2__left-img2"><img :src="t2.leftImg2" alt="" /></div>
           <div class="t2__right-img"><img :src="t2.rightImg" alt="" /></div>
         </div>
-      </ContentArea>
 
-      <!-- ── Tech 3：高边坡爆破开挖安全防控 ── -->
-      <ContentArea
-        v-else-if="page === 2"
-        key="tech3"
-        :content-bg="contentBg"
-        :block-title="t3.blockTitle"
-        :show-page-nav="true"
-        :is-first="isFirst"
-        :is-last="isLast"
-        @prev="goPrev"
-        @next="goNext"
-      >
-        <div class="t3">
+        <!-- ── Tech 3：高边坡爆破开挖安全防控 ── -->
+        <div v-else-if="page === 2" class="t3" key="tech3">
           <!-- 上半：左文字 + 箭头 + 右图 -->
           <div class="t3__top-left-text"><img :src="t3.topLeftText" alt="" /></div>
           <div class="t3__top-arrow"><img :src="t3.topArrow" alt="" /></div>
@@ -182,21 +174,9 @@ const t9 = {
           <div class="t3__br-title"><img :src="t3.bottomRightTitle" alt="" /></div>
           <div class="t3__br-img"><img :src="t3.bottomRightImg" alt="" /></div>
         </div>
-      </ContentArea>
 
-      <!-- ── Tech 4：智慧安全管理 ── -->
-      <ContentArea
-        v-else-if="page === 3"
-        key="tech4"
-        :content-bg="contentBg"
-        :block-title="t4.blockTitle"
-        :show-page-nav="true"
-        :is-first="isFirst"
-        :is-last="isLast"
-        @prev="goPrev"
-        @next="goNext"
-      >
-        <div class="t4">
+        <!-- ── Tech 4：智慧安全管理 ── -->
+        <div v-else-if="page === 3" class="t4" key="tech4">
           <!-- 上方全宽文字 -->
           <div class="t4__top-text"><img :src="t4.topText" alt="" /></div>
           <!-- 下左图片 -->
@@ -207,22 +187,9 @@ const t9 = {
           <div class="t4__br-title2"><img :src="t4.bottomRightTitle2" alt="" /></div>
           <div class="t4__br-text2"><img :src="t4.bottomRightText2" alt="" /></div>
         </div>
-      </ContentArea>
 
-      <!-- ── Tech 5：智慧安全管理 ── -->
-      <ContentArea
-        v-else-if="page === 4"
-        key="tech5"
-        :content-bg="contentBg"
-        :content-overlay="t5.overlay"
-        :block-title="t5.blockTitle"
-        :show-page-nav="true"
-        :is-first="isFirst"
-        :is-last="isLast"
-        @prev="goPrev"
-        @next="goNext"
-      >
-        <div class="t5">
+        <!-- ── Tech 5：智慧安全管理 ── -->
+        <div v-else-if="page === 4" class="t5" key="tech5">
           <div class="t5__left-bg"></div>
           <div class="t5__right-bg"></div>
           <div class="t5__left-title"><img :src="t5.leftTitle" alt="" /></div>
@@ -232,41 +199,16 @@ const t9 = {
           <div class="t5__right-img"><img :src="t5.rightImg" alt="" /></div>
           <div class="t5__right-text"><img :src="t5.rightText" alt="" /></div>
         </div>
-      </ContentArea>
 
-      <!-- ── Tech 6：白马乌江大桥健康监测 ── -->
-      <ContentArea
-        v-else-if="page === 5"
-        key="tech6"
-        :content-bg="contentBg"
-        :content-overlay="t6.overlay"
-        :block-title="t6.blockTitle"
-        :show-page-nav="true"
-        :is-first="isFirst"
-        :is-last="isLast"
-        @prev="goPrev"
-        @next="goNext"
-      >
-        <div class="t6">
+        <!-- ── Tech 6：白马乌江大桥健康监测 ── -->
+        <div v-else-if="page === 5" class="t6" key="tech6">
           <div class="t6__top-text"><img :src="t6.topText" alt="" /></div>
           <div class="t6__bl-img"><img :src="t6.bottomLeftImg" alt="" /></div>
           <div class="t6__br-img"><img :src="t6.bottomRightImg" alt="" /></div>
         </div>
-      </ContentArea>
 
-      <!-- ── Tech 7：枢纽建设营运安全监测 ── -->
-      <ContentArea
-        v-else-if="page === 6"
-        key="tech7"
-        :content-bg="contentBg"
-        :block-title="t7.blockTitle"
-        :show-page-nav="true"
-        :is-first="isFirst"
-        :is-last="isLast"
-        @prev="goPrev"
-        @next="goNext"
-      >
-        <div class="t7">
+        <!-- ── Tech 7：枢纽建设营运安全监测 ── -->
+        <div v-else-if="page === 6" class="t7" key="tech7">
           <div class="t7__left-bg"></div>
           <div class="t7__right-bg"></div>
           <div class="t7__left-title"><img :src="t7.leftTitle" alt="" /></div>
@@ -276,72 +218,67 @@ const t9 = {
           <div class="t7__right-text"><img :src="t7.rightText" alt="" /></div>
           <div class="t7__right-img"><img :src="t7.rightImg" alt="" /></div>
         </div>
-      </ContentArea>
 
-      <!-- ── Tech 8：智慧化喷淋降尘系统 ── -->
-      <ContentArea
-        v-else-if="page === 7"
-        key="tech8"
-        :content-bg="contentBg"
-        :content-overlay="t8.overlay"
-        :block-title="t8.blockTitle"
-        :show-page-nav="true"
-        :is-first="isFirst"
-        :is-last="isLast"
-        @prev="goPrev"
-        @next="goNext"
-      >
-        <div class="t8">
+        <!-- ── Tech 8：智慧化喷淋降尘系统 ── -->
+        <div v-else-if="page === 7" class="t8" key="tech8">
           <div class="t8__top-text"><img :src="t8.topText" alt="" /></div>
           <div class="t8__bl-img"><img :src="t8.bottomLeftImg" alt="" /></div>
           <div class="t8__br-img"><img :src="t8.bottomRightImg" alt="" /></div>
         </div>
-      </ContentArea>
 
-      <!-- ── Tech 9：沉浸式安全培训（VR） ── -->
-      <ContentArea
-        v-else
-        key="tech9"
-        :content-bg="contentBg"
-        :content-overlay="t9.overlay"
-        :block-title="t9.blockTitle"
-        :show-page-nav="true"
-        :is-first="isFirst"
-        :is-last="isLast"
-        @prev="goPrev"
-        @next="goNext"
-      >
-        <div class="t9">
+        <!-- ── Tech 9：沉浸式安全培训（VR） ── -->
+        <div v-else class="t9" key="tech9">
           <div class="t9__top-text"><img :src="t9.topText" alt="" /></div>
           <div class="t9__bl-img"><img :src="t9.bottomLeftImg" alt="" /></div>
           <div class="t9__br-img"><img :src="t9.bottomRightImg" alt="" /></div>
         </div>
-      </ContentArea>
-    </Transition>
+      </Transition>
+    </ContentArea>
   </PageLayout>
 </template>
 
 <style scoped lang="scss">
 /* @use '@shared/styles/transitions' as fx; */
 
-/* 页切换：淡入 + 轻微上移滑入，离场略微下沉淡出 */
-.page-fade-enter-active {
+/* ── 内容切换方向性过渡 ── */
+/* 点击"下一页"（右按钮）：当前内容向左滑出，新内容从右侧滑入 */
+.slide-next-enter-active {
   transition:
-    opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.page-fade-leave-active {
+.slide-next-leave-active {
   transition:
-    opacity 0.3s ease,
-    transform 0.3s ease;
+    opacity 0.4s ease,
+    transform 0.4s ease;
 }
-.page-fade-enter-from {
+.slide-next-enter-from {
   opacity: 0;
-  transform: translateY(3vh);
+  transform: translateX(4vw);
 }
-.page-fade-leave-to {
+.slide-next-leave-to {
   opacity: 0;
-  transform: translateY(-2vh);
+  transform: translateX(-4vw);
+}
+
+/* 点击"上一页"（左按钮）：当前内容向右滑出，新内容从左侧滑入 */
+.slide-prev-enter-active {
+  transition:
+    opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.slide-prev-leave-active {
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s ease;
+}
+.slide-prev-enter-from {
+  opacity: 0;
+  transform: translateX(-4vw);
+}
+.slide-prev-leave-to {
+  opacity: 0;
+  transform: translateX(4vw);
 }
 
 /* ── Tech 1 ── */
@@ -686,8 +623,9 @@ const t9 = {
     left: d.w(361);
     width: d.w(1510);
     height: d.h(985);
-    background: radial-gradient(circle at 0% 0%, #0042B0, #000000);
+    background: linear-gradient(to top, #0042B0, transparent);
     opacity: 0.5;
+    animation: bg-fade-in 0.8s 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
   &__right-bg {
@@ -696,8 +634,9 @@ const t9 = {
     left: d.w(1973);
     width: d.w(1510);
     height: d.h(985);
-    background: radial-gradient(circle at 0% 0%, #0042B0, #000000);
+    background: linear-gradient(to top, #0042B0, transparent);
     opacity: 0.5;
+    animation: bg-fade-in 0.8s 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
   &__left-title {
@@ -845,8 +784,9 @@ const t9 = {
     left: d.w(361);
     width: d.w(1488);
     height: d.h(985);
-    background: radial-gradient(circle at 0% 0%, #0042B0, #000000);
+    background: linear-gradient(to top, #0042B0, transparent);
     opacity: 0.5;
+    animation: bg-fade-in 0.8s 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
   &__right-bg {
@@ -855,8 +795,9 @@ const t9 = {
     left: d.w(1996);
     width: d.w(1487);
     height: d.h(985);
-    background: radial-gradient(circle at 0% 0%, #0042B0, #000000);
+    background: linear-gradient(to top, #0042B0, transparent);
     opacity: 0.5;
+    animation: bg-fade-in 0.8s 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
   &__left-title {
@@ -1038,5 +979,25 @@ const t9 = {
       object-fit: fill;
     }
   }
+}
+
+@keyframes bg-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 0.5; }
+}
+</style>
+
+<!-- 背景块离场渐隐：非 scoped -->
+<style lang="scss">
+.page-leave-active .t5__left-bg,
+.page-leave-active .t5__right-bg,
+.page-leave-active .t8__left-bg,
+.page-leave-active .t8__right-bg {
+  animation: bg-fade-out 0.4s ease both;
+}
+
+@keyframes bg-fade-out {
+  from { opacity: 0.5; }
+  to   { opacity: 0; }
 }
 </style>

@@ -118,16 +118,24 @@ const overlayComputedStyle = computed(() => {
     </div>
 
     <!-- overlay：基于 content-area__wrapper（页面级）独立定位 -->
-    <img
-      v-if="props.contentOverlay"
-      class="content-area__overlay"
-      :src="props.contentOverlay"
-      :style="overlayComputedStyle"
-      alt=""
-    />
+    <Transition name="overlay-fade" mode="out-in" appear>
+      <img
+        v-if="props.contentOverlay"
+        :key="props.contentOverlay"
+        class="content-area__overlay"
+        :src="props.contentOverlay"
+        :style="overlayComputedStyle"
+        alt=""
+      />
+    </Transition>
 
     <!-- 顶部标题块（基于 sec-page__body 定位） -->
-    <img class="content-area__block-title" :src="props.blockTitle" alt="" />
+    <img
+      :key="props.blockTitle"
+      class="content-area__block-title"
+      :src="props.blockTitle"
+      alt=""
+    />
 
     <!-- 中间内容区：不设定位样式，slot 内容直接基于 sec-page__body 定位 -->
     <div class="content-area__main">
@@ -258,6 +266,26 @@ const overlayComputedStyle = computed(() => {
   pointer-events: none;
 }
 
+/* 内部切换：overlay 离场渐隐 + 入场渐显 + 轻微缩放位移 */
+.overlay-fade-enter-active {
+  transition:
+    opacity 1.4s ease 0.5s,
+    transform 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.5s;
+}
+.overlay-fade-leave-active {
+  transition:
+    opacity 0.35s ease,
+    transform 0.35s ease;
+}
+.overlay-fade-enter-from {
+  opacity: 0;
+  transform: scale(0.96) translateY(2vh);
+}
+.overlay-fade-leave-to {
+  opacity: 0;
+  transform: scale(0.97) translateY(-1vh);
+}
+
 /* 顶部标题块（基于 sec-page__body 绝对定位） */
 .content-area__block-title {
   position: absolute;
@@ -267,14 +295,14 @@ const overlayComputedStyle = computed(() => {
   display: block;
   width: auto;
   height: d.h(305);
-  animation: block-title-in 1.5s 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: block-title-in 1.2s 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* 二级标题块：从右侧滑入 + 淡入 */
 @keyframes block-title-in {
   from {
     opacity: 0;
-    transform: translateX(60vw);
+    transform: translateX(20vw);
   }
   to {
     opacity: 1;
@@ -419,6 +447,77 @@ const overlayComputedStyle = computed(() => {
 
   &:hover .btn-icon--flip {
     transform: scaleX(-1) scale(1.12);
+  }
+}
+</style>
+
+<!-- 底部按钮区入场/离场：非 scoped，匹配全局 transition class -->
+<style lang="scss">
+/* 入场：底部按钮区渐显上浮 */
+.content-area__footer {
+  animation: footer-fade-in 0.8s 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes footer-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(3vh);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 离场：overlay 渐隐 */
+.page-leave-active .content-area__overlay {
+  animation: overlay-fade-out 0.5s ease-in both;
+}
+
+@keyframes overlay-fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* 离场：内容区整体渐隐 */
+.page-leave-active .content-area__main {
+  animation: main-fade-out 0.5s ease-in both;
+}
+
+@keyframes main-fade-out {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(1vh); }
+}
+
+/* 离场：二级标题渐隐右滑 */
+.page-leave-active .content-area__block-title {
+  animation: block-title-out 0.5s ease-in both;
+}
+
+@keyframes block-title-out {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(20vw);
+  }
+}
+
+/* 离场：按钮区渐隐下沉 */
+.page-leave-active .content-area__footer {
+  animation: footer-fade-out 0.5s ease-in both;
+}
+
+@keyframes footer-fade-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(2vh);
   }
 }
 </style>

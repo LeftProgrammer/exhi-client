@@ -94,20 +94,13 @@ const rightItems = [1, 2, 3, 4, 5, 6].map((n) => resolvePkgUrl(`safety/right-${n
   flex-direction: column;
   justify-content: space-between;
   align-items: flex-start;
+  @include sf-from-left($duration: 0.9s, $delay: 0.75s);
 
   img {
     display: block;
     width: d.w(843);
     height: d.h(190);
     object-fit: contain;
-    @include sf-from-left($duration: 0.9s, $delay: 0.75s);
-
-    &:nth-child(2) {
-      animation-delay: 0.9s;
-    }
-    &:nth-child(3) {
-      animation-delay: 1.05s;
-    }
   }
 }
 
@@ -121,28 +114,12 @@ const rightItems = [1, 2, 3, 4, 5, 6].map((n) => resolvePkgUrl(`safety/right-${n
   align-content: space-between;
   justify-items: end;
   column-gap: d.w(150);
+  @include sf-from-right($duration: 0.9s, $delay: 0.75s);
 
   img {
     display: block;
     height: d.h(129);
     width: auto;
-    @include sf-from-right($duration: 0.9s, $delay: 0.85s);
-
-    &:nth-child(2) {
-      animation-delay: 0.97s;
-    }
-    &:nth-child(3) {
-      animation-delay: 1.09s;
-    }
-    &:nth-child(4) {
-      animation-delay: 1.21s;
-    }
-    &:nth-child(5) {
-      animation-delay: 1.33s;
-    }
-    &:nth-child(6) {
-      animation-delay: 1.45s;
-    }
   }
 }
 
@@ -152,12 +129,42 @@ const rightItems = [1, 2, 3, 4, 5, 6].map((n) => resolvePkgUrl(`safety/right-${n
   right: d.w(1440);
   bottom: d.h(159);
   left: d.w(1440);
-  @include sf-from-bottom($duration: 0.9s, $delay: 1.6s);
+  @include sf-from-bottom($duration: 0.9s, $delay: 0.75s);
 
   img {
     width: 100%;
     height: 100%;
     object-fit: contain;
   }
+}
+</style>
+
+<!-- 内容区域离场：非 scoped，匹配全局 transition class -->
+<style lang="scss">
+.page-leave-active .safety__body-left {
+  animation: sf-out-left 0.5s ease-in both;
+}
+
+.page-leave-active .safety__body-right {
+  animation: sf-out-right 0.5s ease-in both;
+}
+
+.page-leave-active .safety__bottom {
+  animation: sf-out-bottom 0.5s ease-in both;
+}
+
+@keyframes sf-out-left {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(-7vw); }
+}
+
+@keyframes sf-out-right {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(7vw); }
+}
+
+@keyframes sf-out-bottom {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(6vh); }
 }
 </style>
