@@ -1,0 +1,6 @@
+{
+  "url": "wss://www.zzqxs.cn/uec/UECServer/ws/webSocketServer.do",
+  "transport": "uec",
+  "id": "research",
+  "target": "research"
+}

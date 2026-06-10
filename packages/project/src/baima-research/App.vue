@@ -2,6 +2,7 @@
 import { useRouter } from 'vue-router'
 import { useBridge } from '@shared/composables/useBridge'
 import { onMounted, watch } from 'vue'
+import { useControl } from './composables/useControl'
 
 const router = useRouter()
 const { on, info, ready } = useBridge()
@@ -9,7 +10,9 @@ const { on, info, ready } = useBridge()
 on('app:home', () => router.push({ name: 'home' }))
 
 onMounted(async () => {
-  // 等 bridge ready 获取 displayId，自动路由到对应视图
+  const control = useControl()
+
+  // 等 bridge ready 获取 displayId，自动路由到对应视图 + 初始化中控指令
   const tryRoute = () => {
     const displayId = info.value?.displayId
     if (!displayId) return
@@ -25,13 +28,19 @@ onMounted(async () => {
       router.push({ name: target })
     }
   }
+
+  const initAll = () => {
+    tryRoute()
+    control.setupCommands()
+  }
+
   // bridge 已就绪直接执行，否则监听 ready 后执行
   if (ready.value) {
-    tryRoute()
+    initAll()
   } else {
     const unwatch = watch(ready, (v) => {
       if (v) {
-        tryRoute()
+        initAll()
         unwatch()
       }
     })

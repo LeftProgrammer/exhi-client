@@ -5,7 +5,15 @@ import { useScreenSync, getDebugPoint } from '../../composables/useScreenSync'
 import { getPoint } from '../../data/points'
 
 const SCREEN = 'top-left'
-const { onSyncPoint, onSyncIdle, onSyncVideoPlay, onSyncVideoPause } = useScreenSync()
+const {
+  onSyncPoint,
+  onSyncIdle,
+  onSyncVideoPlay,
+  onSyncVideoPause,
+  onSyncVideoSeek,
+  onSyncVideoVolume,
+  onSyncVideoMute
+} = useScreenSync()
 
 // dev 调试：可通过 URL ?point=baima-bridge 直接预览选中态
 const activeId = ref<string | null>(getDebugPoint())
@@ -30,6 +38,27 @@ onSyncVideoPause(() => {
   if (!v) return
   v.pause()
   isPaused.value = true
+})
+
+// 快进/快退（offset 单位：秒，正数快进，负数快退）
+onSyncVideoSeek((offset) => {
+  const v = videoRef.value
+  if (!v) return
+  v.currentTime = Math.max(0, Math.min(v.duration || Infinity, v.currentTime + offset))
+})
+
+// 音量调节（delta 单位：0~1，正数加大，负数减小）
+onSyncVideoVolume((delta) => {
+  const v = videoRef.value
+  if (!v) return
+  v.volume = Math.max(0, Math.min(1, v.volume + delta))
+})
+
+// 静音/恢复
+onSyncVideoMute((muted) => {
+  const v = videoRef.value
+  if (!v) return
+  v.muted = muted
 })
 
 const point = computed(() => getPoint(activeId.value))

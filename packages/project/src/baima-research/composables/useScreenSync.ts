@@ -27,6 +27,9 @@ type SyncMsg =
   | { type: 'research:idle' }
   | { type: 'research:video-play' }
   | { type: 'research:video-pause' }
+  | { type: 'research:video-seek'; offset: number }
+  | { type: 'research:video-volume'; delta: number }
+  | { type: 'research:video-mute'; muted: boolean }
 
 /** 从 URL 读取调试点位：如 /baima-research/#/top-left?point=baima-bridge */
 export function getDebugPoint(): string | null {
@@ -47,6 +50,9 @@ export function useScreenSync() {
     else if (msg.type === 'research:idle') emit('research:idle', {})
     else if (msg.type === 'research:video-play') emit('research:video-play', {})
     else if (msg.type === 'research:video-pause') emit('research:video-pause', {})
+    else if (msg.type === 'research:video-seek') emit('research:video-seek', { offset: msg.offset })
+    else if (msg.type === 'research:video-volume') emit('research:video-volume', { delta: msg.delta })
+    else if (msg.type === 'research:video-mute') emit('research:video-mute', { muted: msg.muted })
     devChannel?.postMessage(msg)
   }
 
@@ -70,6 +76,21 @@ export function useScreenSync() {
   /** 主屏：通知所有副屏暂停视频 */
   function syncVideoPause() {
     broadcast({ type: 'research:video-pause' })
+  }
+
+  /** 主屏：通知所有副屏视频快进/快退（offset 单位：秒，正数快进，负数快退） */
+  function syncVideoSeek(offset: number) {
+    broadcast({ type: 'research:video-seek', offset })
+  }
+
+  /** 主屏：通知所有副屏调节音量（delta 单位：0~1，正数加大，负数减小） */
+  function syncVideoVolume(delta: number) {
+    broadcast({ type: 'research:video-volume', delta })
+  }
+
+  /** 主屏：通知所有副屏静音/恢复 */
+  function syncVideoMute(muted: boolean) {
+    broadcast({ type: 'research:video-mute', muted })
   }
 
   /** 副屏：监听点位选中 */
@@ -135,15 +156,69 @@ export function useScreenSync() {
     }
   }
 
+  /** 副屏：监听视频快进/快退指令 */
+  function onSyncVideoSeek(cb: (offset: number) => void) {
+    on('research:video-seek', (payload) => {
+      if (payload && typeof payload === 'object' && 'offset' in payload) {
+        cb((payload as { offset: number }).offset)
+      }
+    })
+    if (devChannel) {
+      const handler = (e: MessageEvent<SyncMsg>) => {
+        if (e.data?.type === 'research:video-seek') cb(e.data.offset)
+      }
+      devChannel.addEventListener('message', handler)
+      onBeforeUnmount(() => devChannel.removeEventListener('message', handler))
+    }
+  }
+
+  /** 副屏：监听音量调节指令 */
+  function onSyncVideoVolume(cb: (delta: number) => void) {
+    on('research:video-volume', (payload) => {
+      if (payload && typeof payload === 'object' && 'delta' in payload) {
+        cb((payload as { delta: number }).delta)
+      }
+    })
+    if (devChannel) {
+      const handler = (e: MessageEvent<SyncMsg>) => {
+        if (e.data?.type === 'research:video-volume') cb(e.data.delta)
+      }
+      devChannel.addEventListener('message', handler)
+      onBeforeUnmount(() => devChannel.removeEventListener('message', handler))
+    }
+  }
+
+  /** 副屏：监听静音/恢复指令 */
+  function onSyncVideoMute(cb: (muted: boolean) => void) {
+    on('research:video-mute', (payload) => {
+      if (payload && typeof payload === 'object' && 'muted' in payload) {
+        cb((payload as { muted: boolean }).muted)
+      }
+    })
+    if (devChannel) {
+      const handler = (e: MessageEvent<SyncMsg>) => {
+        if (e.data?.type === 'research:video-mute') cb(e.data.muted)
+      }
+      devChannel.addEventListener('message', handler)
+      onBeforeUnmount(() => devChannel.removeEventListener('message', handler))
+    }
+  }
+
   return {
     state: readonly(state),
     syncPoint,
     syncIdle,
     syncVideoPlay,
     syncVideoPause,
+    syncVideoSeek,
+    syncVideoVolume,
+    syncVideoMute,
     onSyncPoint,
     onSyncIdle,
     onSyncVideoPlay,
-    onSyncVideoPause
+    onSyncVideoPause,
+    onSyncVideoSeek,
+    onSyncVideoVolume,
+    onSyncVideoMute
   }
 }

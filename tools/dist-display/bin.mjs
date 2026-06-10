@@ -45,15 +45,40 @@ async function build(variant) {
     process.exit(1)
   }
 
-  // 备份根目录 displays.json
+  // 备份根目录 displays.json 和 hub.json
   const backupFile = path.join(deployDir, 'displays.json.bak')
+  const hubFile = path.join(deployDir, 'hub.json')
+  const hubBackupFile = path.join(deployDir, 'hub.json.bak')
   let restored = false
+  let hubRestored = false
+
+  const variantToHubId = {
+    main: 'research-main',
+    'top-left': 'research-tl',
+    'bottom-left': 'research-bl',
+    'top-right': 'research-tr',
+    'bottom-right': 'research-br'
+  }
+  const hubId = variantToHubId[variant]
 
   try {
     if (useVariant) {
       await fs.copyFile(defaultDisplays, backupFile)
       await fs.copyFile(sourceFile, defaultDisplays)
       console.log(`[dist-display] 已替换 displays.json → ${variant}`)
+    }
+
+    // 替换 hub.json id
+    const hubExists = await exists(hubFile)
+    if (hubExists && hubId) {
+      const raw = await fs.readFile(hubFile, 'utf-8')
+      const hubJson = JSON.parse(raw)
+      if (hubJson.id !== hubId) {
+        await fs.copyFile(hubFile, hubBackupFile)
+        hubJson.id = hubId
+        await fs.writeFile(hubFile, JSON.stringify(hubJson, null, 2) + '\n', 'utf-8')
+        console.log(`[dist-display] 已替换 hub.json id → ${hubId}`)
+      }
     }
 
     // 先清理旧产物，避免 electron-builder 清理 win-unpacked 时 app.asar 被锁定
@@ -84,6 +109,16 @@ async function build(variant) {
         await fs.unlink(backupFile)
         console.log('[dist-display] 已恢复 displays.json')
         restored = true
+      } catch {
+        /* ignore */
+      }
+    }
+    if (!hubRestored && (await exists(hubBackupFile))) {
+      try {
+        await fs.copyFile(hubBackupFile, hubFile)
+        await fs.unlink(hubBackupFile)
+        console.log('[dist-display] 已恢复 hub.json')
+        hubRestored = true
       } catch {
         /* ignore */
       }

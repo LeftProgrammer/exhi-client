@@ -2,8 +2,11 @@
 import { ref, computed } from 'vue'
 import { resolvePkgUrl } from '@shared/utils/url'
 import { useIdleReset } from '@shared/composables/useIdleReset'
+import { useProjectSfx } from '@shared/composables/useProjectSfx'
 import { useScreenSync } from '../../composables/useScreenSync'
 import { POINTS, MENU_POINTS, getPoint, type PointStatus, type Layout } from '../../data/points'
+
+const sfx = useProjectSfx()
 
 const { syncPoint, syncIdle, syncVideoPlay, syncVideoPause } = useScreenSync()
 
@@ -73,20 +76,24 @@ function selectPoint(id: string) {
   if (activeId.value === id) return
   activeId.value = id
   syncPoint(id)
+  sfx.play('tap')
 }
 
 function backToStandby() {
   if (isStandby.value) return
   activeId.value = null
   syncIdle()
+  sfx.play('tap')
 }
 
 function handlePlay() {
   syncVideoPlay()
+  sfx.play('tap')
 }
 
 function handlePause() {
   syncVideoPause()
+  sfx.play('tap')
 }
 
 useIdleReset(() => {
