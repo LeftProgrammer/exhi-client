@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { resolvePkgUrl } from '@shared/utils/url'
 import { useIdleReset } from '@shared/composables/useIdleReset'
 import { useProjectSfx } from '@shared/composables/useProjectSfx'
@@ -9,12 +9,11 @@ import { POINTS, MENU_POINTS, getPoint, type PointStatus, type Layout } from '..
 const sfx = useProjectSfx()
 
 const {
+  state,
   syncPoint,
   syncIdle,
   syncVideoPlay,
-  syncVideoPause,
-  onSyncPoint,
-  onSyncIdle
+  syncVideoPause
 } = useScreenSync()
 
 const bgImage = resolvePkgUrl('common/main-bg.png')
@@ -103,13 +102,14 @@ function handlePause() {
   sfx.play('tap')
 }
 
-// 监听 BC 广播：中控/副屏发来 point/idle 指令时主屏也要同步
-onSyncPoint((id) => {
-  selectPoint(id)
-})
-onSyncIdle(() => {
-  backToStandby()
-})
+// 主屏与中控指令处理在同一 iframe，共享 useScreenSync.state。
+// 中控 point/idle 指令 → useControl → syncPoint/syncIdle 直接改 state，这里同步到本地 activeId
+watch(
+  () => state.value.activePointId,
+  (id) => {
+    if (activeId.value !== id) activeId.value = id
+  }
+)
 
 useIdleReset(() => {
   if (!isStandby.value) backToStandby()

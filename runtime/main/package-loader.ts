@@ -104,6 +104,28 @@ export class PackageLoader {
     const manifest = this.readJson<Manifest>(path.join(rootPath, 'manifest.json'))
     this.checkRuntimeCompatibility(manifest)
     const displays = this.readJson<DisplaysConfig>(path.join(rootPath, 'displays.json'))
+
+    // 合并 displays/ 目录下独立的 display 配置文件（如 baima-research 的各屏分散配置）
+    const displaysDir = path.join(rootPath, 'displays')
+    if (fs.existsSync(displaysDir) && fs.statSync(displaysDir).isDirectory()) {
+      for (const entry of fs.readdirSync(displaysDir)) {
+        if (!entry.endsWith('.json')) continue
+        try {
+          const alt = JSON.parse(
+            fs.readFileSync(path.join(displaysDir, entry), 'utf-8')
+          ) as Partial<DisplaysConfig>
+          if (alt.displays?.length) {
+            for (const d of alt.displays) {
+              if (!displays.displays.find((existing) => existing.id === d.id)) {
+                displays.displays.push(d)
+              }
+            }
+          }
+        } catch {
+          /* 文件不存在或解析失败，忽略 */
+        }
+      }
+    }
     const scenes = this.readJson<ScenesConfig>(path.join(rootPath, 'scenes.json'))
     const bindings = this.readJson<BindingsConfig>(path.join(rootPath, 'bindings.json'))
     const hub = this.readOptionalJson<HubConfig>(path.join(rootPath, 'hub.json'))

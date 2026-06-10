@@ -63,9 +63,22 @@ export interface UseBridgeReturn {
 
 let bridgeWarned = false
 
+/**
+ * 模块级共享状态：bridge 信息按窗口全局唯一，所有 useBridge 实例共享同一份。
+ *
+ * 之前 ready/info 是每个 useBridge() 实例各自的局部 ref，且仅在自己的 onMounted
+ * 里填充。若在组件已 mounted 之后（如另一个 onMounted 回调里）再调用 useBridge()，
+ * 新实例注册的 onMounted 不会执行，其 info 永远为 null —— 导致依赖 info.displayId
+ * 的逻辑（如 useControl.setupCommands）误判而提前 return。改为模块级单例后，任何
+ * 时机调用 useBridge() 都能读到已解析的 info。
+ */
+const sharedReady = ref(false)
+const sharedInfo = ref<BridgeInfo | null>(null)
+let initStarted = false
+
 export function useBridge(): UseBridgeReturn {
-  const ready = ref(false)
-  const info = ref<BridgeInfo | null>(null)
+  const ready = sharedReady
+  const info = sharedInfo
   const subscriptions: Array<() => void> = []
 
   onMounted(async () => {
@@ -78,6 +91,9 @@ export function useBridge(): UseBridgeReturn {
       }
       return
     }
+    // 只初始化一次：bridge 信息全局唯一，避免多实例重复 getInfo
+    if (initStarted || ready.value) return
+    initStarted = true
     try {
       info.value = await window.exhibitBridge.getInfo()
       ready.value = true
@@ -88,6 +104,8 @@ export function useBridge(): UseBridgeReturn {
         document.documentElement.style.setProperty('--design-h', String(height))
       }
     } catch (e) {
+      // 失败允许后续实例重试
+      initStarted = false
       console.error('[useBridge] getInfo 失败', e)
     }
   })

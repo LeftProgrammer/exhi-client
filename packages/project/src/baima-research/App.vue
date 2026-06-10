@@ -35,8 +35,11 @@ onMounted(async () => {
   }
 
   // 浏览器 dev 模式：没有 exhibitBridge，直接初始化中控指令
+  // 注意：需等 router.isReady()，否则 hash 路由（如 #/top-left）尚未解析完成，
+  // setupCommands 读到的还是初始路由，会把副屏的 hubId 误判为 research-main
   // Electron 环境：等 bridge ready 后再初始化
   if (!window.exhibitBridge) {
+    await router.isReady()
     initAll()
     return
   }

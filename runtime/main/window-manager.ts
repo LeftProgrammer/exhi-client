@@ -32,6 +32,25 @@ export class WindowManager {
    * 启动时按 displays.json 创建所有窗口。
    */
   createAll(): BrowserWindow[] {
+    const isDev = !!process.env['ELECTRON_RENDERER_URL']
+    const devDisplay = isDev ? process.env['EXHI_DEV_DISPLAY'] : undefined
+
+    // 开发模式指定了目标 display：直接创建该窗口，不走多屏匹配
+    if (devDisplay) {
+      const cfg = this.pkg.displays.displays.find((d) => d.id === devDisplay)
+      if (cfg) {
+        const primary = screen.getPrimaryDisplay()
+        this.displayCfgMap.set(cfg.id, cfg)
+        this.physicalDisplayMap.set(cfg.id, primary)
+        const win = this.createWindow(cfg, primary)
+        this.windows.set(cfg.id, win)
+        this.attachWatchdog(cfg.id, win)
+        logger.info(`dev 模式强制创建窗口: display=${cfg.id}`)
+        return [win]
+      }
+      logger.warn(`EXHI_DEV_DISPLAY=${devDisplay} 未在 displays.json 中找到，回退到正常流程`)
+    }
+
     const physicalDisplays = screen.getAllDisplays()
     logger.info(`检测到 ${physicalDisplays.length} 块物理屏`)
 

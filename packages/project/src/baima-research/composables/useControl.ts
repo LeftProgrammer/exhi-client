@@ -1,7 +1,21 @@
 import { useRemoteControl } from '@shared/composables/useRemoteControl'
 import { useBridge } from '@shared/composables/useBridge'
-import { useScreenSync } from './useScreenSync'
+import { useScreenSync, setSyncForwarder } from './useScreenSync'
 import { useRouter } from 'vue-router'
+
+const HUB_URL = 'wss://www.zzqxs.cn/uec/UECServer/ws/webSocketServer.do'
+
+/** 路由名 → UEC hubId 映射（浏览器模式各屏用各自 id 连 WS） */
+const ROUTE_HUB_MAP: Record<string, string> = {
+  home: 'research-main',
+  'top-left': 'research-tl',
+  'bottom-left': 'research-bl',
+  'top-right': 'research-tr',
+  'bottom-right': 'research-br'
+}
+
+/** 4 个副屏的 hubId（主屏收到中控指令后转发到这些目标） */
+const SUB_HUB_IDS = ['research-tl', 'research-bl', 'research-tr', 'research-br']
 
 /**
  * 白马科研 中控通信封装。
@@ -9,15 +23,17 @@ import { useRouter } from 'vue-router'
  * 基于 useRemoteControl（shared 通用指令注册器），
  * 支持中控指令控制点位切换、待机、视频播放/暂停/快进/快退/音量/静音。
  *
- * 架构（方案 1：中控只发主屏，内部广播同步副屏）：
- *  - 中控 WS 指令只发给 main 屏（通过 hub.json 中不同 id 区分）
- *  - main 收到 point/goto/video 指令后调用 useScreenSync，内部广播到 4 个副屏
- *  - 所有 5 个屏都注册 home（回待机），确保任意屏都能接收 home 指令
+ * 架构（多设备分布式部署，每屏一台设备，各自连 WS）：
+ *  - 中控只把指令发给主屏（hubId=research-main）。
+ *  - 每个屏都注册全部指令处理；handler 调用 syncXxx 把指令“应用到本设备视图”。
+ *  - 主屏额外注入 forwarder：收到指令后转发给 4 个副屏设备（syncXxx → broadcast → forwarder）。
+ *      · Electron：emit('hub:send', { to: subHubId, msg })，由主进程 ws.sendApp 经 UEC 转发。
+ *      · 浏览器 dev：直接用本屏的原生 WebSocket ws.send({ to: subHubId, msg })。
+ *  - 副屏不注入 forwarder，收到主屏转发的指令后仅应用到本设备视图，不再二次转发。
  *
- * 浏览器 dev 回退：
- *  - Electron 外直接访问 vite dev server 时，window.exhibitBridge 不存在
- *  - 此时直接创建原生 WebSocket 连 UEC，收到消息后通过 rc.dispatch 触发 handler
- *  - 和 Electron 环境行为一致，方便浏览器多标签页联动调试
+ * 接收侧：
+ *  - Electron：主进程 WS → hub:command → useRemoteControl 分发。
+ *  - 浏览器 dev：window.exhibitBridge 不存在，本屏直接连 UEC WS，收到消息 rc.dispatch。
  */
 export function useControl() {
   const rc = useRemoteControl()
@@ -30,7 +46,7 @@ export function useControl() {
     syncVideoVolume,
     syncVideoMute
   } = useScreenSync()
-  const { info } = useBridge()
+  const { info, emit } = useBridge()
   const router = useRouter()
 
   return {
@@ -55,88 +71,96 @@ export function useControl() {
 
       if (!displayId && !isBrowserDev) return
 
-      // 所有屏都注册 home：中控群发 home 时任意屏都能响应
+      // 每个屏都注册全部指令：handler 调用 syncXxx 把指令应用到本设备视图。
+      // 主屏会经 forwarder 把指令转发给副屏，副屏的 forwarder 为 null 不再二次转发。
       rc.onCommand('home', () => syncIdle())
+      rc.onCommand('point', (p) => {
+        const id = p.id as string
+        if (id) syncPoint(id)
+      })
+      rc.onCommand('goto', (p) => {
+        const id = p.id as string
+        if (id) syncPoint(id)
+      })
+      rc.onCommand('video-play', () => syncVideoPlay())
+      rc.onCommand('video-pause', () => syncVideoPause())
+      // 视频快进/快退（offset 单位：秒，正数快进，负数快退）
+      rc.onCommand('video-seek', (p) => {
+        const offset = Number(p.offset)
+        if (!isNaN(offset)) syncVideoSeek(offset)
+      })
+      // 音量调节（delta 单位：0~1，正数加大，负数减小）
+      rc.onCommand('video-volume', (p) => {
+        const delta = Number(p.delta)
+        if (!isNaN(delta)) syncVideoVolume(delta)
+      })
+      // 静音/恢复
+      rc.onCommand('video-mute', (p) => {
+        const muted = p.muted !== undefined ? Boolean(p.muted) : true
+        syncVideoMute(muted)
+      })
 
-      // 只有 main 屏注册 point/goto/video 指令
-      // 中控只给 main 发这些指令，main 通过 useScreenSync 内部广播到副屏
-      if (isMain) {
-        rc.onCommand('point', (p) => {
-          const id = p.id as string
-          if (id) syncPoint(id)
-        })
-
-        rc.onCommand('goto', (p) => {
-          const id = p.id as string
-          if (id) syncPoint(id)
-        })
-
-        // 视频播放控制
-        rc.onCommand('video-play', () => syncVideoPlay())
-        rc.onCommand('video-pause', () => syncVideoPause())
-
-        // 视频快进/快退（offset 单位：秒，正数快进，负数快退）
-        rc.onCommand('video-seek', (p) => {
-          const offset = Number(p.offset)
-          if (!isNaN(offset)) syncVideoSeek(offset)
-        })
-
-        // 音量调节（delta 单位：0~1，正数加大，负数减小）
-        rc.onCommand('video-volume', (p) => {
-          const delta = Number(p.delta)
-          if (!isNaN(delta)) syncVideoVolume(delta)
-        })
-
-        // 静音/恢复
-        rc.onCommand('video-mute', (p) => {
-          const muted = p.muted !== undefined ? Boolean(p.muted) : true
-          syncVideoMute(muted)
-        })
+      if (!isBrowserDev) {
+        // Electron：主进程 WS 已连，渲染层经 hub:command 收指令。
+        // 主屏注入 forwarder，通过 hub:send 把指令转发给 4 个副屏设备。
+        if (isMain) {
+          setSyncForwarder((cmd) => {
+            for (const subId of SUB_HUB_IDS) emit('hub:send', { to: subId, msg: cmd })
+          })
+        }
+        return
       }
 
-      // 浏览器 dev 回退：直接连 UEC WS
-      if (isBrowserDev && isMain) {
-        startBrowserWsFallback()
-      }
+      // 浏览器 dev：每个屏各自连 UEC WS（hubId 由路由名映射）。
+      // 主屏连上后注入基于本屏 WebSocket 的 forwarder。
+      const hubId = ROUTE_HUB_MAP[String(routeName ?? 'home')] ?? 'research-main'
+      startBrowserWsFallback(hubId, isMain)
     }
   }
 
-  function startBrowserWsFallback() {
-    const HUB_URL = 'wss://www.zzqxs.cn/uec/UECServer/ws/webSocketServer.do'
-    const urlParams = new URLSearchParams(window.location.search)
-    const hubId = urlParams.get('hubId') || 'research-main'
+  function startBrowserWsFallback(hubId: string, isMain: boolean) {
     const wsUrl = `${HUB_URL}?id=${encodeURIComponent(hubId)}`
 
     const ws = new WebSocket(wsUrl)
     let heartbeatTimer: number | null = null
 
+    // 主屏：注入基于本屏 WebSocket 的转发器。
+    // syncXxx → broadcast → forwarder(cmd) 时，把指令发给 4 个副屏 hubId。
+    // 既覆盖“中控指令到主屏”的转发，也覆盖“主屏本地用户操作”触发的同步。
+    if (isMain) {
+      setSyncForwarder((cmd) => {
+        if (ws.readyState !== WebSocket.OPEN) return
+        const payload = JSON.stringify(cmd)
+        for (const subId of SUB_HUB_IDS) {
+          ws.send(JSON.stringify({ to: subId, msg: payload }))
+        }
+        console.log('[useControl] 主屏已转发指令给副屏:', SUB_HUB_IDS, cmd)
+      })
+    }
+
     ws.onopen = () => {
       console.log('[useControl] Browser WS connected, id=' + hubId)
       heartbeatTimer = window.setInterval(() => {
-        if (ws.readyState === WebSocket.OPEN) {
-          ws.send('heartbeat')
-        }
+        if (ws.readyState === WebSocket.OPEN) ws.send('heartbeat')
       }, 20000)
     }
 
     ws.onmessage = (event) => {
       if (event.data === 'heartbeat') return
+      console.log('[useControl] Browser WS raw msg:', event.data)
       try {
         const data = JSON.parse(event.data)
         let msg
         if (typeof data.msg === 'string') {
-          // UEC 标准格式：{ to: '...', msg: '{"cmd":"..."}' }
           msg = JSON.parse(data.msg)
         } else if (data.msg && typeof data.msg === 'object') {
-          // UEC 格式但 msg 已经是对象
           msg = data.msg
         } else {
-          // 服务端直接发的业务消息，无 msg 包装
           msg = data
         }
-        if (msg && msg.cmd) {
-          rc.dispatch(msg.cmd, msg)
-        }
+        console.log('[useControl] Browser WS parsed cmd:', msg.cmd, msg)
+        // 应用到本屏（主屏更新自身视图并经 forwarder 转发；副屏仅更新自身视图）
+        if (msg && msg.cmd) rc.dispatch(msg.cmd, msg)
       } catch (e) {
         console.warn('[useControl] WS message parse failed:', e)
       }
@@ -150,7 +174,7 @@ export function useControl() {
         window.clearInterval(heartbeatTimer)
         heartbeatTimer = null
       }
-      setTimeout(startBrowserWsFallback, 3000)
+      setTimeout(() => startBrowserWsFallback(hubId, isMain), 3000)
     }
   }
 }
