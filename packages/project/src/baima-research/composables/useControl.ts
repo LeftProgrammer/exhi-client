@@ -122,7 +122,7 @@ export function useControl() {
       if (isMain) {
         setSyncForwarder((cmd) => {
           for (const subId of SUB_HUB_IDS) {
-            fallback.send({ to: subId, msg: cmd })
+            fallback.send({ to: subId, msg: JSON.stringify(cmd) })
           }
           console.log('[useControl] 主屏已转发指令给副屏:', SUB_HUB_IDS, cmd)
         })

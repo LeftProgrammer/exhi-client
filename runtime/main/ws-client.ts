@@ -251,7 +251,8 @@ export class WsClient extends EventEmitter {
 
   private onMessage(data: RawData) {
     const text = data.toString()
-    // UEC 字符串心跳回包：视为连接存活，重置 pong 超时
+    // 过滤空消息和心跳回包
+    if (!text || text.trim() === '') return
     if (this.isUec && text === UEC_HEARTBEAT) {
       this.resetPongTimer()
       return

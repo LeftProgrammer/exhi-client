@@ -44,7 +44,7 @@ export function useBrowserFallback() {
     }
 
     newWs.onmessage = (event) => {
-      if (event.data === 'heartbeat') return
+      if (!event.data || event.data === 'heartbeat') return
       try {
         const data = JSON.parse(event.data)
         let msg: unknown
