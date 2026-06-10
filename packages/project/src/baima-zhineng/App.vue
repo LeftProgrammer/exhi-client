@@ -1,12 +1,22 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { useBridge } from '@shared/composables/useBridge'
+import { useControl } from '@baima-zhineng/composables/useControl'
 
 const router = useRouter()
 const { on } = useBridge()
 
 // 展厅 runtime 下发回首页指令
 on('app:home', () => router.push({ name: 'home' }))
+
+// === UEC 中控协议处理 ===
+const control = useControl()
+control.setupCommands(router)
+
+// 浏览器 dev 模式没有 exhibitBridge，直接连 UEC WS 接收中控指令
+if (!window.exhibitBridge) {
+  control.startFallback('zhineng')
+}
 </script>
 
 <template>

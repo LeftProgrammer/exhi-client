@@ -49,6 +49,11 @@ on('app:goto', (payload) => {
 const control = useControl()
 control.setupCommands(router)
 
+// 浏览器 dev 模式没有 exhibitBridge，直接连 UEC WS 接收中控指令
+if (!window.exhibitBridge) {
+  control.startFallback('yushui')
+}
+
 /**
  * 给 <transition> 算 :key——只在"页面级身份"变化时重挂载：
  *   - section 页：身份 = section + sectionId（同 section 内切 category/entry 不重挂）

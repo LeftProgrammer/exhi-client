@@ -1,5 +1,6 @@
 import type { Router } from 'vue-router'
 import { useRemoteControl } from '@shared/composables/useRemoteControl'
+import { useBrowserFallback } from '@shared/composables/useBrowserFallback'
 import { getSection, type SectionId } from '@baima-yushui/data/sections'
 
 /**
@@ -10,6 +11,7 @@ import { getSection, type SectionId } from '@baima-yushui/data/sections'
  */
 export function useControl() {
   const rc = useRemoteControl()
+  const fallback = useBrowserFallback()
 
   return {
     /** 上报页面导航（进入板块 / 回首页）
@@ -102,6 +104,14 @@ export function useControl() {
             params: { sectionId, categoryId, entryIndex: nextIndex }
           })
         }
+      })
+    },
+
+    /** 浏览器 dev 模式下启动 WS 回退连接 */
+    startFallback(hubId: string) {
+      fallback.start({
+        hubId,
+        onDispatch: (cmd, payload) => rc.dispatch(cmd, payload)
       })
     }
   }

@@ -1,4 +1,5 @@
 import { useRemoteControl } from '@shared/composables/useRemoteControl'
+import { useBrowserFallback } from '@shared/composables/useBrowserFallback'
 
 /**
  * 白马 milestones 中控通信封装。
@@ -8,6 +9,7 @@ import { useRemoteControl } from '@shared/composables/useRemoteControl'
  */
 export function useControl() {
   const rc = useRemoteControl()
+  const fallback = useBrowserFallback()
 
   return {
     /** 向指定设备发送控制消息（多屏互联）
@@ -55,6 +57,14 @@ export function useControl() {
         if (next !== current) {
           options.onGoto(next)
         }
+      })
+    },
+
+    /** 浏览器 dev 模式下启动 WS 回退连接 */
+    startFallback(hubId: string) {
+      fallback.start({
+        hubId,
+        onDispatch: (cmd, payload) => rc.dispatch(cmd, payload)
       })
     }
   }

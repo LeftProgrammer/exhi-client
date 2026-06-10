@@ -55,6 +55,11 @@ control.setupCommands({
   onGoto: goto
 })
 
+// 浏览器 dev 模式没有 exhibitBridge，直接连 UEC WS 接收中控指令
+if (!window.exhibitBridge) {
+  control.startFallback('milestone')
+}
+
 function onKeyDown(e: KeyboardEvent) {
   const n = parseInt(e.key)
   if (n >= 1 && n <= 5) goto(n - 1)

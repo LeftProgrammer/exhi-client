@@ -1,9 +1,8 @@
 import { useRemoteControl } from '@shared/composables/useRemoteControl'
 import { useBridge } from '@shared/composables/useBridge'
+import { useBrowserFallback } from '@shared/composables/useBrowserFallback'
 import { useScreenSync, setSyncForwarder } from './useScreenSync'
 import { useRouter } from 'vue-router'
-
-const HUB_URL = 'wss://www.zzqxs.cn/uec/UECServer/ws/webSocketServer.do'
 
 /** 路由名 → UEC hubId 映射（浏览器模式各屏用各自 id 连 WS） */
 const ROUTE_HUB_MAP: Record<string, string> = {
@@ -37,6 +36,7 @@ const SUB_HUB_IDS = ['research-tl', 'research-bl', 'research-tr', 'research-br']
  */
 export function useControl() {
   const rc = useRemoteControl()
+  const fallback = useBrowserFallback()
   const {
     syncPoint,
     syncIdle,
@@ -112,69 +112,21 @@ export function useControl() {
       }
 
       // 浏览器 dev：每个屏各自连 UEC WS（hubId 由路由名映射）。
-      // 主屏连上后注入基于本屏 WebSocket 的 forwarder。
       const hubId = ROUTE_HUB_MAP[String(routeName ?? 'home')] ?? 'research-main'
-      startBrowserWsFallback(hubId, isMain)
-    }
-  }
-
-  function startBrowserWsFallback(hubId: string, isMain: boolean) {
-    const wsUrl = `${HUB_URL}?id=${encodeURIComponent(hubId)}`
-
-    const ws = new WebSocket(wsUrl)
-    let heartbeatTimer: number | null = null
-
-    // 主屏：注入基于本屏 WebSocket 的转发器。
-    // syncXxx → broadcast → forwarder(cmd) 时，把指令发给 4 个副屏 hubId。
-    // 既覆盖“中控指令到主屏”的转发，也覆盖“主屏本地用户操作”触发的同步。
-    if (isMain) {
-      setSyncForwarder((cmd) => {
-        if (ws.readyState !== WebSocket.OPEN) return
-        const payload = JSON.stringify(cmd)
-        for (const subId of SUB_HUB_IDS) {
-          ws.send(JSON.stringify({ to: subId, msg: payload }))
-        }
-        console.log('[useControl] 主屏已转发指令给副屏:', SUB_HUB_IDS, cmd)
+      fallback.start({
+        hubId,
+        onDispatch: (cmd, payload) => rc.dispatch(cmd, payload)
       })
-    }
 
-    ws.onopen = () => {
-      console.log('[useControl] Browser WS connected, id=' + hubId)
-      heartbeatTimer = window.setInterval(() => {
-        if (ws.readyState === WebSocket.OPEN) ws.send('heartbeat')
-      }, 20000)
-    }
-
-    ws.onmessage = (event) => {
-      if (event.data === 'heartbeat') return
-      console.log('[useControl] Browser WS raw msg:', event.data)
-      try {
-        const data = JSON.parse(event.data)
-        let msg
-        if (typeof data.msg === 'string') {
-          msg = JSON.parse(data.msg)
-        } else if (data.msg && typeof data.msg === 'object') {
-          msg = data.msg
-        } else {
-          msg = data
-        }
-        console.log('[useControl] Browser WS parsed cmd:', msg.cmd, msg)
-        // 应用到本屏（主屏更新自身视图并经 forwarder 转发；副屏仅更新自身视图）
-        if (msg && msg.cmd) rc.dispatch(msg.cmd, msg)
-      } catch (e) {
-        console.warn('[useControl] WS message parse failed:', e)
+      // 主屏：注入基于 fallback WebSocket 的转发器。
+      if (isMain) {
+        setSyncForwarder((cmd) => {
+          for (const subId of SUB_HUB_IDS) {
+            fallback.send({ to: subId, msg: cmd })
+          }
+          console.log('[useControl] 主屏已转发指令给副屏:', SUB_HUB_IDS, cmd)
+        })
       }
-    }
-
-    ws.onerror = (e) => console.error('[useControl] Browser WS error:', e)
-
-    ws.onclose = () => {
-      console.log('[useControl] Browser WS closed, reconnect in 3s')
-      if (heartbeatTimer) {
-        window.clearInterval(heartbeatTimer)
-        heartbeatTimer = null
-      }
-      setTimeout(() => startBrowserWsFallback(hubId, isMain), 3000)
     }
   }
 }

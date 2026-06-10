@@ -43,6 +43,11 @@ on('app:home', () => router.push({ name: 'home' }))
 // === UEC 中控协议处理 ===
 const control = useControl()
 control.setupCommands(router)
+
+// 浏览器 dev 模式没有 exhibitBridge，直接连 UEC WS 接收中控指令
+if (!window.exhibitBridge) {
+  control.startFallback('duowei')
+}
 </script>
 
 <template>
