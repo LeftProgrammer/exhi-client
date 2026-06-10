@@ -33,6 +33,11 @@ export function useRemoteControl() {
     /** 向中控发送消息 */
     send: hub.send,
     /** 向指定设备发送消息 */
-    sendTo: hub.sendTo
+    sendTo: hub.sendTo,
+    /** 手动触发某类指令（用于浏览器回退等场景） */
+    dispatch: (type: string, payload: CommandPayload) => {
+      const handler = handlers.get(type)
+      if (handler) handler(payload)
+    }
   }
 }

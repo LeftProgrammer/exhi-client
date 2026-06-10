@@ -61,6 +61,8 @@ export interface UseBridgeReturn {
   dispatch: (cmd: { type: string; payload?: unknown }) => Promise<unknown>
 }
 
+let bridgeWarned = false
+
 export function useBridge(): UseBridgeReturn {
   const ready = ref(false)
   const info = ref<BridgeInfo | null>(null)
@@ -70,7 +72,10 @@ export function useBridge(): UseBridgeReturn {
     if (!window.exhibitBridge) {
       // dev 模式 / 浏览器直接访问：bridge.js 未注入。
       // 不覆盖 CSS 变量，让 reset.scss 的 :root 默认值自然生效。
-      console.warn('[useBridge] window.exhibitBridge 未就绪，使用 reset.scss 默认值')
+      if (!bridgeWarned) {
+        bridgeWarned = true
+        console.warn('[useBridge] window.exhibitBridge 未就绪，使用 reset.scss 默认值')
+      }
       return
     }
     try {

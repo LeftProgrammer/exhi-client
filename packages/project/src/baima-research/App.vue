@@ -34,7 +34,13 @@ onMounted(async () => {
     control.setupCommands()
   }
 
-  // bridge 已就绪直接执行，否则监听 ready 后执行
+  // 浏览器 dev 模式：没有 exhibitBridge，直接初始化中控指令
+  // Electron 环境：等 bridge ready 后再初始化
+  if (!window.exhibitBridge) {
+    initAll()
+    return
+  }
+
   if (ready.value) {
     initAll()
   } else {

@@ -8,7 +8,14 @@ import { POINTS, MENU_POINTS, getPoint, type PointStatus, type Layout } from '..
 
 const sfx = useProjectSfx()
 
-const { syncPoint, syncIdle, syncVideoPlay, syncVideoPause } = useScreenSync()
+const {
+  syncPoint,
+  syncIdle,
+  syncVideoPlay,
+  syncVideoPause,
+  onSyncPoint,
+  onSyncIdle
+} = useScreenSync()
 
 const bgImage = resolvePkgUrl('common/main-bg.png')
 const topText = resolvePkgUrl('common/top-text.png')
@@ -95,6 +102,14 @@ function handlePause() {
   syncVideoPause()
   sfx.play('tap')
 }
+
+// 监听 BC 广播：中控/副屏发来 point/idle 指令时主屏也要同步
+onSyncPoint((id) => {
+  selectPoint(id)
+})
+onSyncIdle(() => {
+  backToStandby()
+})
 
 useIdleReset(() => {
   if (!isStandby.value) backToStandby()
