@@ -281,6 +281,8 @@ const contentStyle = computed(() => {
 <style scoped lang="scss">
 .file-carousel {
   position: absolute;
+  /* 首次出现：淡入微缩，与父级 content block 的 fade 进场结合 */
+  animation: fc-mount 0.5s 0.1s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 
   .fc-stack {
     position: absolute;
@@ -363,6 +365,17 @@ const contentStyle = computed(() => {
       opacity: 1;
       z-index: 2;
     }
+  }
+}
+
+@keyframes fc-mount {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 </style>

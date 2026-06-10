@@ -225,6 +225,29 @@ const blGroups3 = computed(() => blockGroups(2))
     gap: d.h(40);
     padding: d.h(120) d.w(90) d.h(80);
 
+    /* 块内子元素错峰升起，营造层次感 */
+    > * {
+      animation: bl-item-rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    @for $i from 1 through 12 {
+      > *:nth-child(#{$i}) {
+        animation-delay: #{0.1 + ($i - 1) * 0.06}s;
+      }
+    }
+
+    /* 所有标题（类名含 -title）：揭示式炫酷入场 */
+    > [class*="-title"] {
+      animation-name: bl-title-reveal;
+      animation-duration: 1.2s;
+      animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    /* 标题单独错峰，间隔 0.08s，等容器淡入（0.6s）基本完成后再揭示 */
+    @for $i from 1 through 12 {
+      > *:nth-child(#{$i})[class*="-title"] {
+        animation-delay: #{0.5 + ($i - 1) * 0.08}s;
+      }
+    }
+
     &--baima {
       display: block;
 
@@ -581,12 +604,52 @@ const blGroups3 = computed(() => blockGroups(2))
   }
 }
 
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.4s ease;
+.fade-enter-active {
+  transition:
+    opacity 0.6s ease,
+    filter 0.6s ease,
+    transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.fade-enter-from,
+.fade-leave-active {
+  transition:
+    opacity 0.45s ease,
+    filter 0.45s ease,
+    transform 0.45s cubic-bezier(0.7, 0, 0.84, 0);
+}
+.fade-enter-from {
+  opacity: 0;
+  filter: blur(d.w(10));
+  transform: translateY(d.h(30)) scale(0.98);
+}
 .fade-leave-to {
   opacity: 0;
+  filter: blur(d.w(12));
+  transform: translateY(d.h(-60)) scale(0.98);
+}
+
+@keyframes bl-item-rise {
+  from {
+    opacity: 0;
+    transform: translateY(d.h(50));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bl-title-reveal {
+  0% {
+    opacity: 0;
+    clip-path: inset(0 100% 0 0);
+    filter: blur(d.w(8));
+  }
+  60% {
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
 }
 </style>
