@@ -3,6 +3,7 @@ import { onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useBridge } from '@shared/composables/useBridge'
 import { useProjectSfx } from '@shared/composables/useProjectSfx'
+import { useControl } from '@baima-duowei/composables/useControl'
 // import { useIdleReset } from '@shared/composables/useIdleReset'
 
 const router = useRouter()
@@ -38,6 +39,10 @@ onBeforeUnmount(() => {
 // }, 20_000)
 
 on('app:home', () => router.push({ name: 'home' }))
+
+// === UEC 中控协议处理 ===
+const control = useControl()
+control.setupCommands(router)
 </script>
 
 <template>

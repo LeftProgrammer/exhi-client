@@ -14,6 +14,11 @@ export function usePageFlip(total: number) {
   /** 是否在最后一页（不能再下一页） */
   const isLast = computed(() => page.value >= total - 1)
 
+  /** 直接设置页码（外部控制，如中控指令） */
+  function setPage(n: number) {
+    page.value = Math.max(0, Math.min(n, total - 1))
+  }
+
   /** 上一页；成功翻页返回 true，已在首页返回 false */
   function prev() {
     if (page.value > 0) {
@@ -32,5 +37,5 @@ export function usePageFlip(total: number) {
     return false
   }
 
-  return { page, prev, next, isFirst, isLast, total }
+  return { page, setPage, prev, next, isFirst, isLast, total }
 }

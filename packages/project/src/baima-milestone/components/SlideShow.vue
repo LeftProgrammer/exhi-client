@@ -13,6 +13,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, type Component } f
 import { slides, IDLE_MS } from '@baima-milestone/data/slides'
 import { slideFadeOut, slideFadeIn, type SlideDir } from '@baima-milestone/effects/gsapPresets'
 import { useProjectSfx } from '@shared/composables/useProjectSfx'
+import { useControl } from '@baima-milestone/composables/useControl'
 import Page1 from './Page1.vue'
 import Page2 from './Page2.vue'
 import Page3 from './Page3.vue'
@@ -46,6 +47,14 @@ function goto(i: number) {
   resetIdle()
 }
 
+// === UEC 中控协议处理 ===
+const control = useControl()
+control.setupCommands({
+  total: slides.length,
+  getCurrent: () => currentIndex.value,
+  onGoto: goto
+})
+
 function onKeyDown(e: KeyboardEvent) {
   const n = parseInt(e.key)
   if (n >= 1 && n <= 5) goto(n - 1)
@@ -60,22 +69,7 @@ function resetIdle() {
   // idleTimer = setTimeout(() => goto(0), IDLE_MS)
 }
 
-const bridgeOff: Array<() => void> = []
-
-function setupBridge() {
-  if (!window.exhibitBridge) return
-  bridgeOff.push(
-    window.exhibitBridge.on('slide.next', () => goto(currentIndex.value + 1)),
-    window.exhibitBridge.on('slide.prev', () => goto(currentIndex.value - 1)),
-    window.exhibitBridge.on('slide.goto', (p) => {
-      const idx = (p as { index?: number })?.index
-      if (idx !== undefined) goto(idx)
-    })
-  )
-}
-
 onMounted(() => {
-  setupBridge()
   resetIdle()
   window.addEventListener('keydown', onKeyDown)
   nextTick(() => pageRef.value?.play())
@@ -84,7 +78,6 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   if (idleTimer !== null) clearTimeout(idleTimer)
-  bridgeOff.forEach((f) => f())
   window.removeEventListener('keydown', onKeyDown)
 })
 

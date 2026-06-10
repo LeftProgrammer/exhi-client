@@ -1,11 +1,21 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onBeforeUnmount } from 'vue'
 import { resolvePkgUrl } from '@shared/utils/url'
 import { usePageFlip } from '@baima-duowei/composables/usePageFlip'
 import PageLayout from '../components/PageLayout.vue'
 import ContentArea from '../components/ContentArea.vue'
 
-const { page, prev: goPrev, next: goNext, isFirst, isLast } = usePageFlip(9)
+const { page, setPage, prev: goPrev, next: goNext, isFirst, isLast } = usePageFlip(9)
+
+// 中控翻页指令（同文档内通过 window 自定义事件传递）
+function onPageCmd(e: Event) {
+  const p = (e as CustomEvent).detail as { action?: string; index?: number }
+  if (typeof p.index === 'number') setPage(p.index)
+  else if (p.action === 'next') goNext()
+  else if (p.action === 'prev') goPrev()
+}
+window.addEventListener('uec:page', onPageCmd)
+onBeforeUnmount(() => window.removeEventListener('uec:page', onPageCmd))
 
 const headerBg = resolvePkgUrl('shared/header-bg.png')
 const headerTitle = resolvePkgUrl('tech/header-title.png')
