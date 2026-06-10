@@ -67,7 +67,7 @@ const leaders: Section = {
   contentBgColor: '#003a9a',
   categories: [
     {
-      id: '2023',
+      id: '1',
       entries: [
         {
           id: 'ldr-2023-01',
@@ -80,7 +80,7 @@ const leaders: Section = {
       ]
     },
     {
-      id: '2025',
+      id: '2',
       entries: [
         {
           id: 'ldr-2025-01',

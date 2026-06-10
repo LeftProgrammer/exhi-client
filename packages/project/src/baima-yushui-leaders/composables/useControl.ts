@@ -22,7 +22,7 @@ export function useControl() {
 
     /** 上报分类切换
      *  target: 'yushui' | 'leaders'
-     *  id: 分类标识，如 '2023' / '2025'
+     *  id: 分类标识，如 '1' / '2'
      */
     reportCategory(target: string, id: string) {
       rc.send({ cmd: 'category', target, id })
@@ -73,7 +73,7 @@ export function useControl() {
         const catId = p.id as string
         if (!catId) return
         const section = getSection(sectionId as SectionId)
-        if (!section.categories.find(c => c.id === catId)) return
+        if (!section.categories.find((c) => c.id === catId)) return
         router.replace({
           name: 'section',
           params: { sectionId, categoryId: catId, entryIndex: 0 }
@@ -87,14 +87,15 @@ export function useControl() {
         const categoryId = route.params.categoryId as string
         const entryIndex = Number(route.params.entryIndex ?? 0)
         const section = getSection(sectionId as SectionId)
-        const category = section.categories.find(c => c.id === categoryId)
+        const category = section.categories.find((c) => c.id === categoryId)
         if (!category) return
         const total = category.entries.length
         const action = p.action as string
         let nextIndex = entryIndex
         if (action === 'next') nextIndex = (entryIndex + 1) % total
         else if (action === 'prev') nextIndex = (entryIndex - 1 + total) % total
-        else if (typeof p.index === 'number') nextIndex = Math.max(0, Math.min(p.index as number, total - 1))
+        else if (typeof p.index === 'number')
+          nextIndex = Math.max(0, Math.min(p.index as number, total - 1))
         if (nextIndex !== entryIndex) {
           router.replace({
             name: 'section',
