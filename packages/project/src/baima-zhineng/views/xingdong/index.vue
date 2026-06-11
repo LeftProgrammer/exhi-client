@@ -6,5 +6,5 @@ const module = getModule('xingdong')!
 </script>
 
 <template>
-  <SecondaryPage :module="module" />
+  <SecondaryPage :module="module" mode="scroll" />
 </template>
