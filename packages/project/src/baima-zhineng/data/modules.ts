@@ -293,74 +293,38 @@ const xingdong: ModuleDef = {
     makeTab('xingdong-xfyl', XINGDONG_TITLE_XFYL, [
       {
         blocks: [
-          {
-            src: url('modules/xingdong/xfyl-p1-s1-title.png'),
-            left: 450,
-            top: 1255,
-            width: 1260,
-            height: 231
-          },
-          {
-            src: url('modules/xingdong/xfyl-p1-s1-text.png'),
-            left: 175,
-            top: 1399,
-            width: 1812,
-            height: 290
-          },
-          {
-            src: url('modules/xingdong/xfyl-p1-s1-img1.png'),
-            left: 336,
-            top: 1702,
-            width: 545,
-            height: 363
-          },
-          {
-            src: url('modules/xingdong/xfyl-p1-s1-img2.png'),
-            left: 925,
-            top: 1702,
-            width: 545,
-            height: 363
-          },
-          {
-            src: url('modules/xingdong/xfyl-p1-s1-img3.png'),
-            left: 1514,
-            top: 1702,
-            width: 308,
-            height: 363
-          },
-          {
-            src: url('modules/xingdong/xfyl-p1-s2-title.png'),
-            left: 338,
-            top: 2221,
-            width: 1485,
-            height: 231
-          },
-          {
-            src: url('modules/xingdong/xfyl-p1-s2-text.png'),
-            left: 175,
-            top: 2351,
-            width: 1812,
-            height: 290
-          },
-          {
-            src: url('modules/xingdong/xfyl-p1-s2-img1.png'),
-            left: 336,
-            top: 2609,
-            width: 711,
-            height: 473
-          },
-          {
-            src: url('modules/xingdong/xfyl-p1-s2-img2.png'),
-            left: 1108,
-            top: 2609,
-            width: 711,
-            height: 473
-          }
+          { src: url('modules/xingdong/xfyl-01-subtitle.png'), left: 732, top: 1000, width: 696, height: 108 },
+          { src: url('modules/xingdong/xfyl-01-1.png'), left: 1, top: 1150, width: 2158, height: 1077 },
+          { src: url('modules/xingdong/xfyl-01-2.png'), left: 0, top: 2250, width: 2160, height: 1100 },
+          { src: url('modules/xingdong/xfyl-01-3.png'), left: 0, top: 3400, width: 2160, height: 1906 },
+          { src: url('modules/xingdong/xfyl-01-4.png'), left: 0, top: 5356, width: 2160, height: 818 },
+          { src: url('modules/xingdong/xfyl-01-5.png'), left: 883, top: 1130, width: 394, height: 109 }
         ]
       }
     ]),
-    makeTab('xingdong-xfyl-02', XINGDONG_TITLE_XFYL),
-    makeTab('xingdong-xfyl-03', XINGDONG_TITLE_XFYL),
+    makeTab('xingdong-xfyl-02', XINGDONG_TITLE_XFYL, [
+      {
+        blocks: [
+          { src: url('modules/xingdong/xfyl-02-subtitle.png'), left: 833, top: 1000, width: 494, height: 107 },
+          { src: url('modules/xingdong/xfyl-02-subtitle-desc.png'), left: 363, top: 1130, width: 1434, height: 57 },
+          { src: url('modules/xingdong/xfyl-02-1.png'), left: 0, top: 1250, width: 2160, height: 2100 },
+          { src: url('modules/xingdong/xfyl-02-2.png'), left: 268, top: 3400, width: 1624, height: 965 },
+          { src: url('modules/xingdong/xfyl-02-3.png'), left: 306, top: 4415, width: 1548, height: 968 },
+          { src: url('modules/xingdong/xfyl-02-4.png'), left: 177, top: 5433, width: 1806, height: 2094 }
+        ]
+      }
+    ]),
+    makeTab('xingdong-xfyl-03', XINGDONG_TITLE_XFYL, [
+      {
+        blocks: [
+          { src: url('modules/xingdong/xfyl-03-subtitle.png'), left: 830, top: 1000, width: 500, height: 100 },
+          { src: url('modules/xingdong/xfyl-03-1.png'), left: 216, top: 1150, width: 1727, height: 1231 },
+          { src: url('modules/xingdong/xfyl-03-2.png'), left: 169, top: 2431, width: 1822, height: 549 },
+          { src: url('modules/xingdong/xfyl-03-3.png'), left: 144, top: 3030, width: 1872, height: 1546 },
+          { src: url('modules/xingdong/xfyl-03-4.png'), left: 662, top: 4626, width: 835, height: 503 }
+        ]
+      }
+    ]),
     makeTab('xingdong-xfyl-04', XINGDONG_TITLE_XFYL),
     makeTab('xingdong-xfyl-05', XINGDONG_TITLE_XFYL),
 

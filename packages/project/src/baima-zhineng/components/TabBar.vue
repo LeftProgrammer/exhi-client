@@ -19,6 +19,8 @@ const prevIndex = ref(0)
 const isDragging = ref(false)
 const dragStartX = ref(0)
 const dragStartOffset = ref(0)
+const dragMoved = ref(false)
+const DRAG_THRESHOLD = 5 // px，超过此位移视为拖拽而非点击
 
 function setItemRef(el: Element | null, i: number) {
   if (el) itemEls.value[i] = el as HTMLElement
@@ -56,17 +58,25 @@ function updateOffset() {
 }
 
 function select(i: number) {
+  if (dragMoved.value) {
+    dragMoved.value = false
+    return
+  }
   emit('update:modelValue', i)
 }
 
 // ── 拖拽滚动 ──
 function onDragStart(x: number) {
   isDragging.value = true
+  dragMoved.value = false
   dragStartX.value = x
   dragStartOffset.value = offset.value
 }
 function onDragMove(x: number) {
   if (!isDragging.value) return
+  if (!dragMoved.value && Math.abs(x - dragStartX.value) > DRAG_THRESHOLD) {
+    dragMoved.value = true
+  }
   const delta = dragStartX.value - x
   offset.value = clampOffset(dragStartOffset.value + delta)
 }
