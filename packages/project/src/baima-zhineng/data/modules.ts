@@ -14,7 +14,7 @@ import { resolvePkgUrl } from '@shared/utils/url'
 /** 拼接素材 URL（统一前缀 zhineng/ 避免与其它项目素材冲突） */
 const url = (p: string) => resolvePkgUrl(`${p}`)
 
-/** 内容块：每张图独立配置位置与大小（设计稿 px） */
+/** 内容块：每张图独立配置位置与大小（设计稿 ） */
 export interface ContentBlock {
   src: string
   left: number
@@ -50,7 +50,7 @@ export interface ModuleDef {
   route: string
   /** 待机页图标（含文字标签） */
   icon: string
-  /** 待机页图标布局（设计稿 px） */
+  /** 待机页图标布局（设计稿 ） */
   layout: { left: number; top: number; width: number; height: number }
   /** tab 列表 */
   tabs: TabDef[]
@@ -282,6 +282,11 @@ const guihua: ModuleDef = {
 // ── 行动举措 ──
 // 已有素材：tab「先锋引领 攻坚克难」首页（两段：标题 + 文字 + 照片墙）。
 const XINGDONG_TITLE_XFYL = url('modules/xingdong/xfyl-title.png')
+const XINGDONG_TITLE_XSJW = url('modules/xingdong/xsjw-title.png')
+const XINGDONG_TITLE_JNQQ = url('modules/xingdong/jnqq-title.png')
+const XINGDONG_TITLE_AQHH = url('modules/xingdong/aqhh-title.png')
+const XINGDONG_TITLE_LJGJ = url('modules/xingdong/ljgj-title.png')
+const XINGDONG_TITLE_KYCX = url('modules/xingdong/kycx-title.png')
 const xingdong: ModuleDef = {
   id: 'xingdong',
   name: '行动举措',
@@ -293,166 +298,165 @@ const xingdong: ModuleDef = {
     makeTab('xingdong-xfyl', XINGDONG_TITLE_XFYL, [
       {
         blocks: [
-          { src: url('modules/xingdong/xfyl-01-subtitle.png'), left: 732, top: 1000, width: 696, height: 108 },
-          { src: url('modules/xingdong/xfyl-01-1.png'), left: 1, top: 1150, width: 2158, height: 1077 },
-          { src: url('modules/xingdong/xfyl-01-2.png'), left: 0, top: 2250, width: 2160, height: 1100 },
-          { src: url('modules/xingdong/xfyl-01-3.png'), left: 0, top: 3400, width: 2160, height: 1906 },
-          { src: url('modules/xingdong/xfyl-01-4.png'), left: 0, top: 5356, width: 2160, height: 818 },
-          { src: url('modules/xingdong/xfyl-01-5.png'), left: 883, top: 1130, width: 394, height: 109 }
+          { src: url('modules/xingdong/xfyl-01-subtitle.png'), left: 732, top: 998, width: 696, height: 108 },
+          { src: url('modules/xingdong/xfyl-01-1.png'), left: 0, top: 1196, width: 2158, height: 1077 },
+          { src: url('modules/xingdong/xfyl-01-2.png'), left: 0, top: 2419, width: 2160, height: 1100 },
+          { src: url('modules/xingdong/xfyl-01-3.png'), left: 0, top: 3561, width: 2160, height: 1906 },
+          { src: url('modules/xingdong/xfyl-01-4.png'), left: 0, top: 5577, width: 2160, height: 967 },
+          { src: url('modules/xingdong/xfyl-01-5.png'), left: 0, top: 6690, width: 2160, height: 818 }
         ]
       }
     ]),
     makeTab('xingdong-xfyl-02', XINGDONG_TITLE_XFYL, [
       {
         blocks: [
-          { src: url('modules/xingdong/xfyl-02-subtitle.png'), left: 833, top: 1000, width: 494, height: 107 },
-          { src: url('modules/xingdong/xfyl-02-subtitle-desc.png'), left: 363, top: 1130, width: 1434, height: 57 },
-          { src: url('modules/xingdong/xfyl-02-1.png'), left: 0, top: 1250, width: 2160, height: 2100 },
-          { src: url('modules/xingdong/xfyl-02-2.png'), left: 268, top: 3400, width: 1624, height: 965 },
-          { src: url('modules/xingdong/xfyl-02-3.png'), left: 306, top: 4415, width: 1548, height: 968 },
-          { src: url('modules/xingdong/xfyl-02-4.png'), left: 177, top: 5433, width: 1806, height: 2094 }
+          { src: url('modules/xingdong/xfyl-02-subtitle.png'), left: 833, top: 961, width: 494, height: 107 },
+          { src: url('modules/xingdong/xfyl-02-subtitle-desc.png'), left: 366, top: 1145, width: 1434, height: 57 },
+          { src: url('modules/xingdong/xfyl-02-1.png'), left: 0, top: 1281, width: 2160, height: 2100 },
+          { src: url('modules/xingdong/xfyl-02-2.png'), left: 0, top: 3473, width: 1624, height: 965 },
+          { src: url('modules/xingdong/xfyl-02-3.png'), left: 612, top: 4588, width: 1548, height: 968 },
+          { src: url('modules/xingdong/xfyl-02-4.png'), left: 170, top: 5666, width: 1806, height: 2094 }
         ]
       }
     ]),
     makeTab('xingdong-xfyl-03', XINGDONG_TITLE_XFYL, [
       {
         blocks: [
-          { src: url('modules/xingdong/xfyl-03-subtitle.png'), left: 830, top: 1000, width: 500, height: 100 },
-          { src: url('modules/xingdong/xfyl-03-1.png'), left: 216, top: 1150, width: 1727, height: 1231 },
-          { src: url('modules/xingdong/xfyl-03-2.png'), left: 169, top: 2431, width: 1822, height: 549 },
-          { src: url('modules/xingdong/xfyl-03-3.png'), left: 144, top: 3030, width: 1872, height: 1546 },
-          { src: url('modules/xingdong/xfyl-03-4.png'), left: 662, top: 4626, width: 835, height: 503 }
+          { src: url('modules/xingdong/xfyl-03-subtitle.png'), left: 870, top: 963, width: 407, height: 85 },
+          { src: url('modules/xingdong/xfyl-03-1.png'), left: 173, top: 1108, width: 1727, height: 1231 },
+          { src: url('modules/xingdong/xfyl-03-2.png'), left: 169, top: 2442, width: 1822, height: 549 },
+          { src: url('modules/xingdong/xfyl-03-3.png'), left: 117, top: 3017, width: 1872, height: 1546 },
+          { src: url('modules/xingdong/xfyl-03-4.png'), left: 186, top: 3974, width: 835, height: 503 }
         ]
       }
     ]),
     makeTab('xingdong-xfyl-04', XINGDONG_TITLE_XFYL, [
       {
         blocks: [
-          { src: url('modules/xingdong/xfyl-04-1.png'), left: 216, top: 1150, width: 1727, height: 1231 },
-          { src: url('modules/xingdong/xfyl-04-2.png'), left: 169, top: 2431, width: 1822, height: 549 },
-          { src: url('modules/xingdong/xfyl-04-3.png'), left: 144, top: 3030, width: 1872, height: 1546 },
+          { src: url('modules/xingdong/xfyl-04-subtitle.png'), left: 833, top: 962, width: 494, height: 106 },
+          { src: url('modules/xingdong/xfyl-04-1.png'), left: 171, top: 1095, width: 1818, height: 1056 },
+          { src: url('modules/xingdong/xfyl-04-2.png'), left: 89, top: 2290, width: 1922, height: 2078 },
         ]
       }
     ]),
     makeTab('xingdong-xfyl-05', XINGDONG_TITLE_XFYL, [
       {
         blocks: [
-          { src: url('modules/xingdong/xfyl-05-1.png'), left: 216, top: 1150, width: 1727, height: 1231 },
-          { src: url('modules/xingdong/xfyl-05-2.png'), left: 169, top: 2431, width: 1822, height: 549 },
-          { src: url('modules/xingdong/xfyl-05-3.png'), left: 144, top: 3030, width: 1872, height: 1546 },
-          { src: url('modules/xingdong/xfyl-05-4.png'), left: 662, top: 4626, width: 835, height: 503 },
-          { src: url('modules/xingdong/xfyl-05-5.png'), left: 662, top: 4626, width: 835, height: 503 }
+          { src: url('modules/xingdong/xfyl-05-subtitle.png'), left: 327, top: 960, width: 1514, height: 88 },
+          { src: url('modules/xingdong/xfyl-05-1.png'), left: 174, top: 1160, width: 1815, height: 339 },
+          { src: url('modules/xingdong/xfyl-05-2.png'), left: 0, top: 1326, width: 2160, height: 980 },
+          { src: url('modules/xingdong/xfyl-05-3.png'), left: 0, top: 2241, width: 2160, height: 1182 },
+          { src: url('modules/xingdong/xfyl-05-4.png'), left: 0, top: 3313, width: 2160, height: 1004 }
         ]
       }
     ]),
 
     // 学思践悟 书香赋能 (4)
-    makeTab('xingdong-xsjw', XINGDONG_TITLE_XFYL, [
+    makeTab('xingdong-xsjw', XINGDONG_TITLE_XSJW, [
       {
         blocks: [
-          { src: url('modules/xingdong/xsjw-01-1.png'), left: 0, top: 1000, width: 2160, height: 1200 },
-          { src: url('modules/xingdong/xsjw-01-2.png'), left: 0, top: 2250, width: 2160, height: 1200 },
-          { src: url('modules/xingdong/xsjw-01-3.png'), left: 0, top: 3500, width: 2160, height: 1200 },
-          { src: url('modules/xingdong/xsjw-01-4.png'), left: 0, top: 4750, width: 2160, height: 1200 },
-          { src: url('modules/xingdong/xsjw-01-5.png'), left: 0, top: 6000, width: 2160, height: 1200 },
-          { src: url('modules/xingdong/xsjw-01-6.png'), left: 0, top: 7250, width: 2160, height: 1200 },
-          { src: url('modules/xingdong/xsjw-01-7.png'), left: 0, top: 8500, width: 2160, height: 1200 },
-          { src: url('modules/xingdong/xsjw-01-8.png'), left: 0, top: 9750, width: 2160, height: 1200 }
+          { src: url('modules/xingdong/xsjw-01-bg.png'), left: 0, top: 3535, width: 1426, height: 4445 },
+          { src: url('modules/xingdong/xsjw-01-subtitle.png'), left: 817, top: 998, width: 526, height: 108 },
+          { src: url('modules/xingdong/xsjw-01-1.png'), left: 0, top: 1198, width: 1869, height: 1265 },
+          { src: url('modules/xingdong/xsjw-01-2.png'), left: 174, top: 2483, width: 1822, height: 762 },
+          { src: url('modules/xingdong/xsjw-01-3.png'), left: 167, top: 3368, width: 1369, height: 959 },
+          { src: url('modules/xingdong/xsjw-01-4.png'), left: 628, top: 4390, width: 1361, height: 959 },
+          { src: url('modules/xingdong/xsjw-01-5.png'), left: 162, top: 5412, width: 1360, height: 954 },
+          { src: url('modules/xingdong/xsjw-01-6.png'), left: 628, top: 6434, width: 1363, height: 1281 },
+          
         ]
       }
     ]),
-    makeTab('xingdong-xsjw-02', XINGDONG_TITLE_XFYL, [
+    makeTab('xingdong-xsjw-02', XINGDONG_TITLE_XSJW, [
       {
         blocks: [
-          { src: url('modules/xingdong/xsjw-02-subtitle.png'), left: 830, top: 1000, width: 500, height: 100 },
-          { src: url('modules/xingdong/xsjw-02-1.png'), left: 0, top: 1150, width: 2160, height: 1200 },
-          { src: url('modules/xingdong/xsjw-02-2.png'), left: 0, top: 2400, width: 2160, height: 1200 },
-          { src: url('modules/xingdong/xsjw-02-3.png'), left: 0, top: 3650, width: 2160, height: 1200 },
-          { src: url('modules/xingdong/xsjw-02-4.png'), left: 0, top: 4900, width: 2160, height: 1200 },
-          { src: url('modules/xingdong/xsjw-02-5.png'), left: 0, top: 6150, width: 2160, height: 1200 },
-          { src: url('modules/xingdong/xsjw-02-6.png'), left: 0, top: 7400, width: 2160, height: 1200 },
-          { src: url('modules/xingdong/xsjw-02-7.png'), left: 0, top: 8650, width: 2160, height: 1200 }
+          { src: url('modules/xingdong/xsjw-02-bg.png'), left: 230, top: 1159, width: 76, height: 6603 },
+          { src: url('modules/xingdong/xsjw-02-subtitle.png'), left: 817, top: 998, width: 526, height: 108 },
+          { src: url('modules/xingdong/xsjw-02-1.png'), left: 402, top: 1146, width: 1353, height: 1100 },
+          { src: url('modules/xingdong/xsjw-02-2.png'), left: 401, top: 2403, width: 1359, height: 962 },
+          { src: url('modules/xingdong/xsjw-02-3.png'), left: 402, top: 3529, width: 1350, height: 983 },
+          { src: url('modules/xingdong/xsjw-02-4.png'), left: 402, top: 4676, width: 1350, height: 876 },
+          { src: url('modules/xingdong/xsjw-02-5.png'), left: 402, top: 5709, width: 1353, height: 957 },
+          { src: url('modules/xingdong/xsjw-02-6.png'), left: 402, top: 6837, width: 1350, height: 960 },
         ]
       }
     ]),
-    makeTab('xingdong-xsjw-03', XINGDONG_TITLE_XFYL, [
+    makeTab('xingdong-xsjw-03', XINGDONG_TITLE_XSJW, [
       {
         blocks: [
-          { src: url('modules/xingdong/xsjw-03-subtitle.png'), left: 830, top: 1000, width: 500, height: 100 },
-          { src: url('modules/xingdong/xsjw-03-1.png'), left: 0, top: 1150, width: 2160, height: 600 },
-          { src: url('modules/xingdong/xsjw-03-2.png'), left: 0, top: 1800, width: 2160, height: 600 },
-          { src: url('modules/xingdong/xsjw-03-3.png'), left: 0, top: 2450, width: 2160, height: 600 },
-          { src: url('modules/xingdong/xsjw-03-4.png'), left: 0, top: 3100, width: 2160, height: 600 },
-          { src: url('modules/xingdong/xsjw-03-5.png'), left: 0, top: 3750, width: 2160, height: 600 },
-          { src: url('modules/xingdong/xsjw-03-6.png'), left: 0, top: 4400, width: 2160, height: 600 },
-          { src: url('modules/xingdong/xsjw-03-7.png'), left: 0, top: 5050, width: 2160, height: 1200 },
-          { src: url('modules/xingdong/xsjw-03-8.png'), left: 0, top: 6300, width: 2160, height: 1200 },
-          { src: url('modules/xingdong/xsjw-03-9.png'), left: 0, top: 7550, width: 2160, height: 1200 },
-          { src: url('modules/xingdong/xsjw-03-10.png'), left: 0, top: 8800, width: 2160, height: 1200 },
-          { src: url('modules/xingdong/xsjw-03-11.png'), left: 0, top: 10050, width: 2160, height: 1200 },
-          { src: url('modules/xingdong/xsjw-03-12.png'), left: 0, top: 11300, width: 2160, height: 1200 },
-          { src: url('modules/xingdong/xsjw-03-13.png'), left: 0, top: 12550, width: 2160, height: 1200 },
-          { src: url('modules/xingdong/xsjw-03-14.png'), left: 0, top: 13800, width: 2160, height: 1200 }
+          { src: url('modules/xingdong/xsjw-03-11.png'), left: 901, top: 2460, width: 851, height: 1570 },
+          { src: url('modules/xingdong/xsjw-03-12.png'), left: 378, top: 3829, width: 605, height: 1356 },
+          { src: url('modules/xingdong/xsjw-03-13.png'), left: 1344, top: 4759, width: 605, height: 1356 },
+          { src: url('modules/xingdong/xsjw-03-14.png'), left: 148, top: 6211, width: 548, height: 1297 },
+          { src: url('modules/xingdong/xsjw-03-15.png'), left: 1424, top: 6999, width: 498, height: 1336 },
+          { src: url('modules/xingdong/xsjw-03-16.png'), left: 211, top: 7987, width: 656, height: 1319 },
+          { src: url('modules/xingdong/xsjw-03-subtitle.png'), left: 883, top: 998, width: 394, height: 88 },
+          { src: url('modules/xingdong/xsjw-03-1.png'), left: 169, top: 1198, width: 1727, height: 1226 },
+          { src: url('modules/xingdong/xsjw-03-2.png'), left: 174, top: 2568, width: 1218, height: 915 },
+          { src: url('modules/xingdong/xsjw-03-3.png'), left: 782, top: 3686, width: 1207, height: 905 },
+          { src: url('modules/xingdong/xsjw-03-4.png'), left: 196, top: 4840, width: 1509, height: 867 },
+          { src: url('modules/xingdong/xsjw-03-5.png'), left: 777, top: 5933, width: 1212, height: 689 },
+          { src: url('modules/xingdong/xsjw-03-6.png'), left: 171, top: 6849, width: 1437, height: 881 },
+          { src: url('modules/xingdong/xsjw-03-7.png'), left: 462, top: 7909, width: 1527, height: 856 },
+          { src: url('modules/xingdong/xsjw-03-8.png'), left: 171, top: 8986, width: 1409, height: 795 },
         ]
       }
     ]),
-    makeTab('xingdong-xsjw-04', XINGDONG_TITLE_XFYL, [
+    makeTab('xingdong-xsjw-04', XINGDONG_TITLE_XSJW, [
       {
         blocks: [
-          { src: url('modules/xingdong/xsjw-04-subtitle.png'), left: 830, top: 1000, width: 500, height: 100 },
-          { src: url('modules/xingdong/xsjw-04-1.png'), left: 0, top: 1150, width: 2160, height: 1500 },
-          { src: url('modules/xingdong/xsjw-04-2.png'), left: 0, top: 2700, width: 2160, height: 1500 }
+          { src: url('modules/xingdong/xsjw-04-subtitle.png'), left: 817, top: 999, width: 526, height: 107 },
+          { src: url('modules/xingdong/xsjw-04-1.png'), left: 224, top: 1193, width: 1712, height: 1508 },
+          { src: url('modules/xingdong/xsjw-04-2.png'), left: 194, top: 2799, width: 1706, height: 899 }
         ]
       }
     ]),
 
     // 技能强企 比武竞赛 (4)
-    makeTab('xingdong-jnqq', XINGDONG_TITLE_XFYL, [
+    makeTab('xingdong-jnqq', XINGDONG_TITLE_JNQQ, [
       {
         blocks: [
-          { src: url('modules/xingdong/jnqq-01-1.png'), left: 0, top: 1000, width: 2160, height: 1200 },
-          { src: url('modules/xingdong/jnqq-01-2.png'), left: 0, top: 2250, width: 2160, height: 1200 },
-          { src: url('modules/xingdong/jnqq-01-3.png'), left: 0, top: 3500, width: 2160, height: 1200 },
-          { src: url('modules/xingdong/jnqq-01-4.png'), left: 0, top: 4750, width: 2160, height: 1200 }
+          { src: url('modules/xingdong/jnqq-01-subtitle.png'), left: 351, top: 995, width: 1458, height: 111 },
+          { src: url('modules/xingdong/jnqq-01-1.png'), left: 167, top: 1191, width: 1832, height: 1221 },
+          { src: url('modules/xingdong/jnqq-01-2.png'), left: 0, top: 2822, width: 558, height: 163 },
+          { src: url('modules/xingdong/jnqq-01-3.png'), left: 636, top: 2442, width: 1524, height: 978 }
         ]
       }
     ]),
-    makeTab('xingdong-jnqq-02', XINGDONG_TITLE_XFYL, [
+    makeTab('xingdong-jnqq-02', XINGDONG_TITLE_JNQQ, [
       {
         blocks: [
-          { src: url('modules/xingdong/jnqq-02-1.png'), left: 0, top: 1000, width: 2160, height: 1200 },
-          { src: url('modules/xingdong/jnqq-02-2.png'), left: 0, top: 2250, width: 2160, height: 1200 },
-          { src: url('modules/xingdong/jnqq-02-3.png'), left: 0, top: 3500, width: 2160, height: 1200 }
+          { src: url('modules/xingdong/jnqq-02-subtitle.png'), left: 169, top: 1019, width: 1823, height: 87 },
+          { src: url('modules/xingdong/jnqq-02-1.png'), left: 167, top: 1234, width: 1698, height: 996 },
+          { src: url('modules/xingdong/jnqq-02-2.png'), left: 167, top: 2347, width: 1829, height: 1073 }
         ]
       }
     ]),
-    makeTab('xingdong-jnqq-03', XINGDONG_TITLE_XFYL, [
+    makeTab('xingdong-jnqq-03', XINGDONG_TITLE_JNQQ, [
       {
         blocks: [
-          { src: url('modules/xingdong/jnqq-03-1.png'), left: 0, top: 1000, width: 2160, height: 1200 },
-          { src: url('modules/xingdong/jnqq-03-2.png'), left: 0, top: 2250, width: 2160, height: 1200 },
-          { src: url('modules/xingdong/jnqq-03-3.png'), left: 0, top: 3500, width: 2160, height: 1200 },
-          { src: url('modules/xingdong/jnqq-03-4.png'), left: 0, top: 4750, width: 2160, height: 1200 }
+          { src: url('modules/xingdong/jnqq-03-subtitle.png'), left: 169, top: 1020, width: 1823, height: 86 },
+          { src: url('modules/xingdong/jnqq-03-1.png'), left: 169, top: 1237, width: 1823, height: 885 },
+          { src: url('modules/xingdong/jnqq-03-2.png'), left: 167, top: 2227, width: 1829, height: 641 },
+          { src: url('modules/xingdong/jnqq-03-3.png'), left: 168, top: 3001, width: 1823, height: 399 },
+          
         ]
       }
     ]),
-    makeTab('xingdong-jnqq-04', XINGDONG_TITLE_XFYL, [
+    makeTab('xingdong-jnqq-04', XINGDONG_TITLE_JNQQ, [
       {
         blocks: [
-          { src: url('modules/xingdong/jnqq-04-subtitle.png'), left: 830, top: 1000, width: 500, height: 100 },
-          { src: url('modules/xingdong/jnqq-04-1.png'), left: 0, top: 1150, width: 2160, height: 1200 },
-          { src: url('modules/xingdong/jnqq-04-2.png'), left: 0, top: 2400, width: 2160, height: 1200 },
-          { src: url('modules/xingdong/jnqq-04-3.png'), left: 0, top: 3650, width: 2160, height: 1200 },
-          { src: url('modules/xingdong/jnqq-04-4.png'), left: 0, top: 4900, width: 2160, height: 1200 },
-          { src: url('modules/xingdong/jnqq-04-5.png'), left: 0, top: 6150, width: 2160, height: 1200 },
-          { src: url('modules/xingdong/jnqq-04-6.png'), left: 0, top: 7400, width: 2160, height: 1200 },
-          { src: url('modules/xingdong/jnqq-04-7.png'), left: 0, top: 8650, width: 2160, height: 1200 }
+          { src: url('modules/xingdong/jnqq-04-subtitle.png'), left: 834, top: 999, width: 492, height: 107 },
+          { src: url('modules/xingdong/jnqq-04-1.png'), left: 169, top: 1203, width: 1810, height: 740 },
+          { src: url('modules/xingdong/jnqq-04-2.png'), left: 172, top: 2126, width: 1824, height: 739 },
+          { src: url('modules/xingdong/jnqq-04-3.png'), left: 168, top: 3008, width: 1478, height: 1045 },
+          { src: url('modules/xingdong/jnqq-04-4.png'), left: 172, top: 4194, width: 1829, height: 745 }
         ]
       }
     ]),
 
     // 安全护航 廉洁固本 (4)
-    makeTab('xingdong-aqhh', XINGDONG_TITLE_XFYL, [
+    makeTab('xingdong-aqhh', XINGDONG_TITLE_AQHH, [
       {
         blocks: [
           { src: url('modules/xingdong/aqhh-01-subtitle.png'), left: 830, top: 1000, width: 500, height: 100 },
@@ -464,7 +468,7 @@ const xingdong: ModuleDef = {
         ]
       }
     ]),
-    makeTab('xingdong-aqhh-02', XINGDONG_TITLE_XFYL, [
+    makeTab('xingdong-aqhh-02', XINGDONG_TITLE_AQHH, [
       {
         blocks: [
           { src: url('modules/xingdong/aqhh-02-subtitle.png'), left: 830, top: 1000, width: 500, height: 100 },
@@ -474,7 +478,7 @@ const xingdong: ModuleDef = {
         ]
       }
     ]),
-    makeTab('xingdong-aqhh-03', XINGDONG_TITLE_XFYL, [
+    makeTab('xingdong-aqhh-03', XINGDONG_TITLE_AQHH, [
       {
         blocks: [
           { src: url('modules/xingdong/aqhh-03-subtitle.png'), left: 830, top: 1000, width: 500, height: 100 },
@@ -484,7 +488,7 @@ const xingdong: ModuleDef = {
         ]
       }
     ]),
-    makeTab('xingdong-aqhh-04', XINGDONG_TITLE_XFYL, [
+    makeTab('xingdong-aqhh-04', XINGDONG_TITLE_AQHH, [
       {
         blocks: [
           { src: url('modules/xingdong/aqhh-04-subtitle.png'), left: 830, top: 1000, width: 500, height: 100 },
@@ -506,7 +510,7 @@ const xingdong: ModuleDef = {
     ]),
 
     // 联建共建 融合共效 (4)
-    makeTab('xingdong-ljgj', XINGDONG_TITLE_XFYL, [
+    makeTab('xingdong-ljgj', XINGDONG_TITLE_LJGJ, [
       {
         blocks: [
           { src: url('modules/xingdong/ljgj-01-subtitle.png'), left: 830, top: 1000, width: 500, height: 100 },
@@ -515,7 +519,7 @@ const xingdong: ModuleDef = {
         ]
       }
     ]),
-    makeTab('xingdong-ljgj-02', XINGDONG_TITLE_XFYL, [
+    makeTab('xingdong-ljgj-02', XINGDONG_TITLE_LJGJ, [
       {
         blocks: [
           { src: url('modules/xingdong/ljgj-02-subtitle.png'), left: 830, top: 1000, width: 500, height: 100 },
@@ -526,7 +530,7 @@ const xingdong: ModuleDef = {
         ]
       }
     ]),
-    makeTab('xingdong-ljgj-03', XINGDONG_TITLE_XFYL, [
+    makeTab('xingdong-ljgj-03', XINGDONG_TITLE_LJGJ, [
       {
         blocks: [
           { src: url('modules/xingdong/ljgj-03-subtitle.png'), left: 830, top: 1000, width: 500, height: 100 },
@@ -538,7 +542,7 @@ const xingdong: ModuleDef = {
         ]
       }
     ]),
-    makeTab('xingdong-ljgj-04', XINGDONG_TITLE_XFYL, [
+    makeTab('xingdong-ljgj-04', XINGDONG_TITLE_LJGJ, [
       {
         blocks: [
           { src: url('modules/xingdong/ljgj-04-subtitle.png'), left: 830, top: 1000, width: 500, height: 100 },
@@ -554,7 +558,7 @@ const xingdong: ModuleDef = {
     ]),
 
     // 科研创新 数字赋能 (3)
-    makeTab('xingdong-kycx', XINGDONG_TITLE_XFYL, [
+    makeTab('xingdong-kycx', XINGDONG_TITLE_KYCX, [
       {
         blocks: [
           { src: url('modules/xingdong/kycx-01-subtitle.png'), left: 830, top: 1000, width: 500, height: 100 },
@@ -570,7 +574,7 @@ const xingdong: ModuleDef = {
         ]
       }
     ]),
-    makeTab('xingdong-kycx-02', XINGDONG_TITLE_XFYL, [
+    makeTab('xingdong-kycx-02', XINGDONG_TITLE_KYCX, [
       {
         blocks: [
           { src: url('modules/xingdong/kycx-02-subtitle.png'), left: 830, top: 1000, width: 500, height: 100 },
@@ -580,7 +584,7 @@ const xingdong: ModuleDef = {
         ]
       }
     ]),
-    makeTab('xingdong-kycx-03', XINGDONG_TITLE_XFYL, [
+    makeTab('xingdong-kycx-03', XINGDONG_TITLE_KYCX, [
       {
         blocks: [
           { src: url('modules/xingdong/kycx-03-subtitle.png'), left: 830, top: 1000, width: 500, height: 100 },
