@@ -289,6 +289,7 @@ const xingdong: ModuleDef = {
   icon: url('home/icon-xingdong.png'),
   layout: { left: 831, top: 2427, width: 1193, height: 828 },
   tabs: [
+    // 先锋引领 攻坚克难 (5)
     makeTab('xingdong-xfyl', XINGDONG_TITLE_XFYL, [
       {
         blocks: [
@@ -358,11 +359,39 @@ const xingdong: ModuleDef = {
         ]
       }
     ]),
+    makeTab('xingdong-xfyl-02', XINGDONG_TITLE_XFYL),
+    makeTab('xingdong-xfyl-03', XINGDONG_TITLE_XFYL),
+    makeTab('xingdong-xfyl-04', XINGDONG_TITLE_XFYL),
+    makeTab('xingdong-xfyl-05', XINGDONG_TITLE_XFYL),
+
+    // 学思践悟 书香赋能 (4)
     makeTab('xingdong-xsjw', XINGDONG_TITLE_XFYL),
+    makeTab('xingdong-xsjw-02', XINGDONG_TITLE_XFYL),
+    makeTab('xingdong-xsjw-03', XINGDONG_TITLE_XFYL),
+    makeTab('xingdong-xsjw-04', XINGDONG_TITLE_XFYL),
+
+    // 技能强企 比武竞赛 (4)
     makeTab('xingdong-jnqq', XINGDONG_TITLE_XFYL),
+    makeTab('xingdong-jnqq-02', XINGDONG_TITLE_XFYL),
+    makeTab('xingdong-jnqq-03', XINGDONG_TITLE_XFYL),
+    makeTab('xingdong-jnqq-04', XINGDONG_TITLE_XFYL),
+
+    // 安全护航 廉洁固本 (4)
     makeTab('xingdong-aqhh', XINGDONG_TITLE_XFYL),
+    makeTab('xingdong-aqhh-02', XINGDONG_TITLE_XFYL),
+    makeTab('xingdong-aqhh-03', XINGDONG_TITLE_XFYL),
+    makeTab('xingdong-aqhh-04', XINGDONG_TITLE_XFYL),
+
+    // 联建共建 融合共效 (4)
     makeTab('xingdong-ljgj', XINGDONG_TITLE_XFYL),
-    makeTab('xingdong-kycx', XINGDONG_TITLE_XFYL)
+    makeTab('xingdong-ljgj-02', XINGDONG_TITLE_XFYL),
+    makeTab('xingdong-ljgj-03', XINGDONG_TITLE_XFYL),
+    makeTab('xingdong-ljgj-04', XINGDONG_TITLE_XFYL),
+
+    // 科研创新 数字赋能 (3)
+    makeTab('xingdong-kycx', XINGDONG_TITLE_XFYL),
+    makeTab('xingdong-kycx-02', XINGDONG_TITLE_XFYL),
+    makeTab('xingdong-kycx-03', XINGDONG_TITLE_XFYL)
   ]
 }
 
