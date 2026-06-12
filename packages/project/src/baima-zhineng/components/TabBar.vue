@@ -182,7 +182,8 @@ onMounted(() => nextTick(updateOffset))
     border: none;
     background: none;
     cursor: pointer;
-    transition: transform 0.2s ease;
+    transition: transform 0.25s ease, filter 0.25s ease;
+    filter: drop-shadow(0 d.h(2) d.w(6) rgba(0, 60, 180, 0.2));
 
     img {
       display: block;
@@ -191,8 +192,13 @@ onMounted(() => nextTick(updateOffset))
       object-fit: contain;
     }
 
+    &.is-active {
+      transform: scale(1.04);
+      filter: drop-shadow(0 d.h(4) d.w(14) rgba(0, 120, 255, 0.45));
+    }
+
     &:active {
-      transform: scale(0.97);
+      transform: scale(0.96);
     }
   }
 }

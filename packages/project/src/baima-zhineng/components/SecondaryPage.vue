@@ -221,6 +221,7 @@ onBeforeUnmount(() => {
 
 const activeTab = ref(0)
 const activePage = ref(0)
+const slideDirection = ref<'right' | 'left'>('right')
 
 const isScroll = computed(() => props.mode === 'scroll')
 
@@ -250,7 +251,10 @@ const pageHeightStyle = computed(() => {
 })
 
 // 切换 tab 时回到首页内容，scroll 模式滚动到顶部
-watch(activeTab, () => {
+watch(activeTab, (newVal, oldVal) => {
+  if (typeof oldVal === 'number') {
+    slideDirection.value = newVal > oldVal ? 'right' : 'left'
+  }
   activePage.value = 0
   if (isScroll.value && contentRef.value) {
     contentRef.value.scrollTo({ top: 0, behavior: 'smooth' })
@@ -261,6 +265,7 @@ watch(activeTab, () => {
 })
 
 function prevPage() {
+  slideDirection.value = 'left'
   if (activePage.value > 0) {
     activePage.value -= 1
     sfx.play('page')
@@ -273,6 +278,7 @@ function prevPage() {
   }
 }
 function nextPage() {
+  slideDirection.value = 'right'
   if (activePage.value < pageCount.value - 1) {
     activePage.value += 1
     sfx.play('page')
@@ -296,7 +302,7 @@ function goHome() {
     <img class="sec__bg" :src="COMMON.bg" alt="" />
 
     <!-- 顶部标题（含副标题，按 tab 切换） -->
-    <transition name="fade" mode="out-in">
+    <transition name="title-slide" @after-enter="updateHasOverflow">
       <img :key="currentTab?.id" class="sec__title" :src="currentTab?.title" alt="" />
     </transition>
 
@@ -309,7 +315,7 @@ function goHome() {
       @mousedown="onContentPointerDown"
       @touchstart.passive="onContentPointerDown"
     >
-      <transition name="page-slide" mode="out-in" @after-enter="updateHasOverflow" @after-leave="updateHasOverflow">
+      <transition :name="`slide-${slideDirection}`" @after-enter="updateHasOverflow" @after-leave="updateHasOverflow">
         <div
           v-if="currentPage"
           :key="`${currentTab?.id}-${activePage}`"
@@ -378,6 +384,31 @@ function goHome() {
 </template>
 
 <style scoped lang="scss">
+@keyframes sec-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes sec-title-enter {
+  from { opacity: 0; transform: translateY(d.h(-50)) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes sec-enter-up {
+  from { opacity: 0; transform: translateY(d.h(60)); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes sec-enter-right {
+  from { opacity: 0; transform: translateX(d.w(60)); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes sec-img-fade {
+  from { opacity: 0; transform: translateY(d.h(20)) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 .sec {
   position: relative;
   width: 100vw;
@@ -392,6 +423,8 @@ function goHome() {
     height: 100%;
     object-fit: fill;
     z-index: 0;
+    opacity: 0;
+    animation: sec-fade-in 0.8s ease-out 0s both;
   }
 
   &__title {
@@ -403,6 +436,8 @@ function goHome() {
     object-fit: fill;
     z-index: 2;
     pointer-events: none;
+    opacity: 0;
+    animation: sec-title-enter 0.5s ease-out 0.1s both;
 
     // scroll 模式下标题需浮在可滚动内容区之上
     .sec--scroll & {
@@ -419,6 +454,8 @@ function goHome() {
     width: d.w(1834);
     height: d.h(2470);
     z-index: 2;
+    opacity: 0;
+    animation: sec-enter-up 0.6s ease-out 0.35s both;
 
     &-bg {
       position: absolute;
@@ -438,6 +475,8 @@ function goHome() {
     overflow: hidden;
     z-index: 3;
     pointer-events: none;
+    opacity: 0;
+    animation: sec-enter-up 0.6s ease-out 0.35s both;
 
     &--scroll {
       top: d.h(926);
@@ -473,6 +512,17 @@ function goHome() {
     position: absolute;
     object-fit: fill;
     pointer-events: none;
+    opacity: 0;
+    animation: sec-img-fade 0.5s ease-out both;
+
+    &:nth-child(1) { animation-delay: 0.05s; }
+    &:nth-child(2) { animation-delay: 0.12s; }
+    &:nth-child(3) { animation-delay: 0.19s; }
+    &:nth-child(4) { animation-delay: 0.26s; }
+    &:nth-child(5) { animation-delay: 0.33s; }
+    &:nth-child(6) { animation-delay: 0.40s; }
+    &:nth-child(7) { animation-delay: 0.47s; }
+    &:nth-child(8) { animation-delay: 0.54s; }
   }
 
   &__empty {
@@ -580,6 +630,8 @@ function goHome() {
     flex-direction: column;
     gap: d.h(90);
     z-index: 3;
+    opacity: 0;
+    animation: sec-enter-right 0.5s ease-out 0.5s both;
   }
 
   &__pager-btn {
@@ -591,7 +643,9 @@ function goHome() {
     cursor: pointer;
     transition:
       transform 0.2s ease,
-      opacity 0.2s ease;
+      opacity 0.2s ease,
+      filter 0.2s ease;
+    filter: drop-shadow(0 d.h(4) d.w(12) rgba(0, 80, 200, 0.25));
 
     img {
       display: block;
@@ -600,13 +654,19 @@ function goHome() {
       object-fit: fill;
     }
 
-    &:active {
+    &:hover:not(:disabled) {
+      transform: scale(1.06);
+      filter: drop-shadow(0 d.h(6) d.w(20) rgba(0, 120, 255, 0.45));
+    }
+
+    &:active:not(:disabled) {
       transform: scale(0.92);
     }
 
     &:disabled {
       opacity: 0.35;
       cursor: default;
+      filter: none;
     }
   }
 
@@ -618,6 +678,8 @@ function goHome() {
     bottom: d.h(196);
     height: d.h(181);
     z-index: 4;
+    opacity: 0;
+    animation: sec-enter-up 0.5s ease-out 0.6s both;
   }
 
   // 首页按钮
@@ -632,7 +694,10 @@ function goHome() {
     background: none;
     cursor: pointer;
     z-index: 5;
-    transition: transform 0.2s ease;
+    opacity: 0;
+    animation: sec-enter-up 0.5s ease-out 0.75s both;
+    transition: transform 0.25s ease, filter 0.25s ease;
+    filter: drop-shadow(0 d.h(6) d.w(16) rgba(0, 80, 200, 0.3));
 
     img {
       display: block;
@@ -641,33 +706,104 @@ function goHome() {
       object-fit: fill;
     }
 
+    &:hover {
+      transform: scale(1.05);
+      filter: drop-shadow(0 d.h(10) d.w(28) rgba(0, 120, 255, 0.5));
+    }
+
     &:active {
       transform: scale(0.94);
+      filter: drop-shadow(0 d.h(4) d.w(12) rgba(0, 80, 200, 0.25));
     }
   }
 }
 
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
+/* ========== tab/page 切换过渡（覆盖式）========== */
+/* 核心：transition 期间禁用默认 animation，避免冲突 */
+.slide-right-enter-active,
+.slide-left-enter-active,
+.slide-right-leave-active,
+.slide-left-leave-active {
+  animation: none !important;
+  transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-.page-slide-enter-active,
-.page-slide-leave-active {
-  transition:
-    opacity 0.35s ease,
-    transform 0.35s ease;
+/* 新内容在上层 */
+.slide-right-enter-active,
+.slide-left-enter-active {
+  z-index: 10 !important;
 }
-.page-slide-enter-from {
-  opacity: 0;
-  transform: translateY(d.h(40));
+/* 旧内容在下层 */
+.slide-right-leave-active,
+.slide-left-leave-active {
+  z-index: 5 !important;
 }
-.page-slide-leave-to {
+
+/* 关键：transition 期间强制子元素可见，让内容真正参与过渡 */
+.slide-right-enter-active .sec__img,
+.slide-left-enter-active .sec__img,
+.slide-right-leave-active .sec__img,
+.slide-left-leave-active .sec__img {
+  animation: none !important;
+  opacity: 1 !important;
+}
+
+/* ========== 标题切换过渡（纯 opacity 淡入淡出，无位移无缩放）========== */
+.title-slide-enter-active,
+.title-slide-leave-active {
+  animation: none !important;
+  transition: opacity 0.35s ease;
+}
+.title-slide-enter-active {
+  z-index: 10 !important;
+}
+.title-slide-leave-active {
+  z-index: 5 !important;
+}
+
+.title-slide-enter-from,
+.title-slide-leave-to {
   opacity: 0;
-  transform: translateY(d.h(-40));
+}
+.title-slide-enter-to,
+.title-slide-leave-from {
+  opacity: 1;
+}
+
+/* ========== 内容切换过渡（覆盖式大位移）========== */
+/* 往右切（next）：新内容从下方大幅上滑覆盖 */
+.slide-right-enter-from {
+  opacity: 0;
+  transform: translateY(65vh) scale(0.88);
+}
+.slide-right-enter-to {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.slide-right-leave-from {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.slide-right-leave-to {
+  opacity: 0.25;
+  transform: translateY(-25vh) scale(0.9);
+}
+
+/* 往左切（prev）：新内容从上方大幅下滑覆盖 */
+.slide-left-enter-from {
+  opacity: 0;
+  transform: translateY(-65vh) scale(0.88);
+}
+.slide-left-enter-to {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.slide-left-leave-from {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+.slide-left-leave-to {
+  opacity: 0.25;
+  transform: translateY(25vh) scale(0.9);
 }
 </style>
