@@ -16,12 +16,23 @@ const contentRef = ref<HTMLDivElement | null>(null)
 
 /** 自定义滚动条状态 */
 const scrollProgress = ref(0)
+const hasOverflow = ref(false)
+
+function updateHasOverflow() {
+  const el = contentRef.value
+  if (!el) {
+    hasOverflow.value = false
+    return
+  }
+  hasOverflow.value = el.scrollHeight > el.clientHeight
+}
 
 function onContentScroll() {
   const el = contentRef.value
   if (!el) return
   const max = el.scrollHeight - el.clientHeight
   scrollProgress.value = max > 0 ? el.scrollTop / max : 0
+  hasOverflow.value = max > 0
 }
 
 /** 滑块高度占轨道的百分比 */
@@ -83,30 +94,86 @@ function onScrollbarPointerDown(e: MouseEvent | TouchEvent) {
 }
 
 function onPointerMove(e: MouseEvent | TouchEvent) {
-  if (!isDragging.value) return
   const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
 
-  if (dragOnThumb.value) {
-    const info = getBarInfo()
-    if (info) {
-      const deltaRatio = (clientY - dragStartY.value) / info.height
-      scrollToRatio(dragStartRatio.value + deltaRatio)
+  // 滚动条拖拽
+  if (isDragging.value) {
+    if (dragOnThumb.value) {
+      const info = getBarInfo()
+      if (info) {
+        const deltaRatio = (clientY - dragStartY.value) / info.height
+        scrollToRatio(dragStartRatio.value + deltaRatio)
+      }
+    } else {
+      const info = getBarInfo()
+      if (info) scrollToRatio((clientY - info.top) / info.height)
     }
-  } else {
-    const info = getBarInfo()
-    if (info) scrollToRatio((clientY - info.top) / info.height)
+  }
+
+  // 内容区拖拽
+  if (isContentDragging.value && contentRef.value) {
+    contentDragLastY.value = clientY
+    const deltaY = contentDragStartY.value - clientY
+    if (!contentDragMoved.value && Math.abs(deltaY) > CONTENT_DRAG_THRESHOLD) {
+      contentDragMoved.value = true
+    }
+    if (contentDragMoved.value) {
+      contentRef.value.scrollTop = contentDragStartScrollTop.value + deltaY
+    }
   }
 }
 
 function onPointerUp() {
-  isDragging.value = false
-  dragOnThumb.value = false
-  dragStartY.value = 0
-  dragStartRatio.value = 0
+  // 滚动条释放
+  if (isDragging.value) {
+    isDragging.value = false
+    dragOnThumb.value = false
+    dragStartY.value = 0
+    dragStartRatio.value = 0
+  }
+
+  // 内容区释放：边界回弹切 tab
+  if (isContentDragging.value && contentRef.value) {
+    const el = contentRef.value
+    const max = el.scrollHeight - el.clientHeight
+    const totalDeltaY = contentDragStartY.value - contentDragLastY.value
+    if (contentDragMoved.value) {
+      // 在顶部继续下拉超过阈值 → 切上一个 tab
+      if (contentDragStartScrollTop.value <= 0 && totalDeltaY < -CONTENT_EDGE_SWITCH_THRESHOLD) {
+        prevPage()
+      }
+      // 在底部继续上拉超过阈值 → 切下一个 tab
+      else if (contentDragStartScrollTop.value >= max && totalDeltaY > CONTENT_EDGE_SWITCH_THRESHOLD) {
+        nextPage()
+      }
+    }
+    isContentDragging.value = false
+    contentDragMoved.value = false
+  }
+}
+
+/** 内容区拖拽滚动 */
+const isContentDragging = ref(false)
+const contentDragStartY = ref(0)
+const contentDragLastY = ref(0)
+const contentDragStartScrollTop = ref(0)
+const contentDragMoved = ref(false)
+const CONTENT_DRAG_THRESHOLD = 10
+const CONTENT_EDGE_SWITCH_THRESHOLD = 60
+
+function onContentPointerDown(e: MouseEvent | TouchEvent) {
+  if (!isScroll.value || !contentRef.value) return
+  const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
+  isContentDragging.value = true
+  contentDragStartY.value = clientY
+  contentDragLastY.value = clientY
+  contentDragStartScrollTop.value = contentRef.value.scrollTop
+  contentDragMoved.value = false
 }
 
 // 全局监听拖拽中事件（组件卸载时清理）
 onMounted(() => {
+  updateHasOverflow()
   if (typeof window !== 'undefined') {
     window.addEventListener('mousemove', onPointerMove, { passive: false })
     window.addEventListener('mouseup', onPointerUp)
@@ -160,6 +227,9 @@ watch(activeTab, () => {
   if (isScroll.value && contentRef.value) {
     contentRef.value.scrollTo({ top: 0, behavior: 'smooth' })
   }
+  nextTick(() => {
+    updateHasOverflow()
+  })
 })
 
 function prevPage() {
@@ -203,8 +273,10 @@ function goHome() {
       class="sec__content"
       :class="{ 'sec__content--scroll': isScroll }"
       @scroll="onContentScroll"
+      @mousedown="onContentPointerDown"
+      @touchstart.passive="onContentPointerDown"
     >
-      <transition name="page-slide" mode="out-in">
+      <transition name="page-slide" mode="out-in" @after-enter="updateHasOverflow" @after-leave="updateHasOverflow">
         <div
           v-if="currentPage"
           :key="`${currentTab?.id}-${activePage}`"
@@ -232,9 +304,9 @@ function goHome() {
       </transition>
     </div>
 
-    <!-- 自定义滚动条（仅 scroll 模式） -->
+    <!-- 自定义滚动条（仅 scroll 模式且内容溢出时） -->
     <div
-      v-if="isScroll"
+      v-if="isScroll && hasOverflow"
       ref="scrollbarRef"
       class="sec__scrollbar"
       @mousedown="onScrollbarPointerDown"
@@ -341,6 +413,8 @@ function goHome() {
       right: 0;
       overflow-y: scroll;
       pointer-events: auto;
+      user-select: none; // 拖拽时禁止选中文本
+      -webkit-user-select: none;
 
       // 隐藏原生滚动条
       &::-webkit-scrollbar {
