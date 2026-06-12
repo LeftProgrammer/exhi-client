@@ -30,8 +30,9 @@ function enter(m: ModuleDef) {
       v-for="m in MODULES"
       :key="m.id"
       class="home__icon"
+      :class="`home__icon--${m.id}`"
       :style="iconStyle(m)"
-      @click="enter(m)"
+      @click="() => enter(m)"
     >
       <img :src="m.icon" :alt="m.name" />
     </button>
@@ -39,6 +40,40 @@ function enter(m: ModuleDef) {
 </template>
 
 <style scoped lang="scss">
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes home-enter-right {
+  from { opacity: 0; transform: translateX(100vw) translateY(40vh) scale(0.55); }
+  to   { opacity: 1; transform: translateX(0) translateY(0) scale(1); }
+}
+
+@keyframes home-enter-left {
+  from { opacity: 0; transform: translateX(-100vw) translateY(40vh) scale(0.55); }
+  to   { opacity: 1; transform: translateX(0) translateY(0) scale(1); }
+}
+
+@keyframes home-float-sync {
+  0%, 100% { transform: translateY(0) scale(1); }
+  25%      { transform: translateY(d.h(-28)) scale(1.035); }
+  50%      { transform: translateY(d.h(10)) scale(0.97); }
+  75%      { transform: translateY(d.h(-12)) scale(1.015); }
+}
+
+@keyframes home-float-alt {
+  0%, 100% { transform: translateY(0) scale(1); }
+  25%      { transform: translateY(d.h(28)) scale(0.97); }
+  50%      { transform: translateY(d.h(-10)) scale(1.035); }
+  75%      { transform: translateY(d.h(12)) scale(0.97); }
+}
+
+@keyframes home-enter-title {
+  from { opacity: 0; transform: translateY(d.h(-200)) scale(0.92); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 .home {
   position: relative;
   width: 100vw;
@@ -53,6 +88,8 @@ function enter(m: ModuleDef) {
     height: 100%;
     object-fit: fill;
     z-index: 0;
+    opacity: 0;
+    animation: fade-in 1.2s ease-out 0.15s both;
   }
 
   &__title {
@@ -64,6 +101,8 @@ function enter(m: ModuleDef) {
     object-fit: fill;
     z-index: 2;
     pointer-events: none;
+    opacity: 0;
+    animation: home-enter-title 1.2s t.$ease-base 0s both;
   }
 
   &__icon {
@@ -73,7 +112,7 @@ function enter(m: ModuleDef) {
     border: none;
     background: none;
     cursor: pointer;
-    transition: transform 0.25s ease;
+    overflow: visible;
 
     img {
       display: block;
@@ -81,15 +120,40 @@ function enter(m: ModuleDef) {
       height: auto;
       object-fit: contain;
       filter: drop-shadow(0 d.h(8) d.w(24) rgba(0, 80, 200, 0.35));
+      transition: transform 0.3s ease, filter 0.3s ease;
     }
 
-    &:active {
-      transform: scale(0.96);
+    /* 入场 + 待机浮动：
+       zhidu/xingdong 从右侧入场，同步呼吸（同放大同缩小）
+       guihua 从左侧入场，反向呼吸（互补） */
+    &--zhidu {
+      opacity: 0;
+      animation:
+        home-enter-right 0.8s ease-out 0.5s both,
+        home-float-sync 8.0s ease-in-out 1.5s infinite;
+    }
+    &--guihua {
+      opacity: 0;
+      animation:
+        home-enter-left  0.8s ease-out 0.5s both,
+        home-float-alt   8.0s ease-in-out 1.5s infinite;
+    }
+    &--xingdong {
+      opacity: 0;
+      animation:
+        home-enter-right 0.8s ease-out 0.5s both,
+        home-float-sync 8.0s ease-in-out 1.5s infinite;
     }
 
-    &:hover {
-      transform: scale(1.04);
+    &:hover img {
+      transform: scale(1.06);
+      filter: drop-shadow(0 d.h(12) d.w(32) rgba(0, 120, 255, 0.55));
+    }
+
+    &:active img {
+      transform: scale(0.94);
     }
   }
+
 }
 </style>
