@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import { useSfx } from '@shared/composables/useSfx'
 import { MODULES, HOME, type ModuleDef } from '../../data/modules'
 
 const router = useRouter()
+const sfx = useSfx()
 
 function iconStyle(m: ModuleDef) {
   return {
@@ -14,6 +16,7 @@ function iconStyle(m: ModuleDef) {
 }
 
 function enter(m: ModuleDef) {
+  sfx.play('nav')
   router.push({ name: m.route })
 }
 </script>

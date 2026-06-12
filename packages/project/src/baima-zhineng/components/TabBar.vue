@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, nextTick, onMounted } from 'vue'
+import { useSfx } from '@shared/composables/useSfx'
 import type { TabDef } from '../data/modules'
 
 const props = defineProps<{
@@ -8,6 +9,8 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{ 'update:modelValue': [index: number] }>()
+
+const sfx = useSfx()
 
 const viewportEl = ref<HTMLElement | null>(null)
 const stripEl = ref<HTMLElement | null>(null)
@@ -62,6 +65,7 @@ function select(i: number) {
     dragMoved.value = false
     return
   }
+  sfx.play('tap')
   emit('update:modelValue', i)
 }
 

@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useBridge } from '@shared/composables/useBridge'
+import { useProjectSfx } from '@shared/composables/useProjectSfx'
 import { useControl } from '@baima-zhineng/composables/useControl'
 
 const router = useRouter()
@@ -17,6 +19,12 @@ control.setupCommands(router)
 if (!window.exhibitBridge) {
   control.startFallback('zhineng')
 }
+
+// 初始化音效系统（注册 + 预加载 + 手势解锁）
+onMounted(() => {
+  const sfx = useProjectSfx()
+  sfx.unlock()
+})
 </script>
 
 <template>

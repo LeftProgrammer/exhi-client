@@ -2,6 +2,7 @@
 import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useIdleReset } from '@shared/composables/useIdleReset'
+import { useSfx } from '@shared/composables/useSfx'
 import TabBar from './TabBar.vue'
 import { COMMON, type ModuleDef } from '../data/modules'
 
@@ -12,6 +13,7 @@ const props = defineProps<{
 }>()
 
 const router = useRouter()
+const sfx = useSfx()
 const contentRef = ref<HTMLDivElement | null>(null)
 
 /** 自定义滚动条状态 */
@@ -85,10 +87,12 @@ function onScrollbarPointerDown(e: MouseEvent | TouchEvent) {
     dragOnThumb.value = true
     dragStartY.value = clientY
     dragStartRatio.value = scrollProgress.value
+    sfx.play('tap')
   } else {
     // 按在轨道上：直接跳转
     dragOnThumb.value = false
     scrollToRatio(ratio)
+    sfx.play('tap')
   }
   isDragging.value = true
 }
@@ -140,10 +144,12 @@ function onPointerUp() {
     if (contentDragMoved.value) {
       // 在顶部继续下拉超过阈值 → 切上一个 tab
       if (contentDragStartScrollTop.value <= 0 && totalDeltaY < -CONTENT_EDGE_SWITCH_THRESHOLD) {
+        sfx.play('page')
         prevPage()
       }
       // 在底部继续上拉超过阈值 → 切下一个 tab
       else if (contentDragStartScrollTop.value >= max && totalDeltaY > CONTENT_EDGE_SWITCH_THRESHOLD) {
+        sfx.play('page')
         nextPage()
       }
     }
@@ -235,8 +241,10 @@ watch(activeTab, () => {
 function prevPage() {
   if (activePage.value > 0) {
     activePage.value -= 1
+    sfx.play('page')
   } else if (activeTab.value > 0) {
     activeTab.value -= 1
+    sfx.play('page')
     nextTick(() => {
       activePage.value = Math.max(0, pages.value.length - 1)
     })
@@ -245,12 +253,15 @@ function prevPage() {
 function nextPage() {
   if (activePage.value < pageCount.value - 1) {
     activePage.value += 1
+    sfx.play('page')
   } else if (activeTab.value < tabCount.value - 1) {
     activeTab.value += 1
+    sfx.play('page')
   }
 }
 
 function goHome() {
+  sfx.play('back')
   router.push({ name: 'home' })
 }
 
