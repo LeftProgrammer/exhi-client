@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
-import { useIdleReset } from '@shared/composables/useIdleReset'
 import { useSfx } from '@shared/composables/useSfx'
 import TabBar from './TabBar.vue'
 import { COMMON, type ModuleDef } from '../data/modules'
@@ -74,7 +73,8 @@ function scrollToRatio(ratio: number) {
   const el = contentRef.value
   if (!el) return
   const max = el.scrollHeight - el.clientHeight
-  el.scrollTop = Math.max(0, Math.min(max, Math.max(0, Math.min(1, ratio)) * max))
+  const clamped = Math.max(0, Math.min(1, ratio))
+  el.scrollTop = clamped * max
 }
 
 function onScrollbarPointerDown(e: MouseEvent | TouchEvent) {
@@ -201,9 +201,7 @@ const CONTENT_EDGE_SWITCH_THRESHOLD = 60
 const isSwiping = ref(false)
 const swipeStartX = ref(0)
 const swipeLastX = ref(0)
-const swipeStartY = ref(0)
 const SWIPE_THRESHOLD = 60
-const SWIPE_MAX_VERTICAL = 80
 
 function onContentPointerDown(e: MouseEvent | TouchEvent) {
   if (isScroll.value) {
@@ -219,11 +217,9 @@ function onContentPointerDown(e: MouseEvent | TouchEvent) {
   }
   // pager 模式：记录水平滑动起始位置
   const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
-  const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
   isSwiping.value = true
   swipeStartX.value = clientX
   swipeLastX.value = clientX
-  swipeStartY.value = clientY
 }
 
 /** 中控 page 指令处理：next/prev/index */
@@ -341,6 +337,17 @@ function onUserInteract() {
   }, 20000)
 }
 
+/** transition 钩子：插入瞬间强制隐藏，防止默认样式闪现 */
+function onBeforeEnter(el: Element) {
+  ;(el as HTMLElement).style.opacity = '0'
+}
+
+/** transition 钩子：过渡完成后清理内联样式 */
+function onAfterEnterClean(el: Element) {
+  ;(el as HTMLElement).style.opacity = ''
+  updateHasOverflow()
+}
+
 // 全局监听拖拽中事件（组件卸载时清理）
 onMounted(() => {
   updateHasOverflow()
@@ -453,7 +460,7 @@ function goHome() {
     <img class="sec__bg" :src="COMMON.bg" alt="" />
 
     <!-- 顶部标题（含副标题，按 tab 切换） -->
-    <transition name="title-slide" @after-enter="updateHasOverflow">
+    <transition name="title-slide" mode="out-in" @before-enter="onBeforeEnter" @after-enter="onAfterEnterClean">
       <img :key="currentTab?.id" class="sec__title" :src="currentTab?.title" alt="" />
     </transition>
 
@@ -467,7 +474,7 @@ function goHome() {
       @touchstart.passive="onContentPointerDown"
       @wheel="onUserInteract"
     >
-      <transition :name="`slide-${slideDirection}`" @after-enter="updateHasOverflow" @after-leave="updateHasOverflow">
+      <transition :name="`slide-${slideDirection}`" @before-enter="onBeforeEnter" @after-enter="onAfterEnterClean" @after-leave="updateHasOverflow">
         <div
           v-if="currentPage"
           :key="`${currentTab?.id}-${activePage}`"
@@ -916,12 +923,13 @@ function goHome() {
 .title-slide-enter-active,
 .title-slide-leave-active {
   animation: none !important;
-  transition: opacity 0.35s ease;
 }
 .title-slide-enter-active {
+  transition: opacity 0.35s ease;
   z-index: 10 !important;
 }
 .title-slide-leave-active {
+  transition: opacity 0.25s ease;
   z-index: 5 !important;
 }
 

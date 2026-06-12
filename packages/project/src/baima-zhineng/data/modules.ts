@@ -322,7 +322,7 @@ const xingdong: ModuleDef = {
     makeTab('xingdong-xfyl-03', XINGDONG_TITLE_XFYL, [
       {
         blocks: [
-          { src: url('modules/xingdong/xfyl-03-subtitle.png'), left: 870, top: 963, width: 407, height: 85 },
+          { src: url('modules/xingdong/xfyl-03-subtitle.png'), left: 833, top: 963, width: 494, height: 105 },
           { src: url('modules/xingdong/xfyl-03-1.png'), left: 173, top: 1108, width: 1727, height: 1231 },
           { src: url('modules/xingdong/xfyl-03-2.png'), left: 169, top: 2442, width: 1822, height: 549 },
           { src: url('modules/xingdong/xfyl-03-3.png'), left: 117, top: 3017, width: 1872, height: 1546 },
@@ -342,7 +342,7 @@ const xingdong: ModuleDef = {
     makeTab('xingdong-xfyl-05', XINGDONG_TITLE_XFYL, [
       {
         blocks: [
-          { src: url('modules/xingdong/xfyl-05-subtitle.png'), left: 327, top: 960, width: 1514, height: 88 },
+          { src: url('modules/xingdong/xfyl-05-subtitle.png'), left: 309, top: 960, width: 1543, height: 108 },
           { src: url('modules/xingdong/xfyl-05-1.png'), left: 174, top: 1160, width: 1815, height: 339 },
           { src: url('modules/xingdong/xfyl-05-2.png'), left: 0, top: 1326, width: 2160, height: 980 },
           { src: url('modules/xingdong/xfyl-05-3.png'), left: 0, top: 2241, width: 2160, height: 1182 },
@@ -390,7 +390,7 @@ const xingdong: ModuleDef = {
           { src: url('modules/xingdong/xsjw-03-14.png'), left: 148, top: 6211, width: 548, height: 1297 },
           { src: url('modules/xingdong/xsjw-03-15.png'), left: 1424, top: 6999, width: 498, height: 1336 },
           { src: url('modules/xingdong/xsjw-03-16.png'), left: 211, top: 7987, width: 656, height: 1319 },
-          { src: url('modules/xingdong/xsjw-03-subtitle.png'), left: 883, top: 998, width: 394, height: 88 },
+          { src: url('modules/xingdong/xsjw-03-subtitle.png'), left: 817, top: 998, width: 526, height: 108 },
           { src: url('modules/xingdong/xsjw-03-1.png'), left: 169, top: 1198, width: 1727, height: 1226 },
           { src: url('modules/xingdong/xsjw-03-2.png'), left: 174, top: 2568, width: 1218, height: 915 },
           { src: url('modules/xingdong/xsjw-03-3.png'), left: 782, top: 3686, width: 1207, height: 905 },
