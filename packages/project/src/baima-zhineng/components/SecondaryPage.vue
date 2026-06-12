@@ -177,6 +177,26 @@ function onContentPointerDown(e: MouseEvent | TouchEvent) {
   contentDragMoved.value = false
 }
 
+/** 中控 page 指令处理：next/prev/index */
+function onUecPage(e: Event) {
+  const detail = (e as CustomEvent).detail as Record<string, unknown>
+  if (!detail) return
+  const action = detail.action as string | undefined
+  const index = detail.index as number | undefined
+
+  if (typeof index === 'number') {
+    const target = Math.max(0, Math.min(index, tabCount.value - 1))
+    if (target !== activeTab.value) activeTab.value = target
+    return
+  }
+
+  if (action === 'next') {
+    nextPage()
+  } else if (action === 'prev') {
+    prevPage()
+  }
+}
+
 // 全局监听拖拽中事件（组件卸载时清理）
 onMounted(() => {
   updateHasOverflow()
@@ -185,6 +205,7 @@ onMounted(() => {
     window.addEventListener('mouseup', onPointerUp)
     window.addEventListener('touchmove', onPointerMove, { passive: false })
     window.addEventListener('touchend', onPointerUp)
+    window.addEventListener('uec:page', onUecPage)
   }
 })
 
@@ -194,6 +215,7 @@ onBeforeUnmount(() => {
     window.removeEventListener('mouseup', onPointerUp)
     window.removeEventListener('touchmove', onPointerMove, { passive: false } as EventListenerOptions)
     window.removeEventListener('touchend', onPointerUp)
+    window.removeEventListener('uec:page', onUecPage)
   }
 })
 

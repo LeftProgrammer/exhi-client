@@ -35,6 +35,11 @@ export function useControl() {
         if (!valid.includes(target)) return
         router.push({ name: target })
       })
+
+      rc.onCommand('page', (p) => {
+        // 通过 window 自定义事件同文档内派发，当前 view 组件监听
+        window.dispatchEvent(new CustomEvent('uec:page', { detail: p }))
+      })
     },
 
     /** 浏览器 dev 模式下启动 WS 回退连接 */
