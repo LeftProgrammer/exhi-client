@@ -129,20 +129,20 @@ function enter(m: ModuleDef) {
     &--zhidu {
       opacity: 0;
       animation:
-        home-enter-right 0.8s ease-out 0.5s both,
-        home-float-sync 8.0s ease-in-out 1.5s infinite;
+        home-enter-right 1s ease-out 0s both,
+        home-float-sync 8.0s ease-in-out 1.2s infinite;
     }
     &--guihua {
       opacity: 0;
       animation:
-        home-enter-left  0.8s ease-out 0.5s both,
-        home-float-alt   8.0s ease-in-out 1.5s infinite;
+        home-enter-left  1s ease-out 0s both,
+        home-float-alt   8.0s ease-in-out 1.2s infinite;
     }
     &--xingdong {
       opacity: 0;
       animation:
-        home-enter-right 0.8s ease-out 0.5s both,
-        home-float-sync 8.0s ease-in-out 1.5s infinite;
+        home-enter-right 1s ease-out 0s both,
+        home-float-sync 8.0s ease-in-out 1.2s infinite;
     }
 
     &:hover img {

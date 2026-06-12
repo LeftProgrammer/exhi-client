@@ -29,12 +29,18 @@ function updateHasOverflow() {
   hasOverflow.value = el.scrollHeight > el.clientHeight
 }
 
+let scrollRaf = 0
+
 function onContentScroll() {
-  const el = contentRef.value
-  if (!el) return
-  const max = el.scrollHeight - el.clientHeight
-  scrollProgress.value = max > 0 ? el.scrollTop / max : 0
-  hasOverflow.value = max > 0
+  if (scrollRaf) return
+  scrollRaf = requestAnimationFrame(() => {
+    scrollRaf = 0
+    const el = contentRef.value
+    if (!el) return
+    const max = el.scrollHeight - el.clientHeight
+    scrollProgress.value = max > 0 ? el.scrollTop / max : 0
+    hasOverflow.value = max > 0
+  })
 }
 
 /** 滑块高度占轨道的百分比 */
@@ -73,6 +79,7 @@ function scrollToRatio(ratio: number) {
 
 function onScrollbarPointerDown(e: MouseEvent | TouchEvent) {
   e.preventDefault()
+  onUserInteract() // 用户操作暂停自动滚动
   const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
   const info = getBarInfo()
   if (!info) return
@@ -125,6 +132,12 @@ function onPointerMove(e: MouseEvent | TouchEvent) {
       contentRef.value.scrollTop = contentDragStartScrollTop.value + deltaY
     }
   }
+
+  // pager 模式左右滑动
+  if (isSwiping.value) {
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
+    swipeLastX.value = clientX
+  }
 }
 
 function onPointerUp() {
@@ -156,6 +169,23 @@ function onPointerUp() {
     isContentDragging.value = false
     contentDragMoved.value = false
   }
+
+  // pager 模式左右滑动释放
+  if (isSwiping.value) {
+    const deltaX = swipeStartX.value - swipeLastX.value
+    if (Math.abs(deltaX) > SWIPE_THRESHOLD) {
+      if (deltaX > 0) {
+        // 向左滑 → 下一页
+        sfx.play('page')
+        nextPage()
+      } else {
+        // 向右滑 → 上一页
+        sfx.play('page')
+        prevPage()
+      }
+    }
+    isSwiping.value = false
+  }
 }
 
 /** 内容区拖拽滚动 */
@@ -167,14 +197,33 @@ const contentDragMoved = ref(false)
 const CONTENT_DRAG_THRESHOLD = 10
 const CONTENT_EDGE_SWITCH_THRESHOLD = 60
 
+/** pager 模式左右滑动手势 */
+const isSwiping = ref(false)
+const swipeStartX = ref(0)
+const swipeLastX = ref(0)
+const swipeStartY = ref(0)
+const SWIPE_THRESHOLD = 60
+const SWIPE_MAX_VERTICAL = 80
+
 function onContentPointerDown(e: MouseEvent | TouchEvent) {
-  if (!isScroll.value || !contentRef.value) return
+  if (isScroll.value) {
+    onUserInteract() // 用户操作暂停自动滚动
+    if (!contentRef.value) return
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
+    isContentDragging.value = true
+    contentDragStartY.value = clientY
+    contentDragLastY.value = clientY
+    contentDragStartScrollTop.value = contentRef.value.scrollTop
+    contentDragMoved.value = false
+    return
+  }
+  // pager 模式：记录水平滑动起始位置
+  const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX
   const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY
-  isContentDragging.value = true
-  contentDragStartY.value = clientY
-  contentDragLastY.value = clientY
-  contentDragStartScrollTop.value = contentRef.value.scrollTop
-  contentDragMoved.value = false
+  isSwiping.value = true
+  swipeStartX.value = clientX
+  swipeLastX.value = clientX
+  swipeStartY.value = clientY
 }
 
 /** 中控 page 指令处理：next/prev/index */
@@ -197,6 +246,101 @@ function onUecPage(e: Event) {
   }
 }
 
+/** 中控 scroll 指令处理：pause / play / scroll-top */
+function onUecScroll(e: Event) {
+  const detail = (e as CustomEvent).detail as Record<string, unknown>
+  if (!detail) return
+  const action = detail.action as string | undefined
+  if (action === 'pause') {
+    stopAutoScroll()
+  } else if (action === 'play') {
+    startAutoScroll()
+  } else if (action === 'scroll-top') {
+    if (contentRef.value) {
+      contentRef.value.scrollTo({ top: 0, behavior: 'smooth' })
+      stopAutoScroll()
+      if (idleTimer) clearTimeout(idleTimer)
+      idleTimer = window.setTimeout(() => {
+        if (isScroll.value && hasOverflow.value) startAutoScroll()
+      }, 20000)
+    }
+  }
+}
+
+// 自动滚动
+let autoScrollRaf = 0
+let idleTimer = 0
+let autoScrollDelayTimer = 0
+let lastScrollTimestamp = 0
+const AUTO_SCROLL_SPEED = 90 // px/s，跨刷新率一致
+const AUTO_SCROLL_START_DELAY = 3000
+
+function startAutoScroll(delay = 0) {
+  if (autoScrollRaf) cancelAnimationFrame(autoScrollRaf)
+  autoScrollRaf = 0
+  lastScrollTimestamp = 0
+  // 没有溢出时不启动
+  const el = contentRef.value
+  if (!el || el.scrollHeight <= el.clientHeight) return
+  if (autoScrollDelayTimer) clearTimeout(autoScrollDelayTimer)
+  if (delay > 0) {
+    autoScrollDelayTimer = window.setTimeout(() => tickAutoScroll(), delay)
+  } else {
+    tickAutoScroll()
+  }
+}
+
+function stopAutoScroll() {
+  if (autoScrollRaf) {
+    cancelAnimationFrame(autoScrollRaf)
+    autoScrollRaf = 0
+  }
+  if (autoScrollDelayTimer) {
+    clearTimeout(autoScrollDelayTimer)
+    autoScrollDelayTimer = 0
+  }
+  lastScrollTimestamp = 0
+}
+
+function tickAutoScroll(timestamp = performance.now()) {
+  if (!isScroll.value || !contentRef.value) {
+    autoScrollRaf = 0
+    lastScrollTimestamp = 0
+    return
+  }
+  const el = contentRef.value
+  const max = el.scrollHeight - el.clientHeight
+  if (max <= 0) {
+    autoScrollRaf = 0
+    lastScrollTimestamp = 0
+    return
+  }
+
+  if (!lastScrollTimestamp) lastScrollTimestamp = timestamp
+  const delta = timestamp - lastScrollTimestamp
+  lastScrollTimestamp = timestamp
+
+  el.scrollTop += (AUTO_SCROLL_SPEED * delta) / 1000
+  if (el.scrollTop >= max) {
+    autoScrollRaf = 0
+    lastScrollTimestamp = 0
+    return // 滚动到底部停止
+  }
+
+  autoScrollRaf = requestAnimationFrame(tickAutoScroll)
+}
+
+function onUserInteract() {
+  if (!isScroll.value) return
+  stopAutoScroll()
+  if (idleTimer) clearTimeout(idleTimer)
+  idleTimer = window.setTimeout(() => {
+    if (isScroll.value && hasOverflow.value) {
+      startAutoScroll()
+    }
+  }, 20000)
+}
+
 // 全局监听拖拽中事件（组件卸载时清理）
 onMounted(() => {
   updateHasOverflow()
@@ -206,7 +350,9 @@ onMounted(() => {
     window.addEventListener('touchmove', onPointerMove, { passive: false })
     window.addEventListener('touchend', onPointerUp)
     window.addEventListener('uec:page', onUecPage)
+    window.addEventListener('uec:scroll', onUecScroll)
   }
+  if (isScroll.value) startAutoScroll(AUTO_SCROLL_START_DELAY)
 })
 
 onBeforeUnmount(() => {
@@ -216,7 +362,11 @@ onBeforeUnmount(() => {
     window.removeEventListener('touchmove', onPointerMove, { passive: false } as EventListenerOptions)
     window.removeEventListener('touchend', onPointerUp)
     window.removeEventListener('uec:page', onUecPage)
+    window.removeEventListener('uec:scroll', onUecScroll)
   }
+  stopAutoScroll()
+  if (idleTimer) clearTimeout(idleTimer)
+  if (scrollRaf) cancelAnimationFrame(scrollRaf)
 })
 
 const activeTab = ref(0)
@@ -261,6 +411,7 @@ watch(activeTab, (newVal, oldVal) => {
   }
   nextTick(() => {
     updateHasOverflow()
+    if (isScroll.value) startAutoScroll(AUTO_SCROLL_START_DELAY)
   })
 })
 
@@ -314,6 +465,7 @@ function goHome() {
       @scroll="onContentScroll"
       @mousedown="onContentPointerDown"
       @touchstart.passive="onContentPointerDown"
+      @wheel="onUserInteract"
     >
       <transition :name="`slide-${slideDirection}`" @after-enter="updateHasOverflow" @after-leave="updateHasOverflow">
         <div
@@ -399,6 +551,11 @@ function goHome() {
   to   { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes sec-frame-enter {
+  from { opacity: 0; transform: translateX(-50%) translateY(d.h(60)); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
 @keyframes sec-enter-right {
   from { opacity: 0; transform: translateX(d.w(60)); }
   to   { opacity: 1; transform: translateX(0); }
@@ -455,7 +612,7 @@ function goHome() {
     height: d.h(2470);
     z-index: 2;
     opacity: 0;
-    animation: sec-enter-up 0.6s ease-out 0.35s both;
+    animation: sec-frame-enter 0.6s ease-out 0.35s both;
 
     &-bg {
       position: absolute;
@@ -781,11 +938,11 @@ function goHome() {
 /* 往右切（next）：新内容从下方大幅上滑覆盖 */
 .slide-right-enter-from {
   opacity: 0;
-  transform: translateY(65vh) scale(0.88);
+  transform: scale(0.92);
 }
 .slide-right-enter-to {
   opacity: 1;
-  transform: translateY(0) scale(1);
+  transform: scale(1);
 }
 .slide-right-leave-from {
   opacity: 1;
@@ -799,11 +956,11 @@ function goHome() {
 /* 往左切（prev）：新内容从上方大幅下滑覆盖 */
 .slide-left-enter-from {
   opacity: 0;
-  transform: translateY(-65vh) scale(0.88);
+  transform: scale(0.92);
 }
 .slide-left-enter-to {
   opacity: 1;
-  transform: translateY(0) scale(1);
+  transform: scale(1);
 }
 .slide-left-leave-from {
   opacity: 1;
