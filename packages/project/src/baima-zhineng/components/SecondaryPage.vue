@@ -290,7 +290,7 @@ function nextPage() {
 
 function goHome() {
   sfx.play('back')
-  router.push({ name: 'home' })
+  setTimeout(() => router.push({ name: 'home' }), 150)
 }
 
 // TODO:触摸屏空闲超时回首页
@@ -695,8 +695,11 @@ function goHome() {
     cursor: pointer;
     z-index: 5;
     opacity: 0;
-    animation: sec-enter-up 0.5s ease-out 0.75s both;
-    transition: transform 0.25s ease, filter 0.25s ease;
+    animation: sec-enter-up 0.5s ease-out 0.6s both;
+    transition:
+      transform 0.3s ease,
+      filter 0.3s ease,
+      opacity 0.3s ease;
     filter: drop-shadow(0 d.h(6) d.w(16) rgba(0, 80, 200, 0.3));
 
     img {
@@ -704,16 +707,20 @@ function goHome() {
       width: 100%;
       height: 100%;
       object-fit: fill;
+      pointer-events: none;
+      -webkit-user-select: none;
+      user-select: none;
     }
 
     &:hover {
-      transform: scale(1.05);
+      transform: scale(1.06);
       filter: drop-shadow(0 d.h(10) d.w(28) rgba(0, 120, 255, 0.5));
     }
 
     &:active {
-      transform: scale(0.94);
-      filter: drop-shadow(0 d.h(4) d.w(12) rgba(0, 80, 200, 0.25));
+      transform: scale(0.94) translateY(d.h(10)) !important;
+      filter: drop-shadow(0 d.h(1) d.w(4) rgba(0, 30, 100, 0.15)) !important;
+      opacity: 0.3 !important;
     }
   }
 }

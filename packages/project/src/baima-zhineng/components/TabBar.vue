@@ -182,7 +182,7 @@ onMounted(() => nextTick(updateOffset))
     border: none;
     background: none;
     cursor: pointer;
-    transition: transform 0.25s ease, filter 0.25s ease;
+    transition: transform 0.3s ease, filter 0.3s ease;
     filter: drop-shadow(0 d.h(2) d.w(6) rgba(0, 60, 180, 0.2));
 
     img {
@@ -192,8 +192,9 @@ onMounted(() => nextTick(updateOffset))
       object-fit: contain;
     }
 
-    &.is-active {
-      transform: scale(1.04);
+    /* 选中项放大+高亮入场，非选中项缩小离场 */
+   &.is-active {
+      transform: scale(1.00);
       filter: drop-shadow(0 d.h(4) d.w(14) rgba(0, 120, 255, 0.45));
     }
 
