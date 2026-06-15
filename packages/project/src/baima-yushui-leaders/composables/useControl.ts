@@ -106,9 +106,10 @@ export function useControl() {
         }
       })
 
-      rc.onCommand('autoplay', (p) => {
-        // 通过 window 自定义事件同文档内派发，当前 view 组件监听
-        window.dispatchEvent(new CustomEvent('uec:autoplay', { detail: p }))
+      rc.onCommand('carousel', (p) => {
+        // 通过 window 自定义事件同文档内派发，section.vue 监听
+        const action = (p.action as string) ?? 'play'
+        window.dispatchEvent(new CustomEvent('uec:carousel', { detail: { action } }))
       })
     },
 

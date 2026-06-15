@@ -7,7 +7,7 @@ import { useViewTransition } from '@shared/composables/useViewTransition'
 import { usePageLeave } from '@shared/composables/usePageLeave'
 import { useProjectSfx } from '@shared/composables/useProjectSfx'
 import { useControl } from '@baima-yushui/composables/useControl'
-import { AUTOPLAY_INTERVAL_MS, AUTOPLAY_RESUME_MS } from '@shared/config'
+import { AUTOPLAY_INTERVAL_MS } from '@baima-yushui/data/config'
 import StageFooter from '@baima-yushui/components/StageFooter.vue'
 import {
   blurDissolveOut,
@@ -142,9 +142,7 @@ function home() {
 
 /** ===== 自动轮播 ===== */
 const AUTOPLAY_INTERVAL = AUTOPLAY_INTERVAL_MS
-const IDLE_RESUME_MS = AUTOPLAY_RESUME_MS
 let autoplayTimer: number | null = null
-let idleTimer: number | null = null
 
 function doAutoplayStep() {
   const cats = section.value.categories
@@ -186,55 +184,37 @@ function stopAutoplay() {
   }
 }
 
+/** 用户操作后停止轮播，不再自动恢复（需中控指令或翻页触发） */
 function onUserInteract() {
   stopAutoplay()
-  if (idleTimer != null) {
-    window.clearTimeout(idleTimer)
-    idleTimer = null
-  }
-  idleTimer = window.setTimeout(() => {
-    startAutoplay()
-  }, IDLE_RESUME_MS)
 }
 
-/** 中控 autoplay 指令处理：pause / play / first */
-function onUecAutoplay(e: Event) {
+/** 中控 carousel 指令处理：play / pause / reset */
+function onUecCarousel(e: Event) {
   const detail = (e as CustomEvent).detail as Record<string, unknown>
   if (!detail) return
   const action = detail.action as string | undefined
   if (action === 'pause') {
     stopAutoplay()
-    if (idleTimer != null) {
-      window.clearTimeout(idleTimer)
-      idleTimer = null
-    }
   } else if (action === 'play') {
     startAutoplay()
-  } else if (action === 'first') {
-    stopAutoplay()
-    if (idleTimer != null) {
-      window.clearTimeout(idleTimer)
-      idleTimer = null
-    }
+  } else if (action === 'reset') {
     router.replace({
       name: 'section',
       params: { sectionId: props.sectionId, categoryId: currentCategory.value.id, entryIndex: 0 }
     })
+    startAutoplay()
   }
 }
 
 onMounted(() => {
-  window.addEventListener('uec:autoplay', onUecAutoplay)
+  window.addEventListener('uec:carousel', onUecCarousel)
   startAutoplay()
 })
 
 onBeforeUnmount(() => {
-  window.removeEventListener('uec:autoplay', onUecAutoplay)
+  window.removeEventListener('uec:carousel', onUecCarousel)
   stopAutoplay()
-  if (idleTimer != null) {
-    window.clearTimeout(idleTimer)
-    idleTimer = null
-  }
 })
 
 // 兜底：categoryId 不存在时回退到第一个分类

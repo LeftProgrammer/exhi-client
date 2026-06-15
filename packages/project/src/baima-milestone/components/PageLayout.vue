@@ -5,6 +5,7 @@
     @touchstart="onTouchStart"
     @touchmove="onTouchMove"
     @touchend="onTouchEnd"
+    @click="onClick"
   >
     <img ref="bgRef" class="layer-bg" :src="bg" alt="" />
     <img v-if="deco" ref="decoRef" class="layer-deco" :src="deco" alt="" />
@@ -24,7 +25,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { usePageScroll } from '@shared/composables/usePageScroll'
-import { SCROLL_HOLD_MS } from '@baima-milestone/data/slides'
+import { SCROLL_HOLD_MS, SCROLL_LOOP_BOTTOM_MS } from '@baima-milestone/data/config'
 
 defineProps<{ bg: string; deco?: string }>()
 
@@ -35,14 +36,17 @@ const contentRef = ref<HTMLElement | null>(null)
 
 const {
   scheduleAutoScroll,
+  startAutoScroll,
+  pause,
   reset: resetScroll,
   onWheel,
   onTouchStart,
   onTouchMove,
-  onTouchEnd
-} = usePageScroll(wrapperRef, contentRef, SCROLL_HOLD_MS)
+  onTouchEnd,
+  onClick
+} = usePageScroll(wrapperRef, contentRef, SCROLL_HOLD_MS, SCROLL_LOOP_BOTTOM_MS)
 
-defineExpose({ bgEl: bgRef, decoEl: decoRef, scheduleAutoScroll, resetScroll })
+defineExpose({ bgEl: bgRef, decoEl: decoRef, scheduleAutoScroll, startAutoScroll, pause, resetScroll })
 </script>
 
 <style lang="scss" scoped>

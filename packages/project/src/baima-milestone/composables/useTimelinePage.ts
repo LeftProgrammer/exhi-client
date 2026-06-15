@@ -1,7 +1,7 @@
 import { ref, type Ref } from 'vue'
 import gsap from 'gsap'
 import { playEnterSequence } from '@baima-milestone/effects/gsapPresets'
-import { SCROLL_ARM_AT } from '@baima-milestone/data/slides'
+import { SCROLL_ARM_AT } from '@baima-milestone/data/config'
 import type PageLayout from '@baima-milestone/components/PageLayout.vue'
 
 export interface TimelinePageOptions {
@@ -60,6 +60,14 @@ export function useTimelinePage(
     tl.call(() => layoutRef.value?.scheduleAutoScroll(), undefined, scrollAt)
   }
 
+  function pause() {
+    layoutRef.value?.pause()
+  }
+
+  function resume() {
+    layoutRef.value?.startAutoScroll()
+  }
+
   function reset() {
     tl?.kill()
     tl = null
@@ -78,5 +86,5 @@ export function useTimelinePage(
     }
   }
 
-  return { play, reset }
+  return { play, pause, resume, reset }
 }

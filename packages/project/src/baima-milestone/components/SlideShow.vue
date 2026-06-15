@@ -1,5 +1,5 @@
 <template>
-  <div class="slideshow" @touchstart="resetIdle" @keydown.passive="resetIdle">
+  <div class="slideshow">
     <Transition :css="false" @leave="onLeave" @enter="onEnter">
       <KeepAlive>
         <component :is="currentComponent" :key="currentIndex" ref="pageRef" />
@@ -10,7 +10,7 @@
 
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, type Component } from 'vue'
-import { slides, IDLE_MS } from '@baima-milestone/data/slides'
+import { slides } from '@baima-milestone/data/slides'
 import { slideFadeOut, slideFadeIn, type SlideDir } from '@baima-milestone/effects/gsapPresets'
 import { useProjectSfx } from '@shared/composables/useProjectSfx'
 import { useControl } from '@baima-milestone/composables/useControl'
@@ -29,7 +29,7 @@ const COMPONENT_MAP: Record<string, Component | null> = {
 }
 
 const currentIndex = ref(0)
-const pageRef = ref<{ play: () => void; reset: () => void } | null>(null)
+const pageRef = ref<{ play: () => void; pause?: () => void; resume?: () => void; reset: () => void } | null>(null)
 let lastDir: SlideDir = 'next'
 const sfx = useProjectSfx()
 
@@ -44,7 +44,6 @@ function goto(i: number) {
   lastDir = i > currentIndex.value ? 'next' : 'prev'
   currentIndex.value = i
   sfx.play('nav')
-  resetIdle()
 }
 
 // === UEC 中控协议处理 ===
@@ -52,7 +51,13 @@ const control = useControl()
 control.setupCommands({
   total: slides.length,
   getCurrent: () => currentIndex.value,
-  onGoto: goto
+  onGoto: goto,
+  onScrollPlay: () => pageRef.value?.resume?.(),
+  onScrollPause: () => pageRef.value?.pause?.(),
+  onScrollReset: () => {
+    pageRef.value?.reset?.()
+    pageRef.value?.resume?.()
+  }
 })
 
 // 浏览器 dev 模式没有 exhibitBridge，直接连 UEC WS 接收中控指令
@@ -63,26 +68,15 @@ if (!window.exhibitBridge) {
 function onKeyDown(e: KeyboardEvent) {
   const n = parseInt(e.key)
   if (n >= 1 && n <= 5) goto(n - 1)
-  resetIdle()
-}
-
-let idleTimer: ReturnType<typeof setTimeout> | null = null
-
-function resetIdle() {
-  // TODO：暂时不用
-  // if (idleTimer !== null) clearTimeout(idleTimer)
-  // idleTimer = setTimeout(() => goto(0), IDLE_MS)
 }
 
 onMounted(() => {
-  resetIdle()
   window.addEventListener('keydown', onKeyDown)
   nextTick(() => pageRef.value?.play())
   sfx.unlock()
 })
 
 onBeforeUnmount(() => {
-  if (idleTimer !== null) clearTimeout(idleTimer)
   window.removeEventListener('keydown', onKeyDown)
 })
 

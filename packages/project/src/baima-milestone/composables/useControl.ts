@@ -25,11 +25,17 @@ export function useControl() {
      *    total:     幻灯片总页数
      *    getCurrent: () => 获取当前页索引
      *    onGoto:    (index) => 跳转到指定页
+     *    onScrollPlay?:  () => 当前页开始自动滚动
+     *    onScrollPause?: () => 当前页暂停自动滚动
+     *    onScrollReset?: () => 当前页回到顶部并暂停
      */
     setupCommands(options: {
       total: number
       getCurrent: () => number
       onGoto: (index: number) => void
+      onScrollPlay?: () => void
+      onScrollPause?: () => void
+      onScrollReset?: () => void
     }) {
       rc.onCommand('home', () => {
         options.onGoto(0)
@@ -58,6 +64,16 @@ export function useControl() {
           options.onGoto(next)
         }
       })
+
+      if (options.onScrollPlay) {
+        rc.onCommand('scrollPlay', () => options.onScrollPlay!())
+      }
+      if (options.onScrollPause) {
+        rc.onCommand('scrollPause', () => options.onScrollPause!())
+      }
+      if (options.onScrollReset) {
+        rc.onCommand('scrollReset', () => options.onScrollReset!())
+      }
     },
 
     /** 浏览器 dev 模式下启动 WS 回退连接 */

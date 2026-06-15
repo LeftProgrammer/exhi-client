@@ -4,7 +4,7 @@ import type { RouteLocationNormalizedLoaded } from 'vue-router'
 import { useRouter } from 'vue-router'
 import { useBridge } from '@shared/composables/useBridge'
 import { useIdleReset } from '@shared/composables/useIdleReset'
-import { IDLE_RESET_MS } from '@shared/config'
+import { IDLE_RESET_MS } from '@baima-yushui/data/config'
 import { useProjectSfx } from '@shared/composables/useProjectSfx'
 import { useControl } from '@baima-yushui/composables/useControl'
 

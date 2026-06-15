@@ -32,9 +32,9 @@ function setItemRef(el: unknown, i: number) {
   if (el instanceof HTMLImageElement) itemRefs[i] = el
 }
 
-const { play, reset } = useTimelinePage(layoutRef, topBarRef, titleRef, itemRefs)
+const { play, pause, resume, reset } = useTimelinePage(layoutRef, topBarRef, titleRef, itemRefs)
 
-defineExpose({ play, reset })
+defineExpose({ play, pause, resume, reset })
 </script>
 
 <style lang="scss" scoped>

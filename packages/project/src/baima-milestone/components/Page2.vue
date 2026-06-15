@@ -31,7 +31,7 @@
 import { ref } from 'vue'
 import { resolvePkgUrl } from '@shared/utils/url'
 import { useTimelinePage } from '@baima-milestone/composables/useTimelinePage'
-import { page2Entries, type EntryConfig } from '@baima-milestone/data/slides'
+import { page2Entries } from '@baima-milestone/data/slides'
 import PageLayout from './PageLayout.vue'
 
 const url = resolvePkgUrl
@@ -46,12 +46,12 @@ function setWrapperRef(el: unknown, i: number) {
   if (el instanceof HTMLElement) wrapperRefs[i] = el
 }
 
-const { play, reset } = useTimelinePage(layoutRef, topBarRef, titleRef, wrapperRefs, {
+const { play, pause, resume, reset } = useTimelinePage(layoutRef, topBarRef, titleRef, wrapperRefs, {
   deco: true,
   timeline: true
 })
 
-defineExpose({ play, reset })
+defineExpose({ play, pause, resume, reset })
 </script>
 
 <style lang="scss" scoped>
