@@ -11,7 +11,7 @@ import { useControl } from '@baima-yushui/composables/useControl'
  * 应用根。
  *
  * 职责：
- *  - 监听 20 秒无交互 → 回首页（一级待机）
+ *  - 监听 5 分钟无交互 → 回首页（一级待机）
  *  - 接收中控指令 → cmd.home / cmd.gotoSection 强制跳转
  *  - 接收 scene:changed / scene:ended 等 bridge 事件（如有需要）
  */
@@ -23,12 +23,12 @@ const { on } = useBridge()
 const { unlock } = useProjectSfx()
 onMounted(() => unlock())
 
-// TODO: 20 秒无交互回首页
-// useIdleReset(() => {
-//   if (router.currentRoute.value.name !== 'home') {
-//     router.push({ name: 'home' })
-//   }
-// }, 20_000)
+// 5 分钟无交互回首页
+useIdleReset(() => {
+  if (router.currentRoute.value.name !== 'home') {
+    router.push({ name: 'home' })
+  }
+}, 300_000)
 
 // 监听中控自定义事件（exhibitBridge.emit 由 main 进程或其他屏触发）
 on('app:home', () => router.push({ name: 'home' }))

@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { getSection, type Category, type SectionId } from '@baima-yushui/data/sections'
 import { resolvePkgUrl } from '@shared/utils/url'
 import { useViewTransition } from '@shared/composables/useViewTransition'
-import { useAutoplay } from '@shared/composables/useAutoplay'
 import { usePageLeave } from '@shared/composables/usePageLeave'
 import { useProjectSfx } from '@shared/composables/useProjectSfx'
+import { useControl } from '@baima-yushui/composables/useControl'
 import StageFooter from '@baima-yushui/components/StageFooter.vue'
 import {
   blurDissolveOut,
@@ -27,6 +27,8 @@ const router = useRouter()
 
 // 500ms 离场动画完整跑完再返回首页
 const { leaving, leaveTo } = usePageLeave({ duration: 500 })
+
+const control = useControl()
 
 const section = computed(() => {
   const id = props.sectionId as SectionId
@@ -96,6 +98,8 @@ function selectCategory(id: string) {
   transitionType.value = 'category'
   categorySwitching.value = true
   setTimeout(() => (categorySwitching.value = false), 600)
+  onUserInteract()
+  control.reportCategory(props.sectionId, id)
   router.replace({
     name: 'section',
     params: { sectionId: props.sectionId, categoryId: id, entryIndex: 0 }
@@ -106,8 +110,10 @@ function next() {
   if (!canNext.value) return
   sfx.play('page')
   transitionType.value = 'entry-next'
+  onUserInteract()
   const len = total.value
   const ni = (props.entryIndex + 1) % len
+  control.reportPage(props.sectionId, currentCategory.value.id, ni, len, 'next')
   router.replace({
     name: 'section',
     params: { sectionId: props.sectionId, categoryId: currentCategory.value.id, entryIndex: ni }
@@ -118,8 +124,10 @@ function prev() {
   if (!canPrev.value) return
   sfx.play('page')
   transitionType.value = 'entry-prev'
+  onUserInteract()
   const len = total.value
   const ni = (props.entryIndex - 1 + len) % len
+  control.reportPage(props.sectionId, currentCategory.value.id, ni, len, 'prev')
   router.replace({
     name: 'section',
     params: { sectionId: props.sectionId, categoryId: currentCategory.value.id, entryIndex: ni }
@@ -131,37 +139,102 @@ function home() {
   leaveTo({ name: 'home' })
 }
 
-/* 自动轮播：同分类内逐张推进；多分类时到末尾跳下一分类首张 */
-useAutoplay(
-  () => [props.categoryId, props.entryIndex] as const,
-  () => {
-    const cats = section.value.categories
-    const len = total.value
-    const isLastEntry = props.entryIndex >= len - 1
-    const hasMultipleCats = cats.length > 1
+/** ===== 自动轮播 ===== */
+const AUTOPLAY_INTERVAL = 6000
+const IDLE_RESUME_MS = 20000
+let autoplayTimer: number | null = null
+let idleTimer: number | null = null
 
-    if (!isLastEntry || !hasMultipleCats) {
-      transitionType.value = 'entry-next'
-      router.replace({
-        name: 'section',
-        params: {
-          sectionId: props.sectionId,
-          categoryId: currentCategory.value.id,
-          entryIndex: (props.entryIndex + 1) % len
-        }
-      })
-    } else {
-      const curCatIdx = cats.findIndex((c) => c.id === currentCategory.value.id)
-      const nextCat = cats[(curCatIdx + 1) % cats.length]
-      transitionType.value = 'category'
-      router.replace({
-        name: 'section',
-        params: { sectionId: props.sectionId, categoryId: nextCat.id, entryIndex: 0 }
-      })
+function doAutoplayStep() {
+  const cats = section.value.categories
+  const len = total.value
+  const isLastEntry = props.entryIndex >= len - 1
+  const hasMultipleCats = cats.length > 1
+
+  if (!isLastEntry || !hasMultipleCats) {
+    transitionType.value = 'entry-next'
+    router.replace({
+      name: 'section',
+      params: {
+        sectionId: props.sectionId,
+        categoryId: currentCategory.value.id,
+        entryIndex: (props.entryIndex + 1) % len
+      }
+    })
+  } else {
+    const curCatIdx = cats.findIndex((c) => c.id === currentCategory.value.id)
+    const nextCat = cats[(curCatIdx + 1) % cats.length]
+    transitionType.value = 'category'
+    router.replace({
+      name: 'section',
+      params: { sectionId: props.sectionId, categoryId: nextCat.id, entryIndex: 0 }
+    })
+  }
+}
+
+function startAutoplay() {
+  stopAutoplay()
+  if (total.value <= 1 && section.value.categories.length <= 1) return
+  autoplayTimer = window.setInterval(doAutoplayStep, AUTOPLAY_INTERVAL)
+}
+
+function stopAutoplay() {
+  if (autoplayTimer != null) {
+    window.clearInterval(autoplayTimer)
+    autoplayTimer = null
+  }
+}
+
+function onUserInteract() {
+  stopAutoplay()
+  if (idleTimer != null) {
+    window.clearTimeout(idleTimer)
+    idleTimer = null
+  }
+  idleTimer = window.setTimeout(() => {
+    startAutoplay()
+  }, IDLE_RESUME_MS)
+}
+
+/** 中控 autoplay 指令处理：pause / play / first */
+function onUecAutoplay(e: Event) {
+  const detail = (e as CustomEvent).detail as Record<string, unknown>
+  if (!detail) return
+  const action = detail.action as string | undefined
+  if (action === 'pause') {
+    stopAutoplay()
+    if (idleTimer != null) {
+      window.clearTimeout(idleTimer)
+      idleTimer = null
     }
-  },
-  6000
-)
+  } else if (action === 'play') {
+    startAutoplay()
+  } else if (action === 'first') {
+    stopAutoplay()
+    if (idleTimer != null) {
+      window.clearTimeout(idleTimer)
+      idleTimer = null
+    }
+    router.replace({
+      name: 'section',
+      params: { sectionId: props.sectionId, categoryId: currentCategory.value.id, entryIndex: 0 }
+    })
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('uec:autoplay', onUecAutoplay)
+  startAutoplay()
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('uec:autoplay', onUecAutoplay)
+  stopAutoplay()
+  if (idleTimer != null) {
+    window.clearTimeout(idleTimer)
+    idleTimer = null
+  }
+})
 
 // 兜底：categoryId 不存在时回退到第一个分类
 watch(

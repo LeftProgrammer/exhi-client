@@ -2,6 +2,7 @@
 import EntryCard from '@baima-yushui/components/EntryCard.vue'
 import { usePageLeave } from '@shared/composables/usePageLeave'
 import { useProjectSfx } from '@shared/composables/useProjectSfx'
+import { useControl } from '@baima-yushui/composables/useControl'
 import { resolvePkgUrl } from '@shared/utils/url'
 
 const bgVideoUrl = resolvePkgUrl('common/bg.mp4')
@@ -14,12 +15,15 @@ const cardBgLeaders = resolvePkgUrl('home/card-bg-leaders.png')
 const { leaving, leaveTo } = usePageLeave({ duration: 500 })
 
 const sfx = useProjectSfx()
+const control = useControl()
 
 function enterSection(sectionId: 'yushui' | 'leaders') {
   console.log('[home] 点击卡片:', sectionId)
   // 先跳转，音效失败不阻塞
   leaveTo({ name: 'section', params: { sectionId } })
   try { sfx.play('nav') } catch { /* 音效文件缺失，静默忽略 */ }
+  const pageMap: Record<string, number> = { yushui: 1, leaders: 2 }
+  control.reportNav(pageMap[sectionId] ?? 0, sectionId)
 }
 </script>
 

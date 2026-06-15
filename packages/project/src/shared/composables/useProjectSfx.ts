@@ -7,9 +7,10 @@
  *   打包时 pkg-assemble 会自动复制 shared/contents/ 到每个项目包内。
  *   某项目想单独覆盖时，只需在 deploy/<项目>/contents/audio/ 放同名文件。
  *
- * 用法（App.vue onMounted 里一行搞定）：
+ * 用法（App.vue）：
  *   import { useProjectSfx } from '@shared/composables/useProjectSfx'
- *   onMounted(() => useProjectSfx())
+ *   const { unlock } = useProjectSfx()
+ *   onMounted(() => unlock())
  *
  * 文件不存在时会静默忽略，自动回退到 useSfx 内置合成音。
  */

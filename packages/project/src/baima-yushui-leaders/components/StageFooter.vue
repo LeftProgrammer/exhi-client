@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ref, watch, nextTick, onMounted } from 'vue'
+
 interface Props {
   /** 操作栏背景图 URL */
   frameUrl: string
@@ -22,19 +24,64 @@ interface Props {
   caption: string
 }
 
-defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  canPrev: false,
+  canNext: false
+})
 defineEmits<{
   (e: 'prev'): void
   (e: 'next'): void
   (e: 'home'): void
 }>()
+
+const captionWrapRef = ref<HTMLDivElement | null>(null)
+const captionInnerRef = ref<HTMLSpanElement | null>(null)
+const needsScroll = ref(false)
+const scrollDuration = ref('0s')
+const SCROLL_SPEED = 60 // px/s
+
+function checkScroll() {
+  nextTick(() => {
+    const inner = captionInnerRef.value
+    const wrap = captionWrapRef.value
+    if (!inner || !wrap) {
+      needsScroll.value = false
+      return
+    }
+    const overflow = inner.scrollWidth > wrap.clientWidth
+    needsScroll.value = overflow
+    if (overflow) {
+      const distance = inner.scrollWidth / 2
+      scrollDuration.value = `${distance / SCROLL_SPEED}s`
+    }
+  })
+}
+
+// 在 Transition 入场完成后检测（mode="out-in" 下新元素延迟插入，不能用 watch 直接检测）
+// onMounted 检测首次渲染，after-enter 检测后续 caption 切换
+onMounted(() => {
+  // 首次渲染：等一帧确保文字已布局
+  requestAnimationFrame(() => checkScroll())
+})
 </script>
 
 <template>
   <footer class="footer" :style="{ backgroundImage: `url(${frameUrl})` }">
-    <Transition name="caption" mode="out-in">
-      <span :key="caption" class="footer__caption">{{ caption }}</span>
-    </Transition>
+    <div ref="captionWrapRef" class="footer__caption-wrap">
+      <Transition name="caption" mode="out-in" @after-enter="checkScroll">
+        <span :key="caption" class="footer__caption">
+          <span
+            ref="captionInnerRef"
+            class="footer__caption-inner"
+            :class="{ 'footer__caption-inner--scroll': needsScroll }"
+            :style="needsScroll ? { animationDuration: scrollDuration, animationDelay: '0.8s' } : {}"
+          >
+            <span class="footer__caption-text">{{ caption }}</span>
+            <span v-if="needsScroll" class="footer__caption-text">{{ caption }}</span>
+          </span>
+        </span>
+      </Transition>
+    </div>
 
     <div class="footer__btns">
       <button
@@ -91,17 +138,39 @@ defineEmits<{
   @include fx.enter-fade-up($duration: 0.7s, $delay: 0.6s);
 }
 
-/* 标题文字：切换时旧文字左滑离场、新文字右滑进场 */
-.footer__caption {
+/* 标题容器 */
+.footer__caption-wrap {
   flex: 1 1 auto;
   min-width: 0;
+  overflow: hidden;
+}
+
+/* 标题文字：切换时旧文字左滑离场、新文字右滑进场 */
+.footer__caption {
+  display: inline-block;
   font-size: t.$fs-h3;
   color: t.$color-text-primary;
   letter-spacing: 0.1em;
   text-shadow: 0 0 8px rgba(0, 229, 212, 0.5);
+}
+
+.footer__caption-inner {
+  display: inline-block;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+.footer__caption-inner--scroll {
+  animation: footer-caption-scroll linear infinite;
+}
+
+.footer__caption-text {
+  display: inline-block;
+  padding-right: 12vw;
+}
+
+@keyframes footer-caption-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
 }
 
 .caption-enter-active,

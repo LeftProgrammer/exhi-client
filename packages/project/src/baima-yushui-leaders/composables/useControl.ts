@@ -105,6 +105,11 @@ export function useControl() {
           })
         }
       })
+
+      rc.onCommand('autoplay', (p) => {
+        // 通过 window 自定义事件同文档内派发，当前 view 组件监听
+        window.dispatchEvent(new CustomEvent('uec:autoplay', { detail: p }))
+      })
     },
 
     /** 浏览器 dev 模式下启动 WS 回退连接 */
