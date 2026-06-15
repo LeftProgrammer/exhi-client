@@ -5,6 +5,7 @@ import { useIdleReset } from '@shared/composables/useIdleReset'
 import { useProjectSfx } from '@shared/composables/useProjectSfx'
 import { useScreenSync } from '../../composables/useScreenSync'
 import { POINTS, MENU_POINTS, getPoint, type PointStatus, type Layout } from '../../data/points'
+import { CONFIG } from '../../data/config'
 
 const sfx = useProjectSfx()
 
@@ -113,7 +114,7 @@ watch(
 
 useIdleReset(() => {
   if (!isStandby.value) backToStandby()
-})
+}, CONFIG.idleResetMs)
 </script>
 
 <template>

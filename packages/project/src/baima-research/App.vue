@@ -3,9 +3,11 @@ import { useRouter } from 'vue-router'
 import { useBridge } from '@shared/composables/useBridge'
 import { onMounted, watch } from 'vue'
 import { useControl } from './composables/useControl'
+import { useProjectSfx } from '@shared/composables/useProjectSfx'
 
 const router = useRouter()
 const { on, info, ready } = useBridge()
+const { unlock } = useProjectSfx()
 
 on('app:home', () => router.push({ name: 'home' }))
 
@@ -41,15 +43,18 @@ onMounted(async () => {
   if (!window.exhibitBridge) {
     await router.isReady()
     initAll()
+    unlock()
     return
   }
 
   if (ready.value) {
     initAll()
+    unlock()
   } else {
     const unwatch = watch(ready, (v) => {
       if (v) {
         initAll()
+        unlock()
         unwatch()
       }
     })

@@ -11,6 +11,7 @@ const {
   onSyncVideoPlay,
   onSyncVideoPause,
   onSyncVideoSeek,
+  onSyncVideoSpeed,
   onSyncVideoVolume,
   onSyncVideoMute
 } = useScreenSync()
@@ -29,6 +30,8 @@ onSyncIdle(() => {
 onSyncVideoPlay(() => {
   const v = videoRef.value
   if (!v) return
+  // 暂停后重新播放，自动恢复正常 1 倍速（无恢复按钮时的兜底）
+  if (v.playbackRate !== 1) v.playbackRate = 1
   v.play()
   isPaused.value = false
 })
@@ -43,8 +46,16 @@ onSyncVideoPause(() => {
 // 快进/快退（offset 单位：秒，正数快进，负数快退）
 onSyncVideoSeek((offset) => {
   const v = videoRef.value
+  if (!v || !offset) return
+  const target = Math.max(0, Math.min(v.duration || Infinity, v.currentTime + offset))
+  v.currentTime = target
+})
+
+// 播放倍速（rate 如 0.5、1、1.5、2）
+onSyncVideoSpeed((rate) => {
+  const v = videoRef.value
   if (!v) return
-  v.currentTime = Math.max(0, Math.min(v.duration || Infinity, v.currentTime + offset))
+  v.playbackRate = rate
 })
 
 // 音量调节（delta 单位：0~1，正数加大，负数减小）

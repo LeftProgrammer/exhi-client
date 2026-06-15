@@ -43,6 +43,7 @@ export function useControl() {
     syncVideoPlay,
     syncVideoPause,
     syncVideoSeek,
+    syncVideoSpeed,
     syncVideoVolume,
     syncVideoMute
   } = useScreenSync()
@@ -88,6 +89,11 @@ export function useControl() {
       rc.onCommand('video-seek', (p) => {
         const offset = Number(p.offset)
         if (!isNaN(offset)) syncVideoSeek(offset)
+      })
+      // 播放倍速（rate 如 0.5、1、1.5、2）
+      rc.onCommand('video-speed', (p) => {
+        const rate = Number(p.rate)
+        if (!isNaN(rate) && rate > 0) syncVideoSpeed(rate)
       })
       // 音量调节（delta 单位：0~1，正数加大，负数减小）
       rc.onCommand('video-volume', (p) => {

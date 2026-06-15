@@ -15,6 +15,7 @@ type SyncMsg =
   | { type: 'research:video-play' }
   | { type: 'research:video-pause' }
   | { type: 'research:video-seek'; offset: number }
+  | { type: 'research:video-speed'; rate: number }
   | { type: 'research:video-volume'; delta: number }
   | { type: 'research:video-mute'; muted: boolean }
 
@@ -53,6 +54,8 @@ function msgToCmd(msg: SyncMsg): Record<string, unknown> {
       return { cmd: 'video-pause' }
     case 'research:video-seek':
       return { cmd: 'video-seek', offset: msg.offset }
+    case 'research:video-speed':
+      return { cmd: 'video-speed', rate: msg.rate }
     case 'research:video-volume':
       return { cmd: 'video-volume', delta: msg.delta }
     case 'research:video-mute':
@@ -119,6 +122,11 @@ export function useScreenSync() {
     broadcast({ type: 'research:video-seek', offset })
   }
 
+  /** 主屏：通知所有副屏设置播放倍速（rate 如 0.5、1、1.5、2） */
+  function syncVideoSpeed(rate: number) {
+    broadcast({ type: 'research:video-speed', rate })
+  }
+
   /** 主屏：通知所有副屏调节音量（delta 单位：0~1，正数加大，负数减小） */
   function syncVideoVolume(delta: number) {
     broadcast({ type: 'research:video-volume', delta })
@@ -160,6 +168,11 @@ export function useScreenSync() {
     subscribe('research:video-seek', (msg) => cb(msg.offset))
   }
 
+  /** 副屏：监听播放倍速指令 */
+  function onSyncVideoSpeed(cb: (rate: number) => void) {
+    subscribe('research:video-speed', (msg) => cb(msg.rate))
+  }
+
   /** 副屏：监听音量调节指令 */
   function onSyncVideoVolume(cb: (delta: number) => void) {
     subscribe('research:video-volume', (msg) => cb(msg.delta))
@@ -177,6 +190,7 @@ export function useScreenSync() {
     syncVideoPlay,
     syncVideoPause,
     syncVideoSeek,
+    syncVideoSpeed,
     syncVideoVolume,
     syncVideoMute,
     onSyncPoint,
@@ -184,6 +198,7 @@ export function useScreenSync() {
     onSyncVideoPlay,
     onSyncVideoPause,
     onSyncVideoSeek,
+    onSyncVideoSpeed,
     onSyncVideoVolume,
     onSyncVideoMute
   }
