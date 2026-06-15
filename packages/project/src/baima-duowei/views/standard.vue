@@ -50,8 +50,10 @@ const s3 = {
 // Standard 4
 const s4 = {
   blockTitle: resolvePkgUrl('standard/standard4/block-title.png'),
-  leftImg: resolvePkgUrl('standard/standard4/left-img.png'),
-  rightImg: resolvePkgUrl('standard/standard4/right-img.png')
+  leftImg1: resolvePkgUrl('standard/standard4/left-img-1.png'),
+  leftImg2: resolvePkgUrl('standard/standard4/left-img-2.png'),
+  rightImg1: resolvePkgUrl('standard/standard4/right-img-1.png'),
+  rightImg2: resolvePkgUrl('standard/standard4/right-img-2.png')
 }
 
 const pageData = [s1, s2, s3, s4]
@@ -117,8 +119,10 @@ function onNext() {
 
         <!-- ── Standard 4：施工工艺标准化（续） ── -->
         <div v-else class="s4" key="standard4">
-          <div class="s4__left-img"><img :src="s4.leftImg" alt="" /></div>
-          <div class="s4__right-img"><img :src="s4.rightImg" alt="" /></div>
+          <div class="s4__left-img1"><img :src="s4.leftImg1" alt="" /></div>
+          <div class="s4__left-img2"><img :src="s4.leftImg2" alt="" /></div>
+          <div class="s4__right-img1"><img :src="s4.rightImg1" alt="" /></div>
+          <div class="s4__right-img2"><img :src="s4.rightImg2" alt="" /></div>
         </div>
       </Transition>
     </ContentArea>
@@ -351,7 +355,7 @@ function onNext() {
   position: absolute;
   inset: 0;
 
-  &__left-img {
+  &__left-img1 {
     position: absolute;
     top: d.h(751);
     right: d.w(2645);
@@ -364,13 +368,39 @@ function onNext() {
       object-fit: fill;
     }
   }
+  &__left-img2 {
+    position: absolute;
+    top: d.h(758);
+    right: d.w(2310);
+    bottom: d.h(899);
+    left: d.w(1145);
+    @include fx.enter-fade-in($duration: 1s, $delay: 0.75s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: fill;
+    }
+  }
 
-  &__right-img {
+  &__right-img1 {
     position: absolute;
     top: d.h(758);
     right: d.w(388);
-    bottom: d.h(489);
+    bottom: d.h(764);
     left: d.w(1656);
+    @include fx.enter-fade-in($duration: 1s, $delay: 0.95s);
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: fill;
+    }
+  }
+  &__right-img2 {
+    position: absolute;
+    top: d.h(1389);
+    right: d.w(387);
+    bottom: d.h(489);
+    left: d.w(1655);
     @include fx.enter-fade-in($duration: 1s, $delay: 0.95s);
     img {
       width: 100%;

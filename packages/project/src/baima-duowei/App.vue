@@ -4,7 +4,8 @@ import { useRouter } from 'vue-router'
 import { useBridge } from '@shared/composables/useBridge'
 import { useProjectSfx } from '@shared/composables/useProjectSfx'
 import { useControl } from '@baima-duowei/composables/useControl'
-// import { useIdleReset } from '@shared/composables/useIdleReset'
+import { useIdleReset } from '@shared/composables/useIdleReset'
+import { IDLE_RESET_MS } from '@baima-duowei/data/config'
 
 const router = useRouter()
 const { on } = useBridge()
@@ -31,12 +32,12 @@ onBeforeUnmount(() => {
   window.removeEventListener('keydown', unlockAudio)
 })
 
-// TODO
-// useIdleReset(() => {
-//   if (router.currentRoute.value.name !== 'home') {
-//     router.push({ name: 'home' })
-//   }
-// }, 20_000)
+// 空闲 5 分钟无操作 → 自动回到首页
+useIdleReset(() => {
+  if (router.currentRoute.value.name !== 'home') {
+    router.push({ name: 'home' })
+  }
+}, IDLE_RESET_MS)
 
 on('app:home', () => router.push({ name: 'home' }))
 

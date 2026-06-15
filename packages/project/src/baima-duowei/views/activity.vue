@@ -2,6 +2,7 @@
 import { ref, watch, onBeforeUnmount, computed } from 'vue'
 import { resolvePkgUrl } from '@shared/utils/url'
 import { usePageFlip } from '@baima-duowei/composables/usePageFlip'
+import { A6_AUTOPLAY_INTERVAL_MS } from '@baima-duowei/data/config'
 import PageLayout from '../components/PageLayout.vue'
 import ContentArea from '../components/ContentArea.vue'
 
@@ -106,7 +107,7 @@ const startA6AutoPlay = () => {
       groupIndex.value = (groupIndex.value + 1) % a6.groups.length
       subIndex.value = 0
     }
-  }, 3000)
+  }, A6_AUTOPLAY_INTERVAL_MS)
 }
 const stopA6AutoPlay = () => {
   if (a6Timer) {
@@ -123,6 +124,44 @@ watch(page, (p) => {
     subIndex.value = 0
   }
 })
+
+// ── a6 触摸滑动切换图片 ──
+let touchStartX = 0
+let touchStartY = 0
+
+const onA6TouchStart = (e: TouchEvent) => {
+  touchStartX = e.touches[0].clientX
+  touchStartY = e.touches[0].clientY
+}
+
+const onA6TouchEnd = (e: TouchEvent) => {
+  const dx = e.changedTouches[0].clientX - touchStartX
+  const dy = e.changedTouches[0].clientY - touchStartY
+  // 水平滑动且距离超过 30px 才响应
+  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 30) {
+    if (dx < 0) {
+      // 左滑 → 下一张
+      const group = a6.groups[groupIndex.value]
+      if (subIndex.value < group.imgs.length - 1) {
+        subIndex.value++
+      } else {
+        groupIndex.value = (groupIndex.value + 1) % a6.groups.length
+        subIndex.value = 0
+      }
+    } else {
+      // 右滑 → 上一张
+      if (subIndex.value > 0) {
+        subIndex.value--
+      } else {
+        groupIndex.value = (groupIndex.value - 1 + a6.groups.length) % a6.groups.length
+        subIndex.value = a6.groups[groupIndex.value].imgs.length - 1
+      }
+    }
+    // 用户交互后重置自动轮播计时
+    stopA6AutoPlay()
+    startA6AutoPlay()
+  }
+}
 
 onBeforeUnmount(stopA6AutoPlay)
 
@@ -207,7 +246,11 @@ function onNext() {
         <div v-else class="a6" key="activity6" @mouseenter="stopA6AutoPlay" @mouseleave="startA6AutoPlay">
           <div class="a6__bg"></div>
           <div class="a6__sub-title"><img :src="a6.subTitle" alt="" /></div>
-          <div class="a6__left-img">
+          <div
+            class="a6__left-img"
+            @touchstart.passive="onA6TouchStart"
+            @touchend="onA6TouchEnd"
+          >
             <img
               v-for="(src, i) in a6.groups[groupIndex].imgs"
               :key="i"
@@ -215,6 +258,15 @@ function onNext() {
               :class="{ 'is-active': subIndex === i }"
               alt=""
             />
+            <!-- 指示点：仅在当前项有多张图时显示 -->
+            <div v-if="a6.groups[groupIndex].imgs.length > 1" class="a6__dots">
+              <span
+                v-for="(_, i) in a6.groups[groupIndex].imgs"
+                :key="i"
+                :class="['a6__dot', { 'is-active': subIndex === i }]"
+                @click.stop="subIndex = i; stopA6AutoPlay(); startA6AutoPlay()"
+              />
+            </div>
           </div>
           <div class="a6__right-text"><img :src="a6.rightText" alt="" /></div>
           <div
@@ -226,6 +278,7 @@ function onNext() {
               { 'is-active': groupIndex === i }
             ]"
             @mouseenter="groupIndex = i; subIndex = 0"
+            @click="groupIndex = i; subIndex = 0; stopA6AutoPlay(); startA6AutoPlay()"
           >
             <img :src="group.line" alt="" />
           </div>
@@ -719,12 +772,38 @@ function onNext() {
       inset: 0;
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: cover;
       opacity: 0;
       transition: opacity 0.4s ease;
+      border-radius: d.w(40);
       &.is-active {
         opacity: 1;
       }
+    }
+  }
+
+  /* 图片指示点 - 叠在图片底部 */
+  &__dots {
+    position: absolute;
+    bottom: d.h(16);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: d.w(16);
+    z-index: 10;
+  }
+
+  &__dot {
+    width: d.w(16);
+    height: d.w(16);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.35);
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.3s ease;
+
+    &.is-active {
+      background: #fff;
+      transform: scale(1.3);
     }
   }
 
