@@ -78,7 +78,8 @@ function toggleVideo() {
   }
 }
 
-const bg = resolvePkgUrl(`common/${SCREEN}-bg.png`)
+const defaultBg = resolvePkgUrl(`common/${SCREEN}-bg.png`)
+const detailBg = resolvePkgUrl(`common/${SCREEN}-detail-bg.png`)
 const text = resolvePkgUrl(`common/${SCREEN}-text.png`)
 
 function asset(name: string) {
@@ -88,7 +89,7 @@ function asset(name: string) {
 
 <template>
   <main class="tl">
-    <img class="tl__bg" :src="bg" alt="" />
+    <img class="tl__bg" :src="activeId ? detailBg : defaultBg" alt="" />
 
     <!-- 待机：说明文字 -->
     <transition name="fade">
@@ -176,9 +177,9 @@ function asset(name: string) {
         v-if="activeId === 'excavation' && point?.detail"
         class="tl__content tl__content--excavation"
       >
+        <img class="tl__excavation ex-top-bg" :src="asset('top-right-bg.png')" alt="" />
         <img class="tl__excavation ex-top-title" :src="asset('top-title.png')" alt="" />
         <img class="tl__excavation ex-top-content" :src="asset('top-content.png')" alt="" />
-        <img class="tl__excavation ex-top-bg" :src="asset('top-right-bg.png')" alt="" />
         <img class="tl__excavation ex-bottom-title" :src="asset('bottom-title.png')" alt="" />
         <img class="tl__excavation ex-bottom-1" :src="asset('bttom-content-1.png')" alt="" />
         <img class="tl__excavation ex-bottom-2" :src="asset('bttom-content-2.png')" alt="" />

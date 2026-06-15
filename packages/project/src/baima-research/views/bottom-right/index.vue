@@ -43,10 +43,10 @@ const exGroups2 = computed(() => blockGroups(1))
         v-if="activeId === 'baima-bridge' && point?.detail"
         class="br__content br__content--baima"
       >
+        <img class="br__baima br-right-bg" :src="asset('right-bg.png')" alt="" />
         <img class="br__baima br-title" :src="asset('title.png')" alt="" />
         <img class="br__baima br-center" :src="asset('center.png')" alt="" />
         <img class="br__baima br-bottom" :src="asset('bottom.png')" alt="" />
-        <img class="br__baima br-right-bg" :src="asset('right-bg.png')" alt="" />
       </div>
     </transition>
 

@@ -76,13 +76,13 @@ export const POINTS: ResearchPoint[] = [
       'bottom-right': [
         // 展示位 1：3 组（测试一个组件展示多组数据）
         [
-          { files: ['files/file-1-1.png'], text: 'text-1-1.png' },
-          { files: ['files/file-2-1.png', 'files/file-2-2.png'], text: 'text-1-2.png' }
+          { files: ['files/file-1-1.png', 'files/file-1-2.png', 'files/file-1-3.png', 'files/file-1-4.png', 'files/file-1-5.png', 'files/file-1-6.png', 'files/file-1-7.png', 'files/file-1-1 copy.png'], text: 'text-1.png' },
+          { files: ['files/file-2-1.png', 'files/file-2-2.png', 'files/file-2-3.png', 'files/file-2-4.png'], text: 'text-2.png' }
         ],
         // 展示位 2：2 组
         [
-          { files: ['files/file-2-1.png', 'files/file-2-2.png'], text: 'text-2-1.png' },
-          { files: ['files/file-1-1.png'], text: 'text-2-2.png' }
+          { files: ['files/file-3-1.png', 'files/file-2-2.png', 'files/file-2-3.png', 'files/file-2-4.png'], text: 'text-3.png' },
+          { files: ['files/file-4-1.png', 'files/file-4-2.png', 'files/file-4-3.png', 'files/file-4-4.png', 'files/file-4-5.png', 'files/file-4-6.png'], text: 'text-4.png' }
         ]
       ]
     }
@@ -114,15 +114,14 @@ export const POINTS: ResearchPoint[] = [
     },
     images: {
       'bottom-left': [
-        [{ files: ['files/file-1-1.png'], text: 'text-1.png' }],
-        [{ files: ['files/file-2-1.png', 'files/file-2-2.png'], text: 'text-2.png' }],
+        [{ files: ['files/file-1-1.png','files/file-1-2.png'], text: 'text-1.png' }],
+        [{ files: ['files/file-2-1.png', 'files/file-2-2.png', 'files/file-2-1 copy.png'], text: 'text-2.png' }],
         [
           {
             files: [
               'files/file-3-1.png',
               'files/file-3-2.png',
-              'files/file-3-3.png',
-              'files/file-3-4.png'
+              'files/file-3-3.png'
             ],
             text: 'text-3.png'
           }
@@ -143,15 +142,14 @@ export const POINTS: ResearchPoint[] = [
     },
     images: {
       'bottom-left': [
-        [{ files: ['files/file-1-1.png'], text: 'text-1.png' }],
-        [{ files: ['files/file-2-1.png', 'files/file-2-2.png'], text: 'text-2.png' }],
+        [{ files: ['files/file-1-1.png','files/file-1-2.png'], text: 'text-1.png' }],
+        [{ files: ['files/file-2-1.png', 'files/file-2-2.png', 'files/file-2-1 copy.png'], text: 'text-2.png' }],
         [
           {
             files: [
               'files/file-3-1.png',
               'files/file-3-2.png',
-              'files/file-3-3.png',
-              'files/file-3-4.png'
+              'files/file-3-3.png'
             ],
             text: 'text-3.png'
           }
