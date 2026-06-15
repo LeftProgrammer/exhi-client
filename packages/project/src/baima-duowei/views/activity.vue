@@ -17,7 +17,8 @@ function onPageCmd(e: Event) {
 window.addEventListener('uec:page', onPageCmd)
 onBeforeUnmount(() => window.removeEventListener('uec:page', onPageCmd))
 
-const activeIndex = ref(0)
+const groupIndex = ref(0)
+const subIndex = ref(0)
 
 const headerBg = resolvePkgUrl('shared/header-bg.png')
 const headerTitle = resolvePkgUrl('activity/header-title.png')
@@ -83,9 +84,14 @@ const a6 = {
     height: 'd.h(477)'
   },
   subTitle: resolvePkgUrl('activity/activity6/sub-title.png'),
-  leftImgs: [1, 2, 3, 4, 5].map((n) => resolvePkgUrl(`activity/activity6/left-img-${n}.png`)),
   rightText: resolvePkgUrl('activity/activity6/right-text.png'),
-  rightLines: [1, 2, 3, 4, 5].map((n) => resolvePkgUrl(`activity/activity6/right-line-${n}.png`))
+  groups: [
+    { imgs: [resolvePkgUrl('activity/activity6/gallery/1-1.jpeg'),resolvePkgUrl('activity/activity6/gallery/1-2.jpeg')], line: resolvePkgUrl('activity/activity6/gallery/line-1.png') },
+    { imgs: [resolvePkgUrl('activity/activity6/gallery/2-1.jpeg'),resolvePkgUrl('activity/activity6/gallery/2-2.jpeg')], line: resolvePkgUrl('activity/activity6/gallery/line-2.png') },
+    { imgs: [resolvePkgUrl('activity/activity6/gallery/3-1.jpeg'),resolvePkgUrl('activity/activity6/gallery/3-2.jpeg'),resolvePkgUrl('activity/activity6/gallery/3-3.jpeg')], line: resolvePkgUrl('activity/activity6/gallery/line-3.png') },
+    { imgs: [resolvePkgUrl('activity/activity6/gallery/4-1.jpeg'),resolvePkgUrl('activity/activity6/gallery/4-2.jpeg')], line: resolvePkgUrl('activity/activity6/gallery/line-4.png') },
+    { imgs: [resolvePkgUrl('activity/activity6/gallery/5-1.jpeg'),resolvePkgUrl('activity/activity6/gallery/5-2.jpeg')], line: resolvePkgUrl('activity/activity6/gallery/line-5.png') },
+  ]
 }
 
 // a6 自动轮播
@@ -93,7 +99,13 @@ let a6Timer: ReturnType<typeof setInterval> | null = null
 const startA6AutoPlay = () => {
   stopA6AutoPlay()
   a6Timer = setInterval(() => {
-    activeIndex.value = (activeIndex.value + 1) % a6.rightLines.length
+    const group = a6.groups[groupIndex.value]
+    if (subIndex.value < group.imgs.length - 1) {
+      subIndex.value++
+    } else {
+      groupIndex.value = (groupIndex.value + 1) % a6.groups.length
+      subIndex.value = 0
+    }
   }, 3000)
 }
 const stopA6AutoPlay = () => {
@@ -107,7 +119,8 @@ watch(page, (p) => {
   if (p === 5) startA6AutoPlay()
   else {
     stopA6AutoPlay()
-    activeIndex.value = 0
+    groupIndex.value = 0
+    subIndex.value = 0
   }
 })
 
@@ -196,25 +209,25 @@ function onNext() {
           <div class="a6__sub-title"><img :src="a6.subTitle" alt="" /></div>
           <div class="a6__left-img">
             <img
-              v-for="(src, i) in a6.leftImgs"
+              v-for="(src, i) in a6.groups[groupIndex].imgs"
               :key="i"
               :src="src"
-              :class="{ 'is-active': activeIndex === i }"
+              :class="{ 'is-active': subIndex === i }"
               alt=""
             />
           </div>
           <div class="a6__right-text"><img :src="a6.rightText" alt="" /></div>
           <div
-            v-for="(src, i) in a6.rightLines"
+            v-for="(group, i) in a6.groups"
             :key="i"
             :class="[
               'a6__right-line',
               `a6__right-line--${i + 1}`,
-              { 'is-active': activeIndex === i }
+              { 'is-active': groupIndex === i }
             ]"
-            @mouseenter="activeIndex = i"
+            @mouseenter="groupIndex = i; subIndex = 0"
           >
-            <img :src="src" alt="" />
+            <img :src="group.line" alt="" />
           </div>
         </div>
       </Transition>

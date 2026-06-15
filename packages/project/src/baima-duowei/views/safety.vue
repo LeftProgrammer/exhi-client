@@ -81,8 +81,8 @@ const rightItems = [1, 2, 3, 4, 5, 6].map((n) => resolvePkgUrl(`safety/right-${n
   position: absolute;
   top: d.h(790);
   left: d.w(511);
-  right: d.h(479);
-  bottom: d.w(506);
+  width: d.w(2850);
+  height: d.h(864);
 }
 
 .safety__body-left {
