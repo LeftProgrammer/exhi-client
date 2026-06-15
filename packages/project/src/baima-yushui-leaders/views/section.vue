@@ -7,6 +7,7 @@ import { useViewTransition } from '@shared/composables/useViewTransition'
 import { usePageLeave } from '@shared/composables/usePageLeave'
 import { useProjectSfx } from '@shared/composables/useProjectSfx'
 import { useControl } from '@baima-yushui/composables/useControl'
+import { AUTOPLAY_INTERVAL_MS, AUTOPLAY_RESUME_MS } from '@shared/config'
 import StageFooter from '@baima-yushui/components/StageFooter.vue'
 import {
   blurDissolveOut,
@@ -140,8 +141,8 @@ function home() {
 }
 
 /** ===== 自动轮播 ===== */
-const AUTOPLAY_INTERVAL = 6000
-const IDLE_RESUME_MS = 20000
+const AUTOPLAY_INTERVAL = AUTOPLAY_INTERVAL_MS
+const IDLE_RESUME_MS = AUTOPLAY_RESUME_MS
 let autoplayTimer: number | null = null
 let idleTimer: number | null = null
 

@@ -5,17 +5,23 @@
       <img ref="titleRef" class="header-title" :src="url('page5/header-title.png')" alt="" />
     </template>
     <div
-      v-for="(_, i) in ENTRY_COUNT"
+      v-for="(item, i) in entries"
       :key="i"
       :ref="(el) => setWrapperRef(el, i)"
       class="entry-wrapper"
+      :style="{
+        '--aspect': `${item.width} / ${item.height}`,
+        '--dot-top': `${(item.dotY / item.height) * 100}%`,
+        '--dot-left': `${(item.dotX / item.width) * 100}%`,
+        '--dot-size': `${(item.dotSize / item.width) * 100}%`
+      }"
     >
       <img
         class="entry-item"
-        :src="url(`page5/entry-${String(i + 1).padStart(2, '0')}.png`)"
+        :src="url(item.src)"
         alt=""
       />
-      <div class="breath-line" v-if="i < ENTRY_COUNT - 1" />
+      <div class="breath-line" v-if="i < entries.length - 1" />
       <div class="breath-dot" />
     </div>
   </PageLayout>
@@ -25,10 +31,11 @@
 import { ref } from 'vue'
 import { resolvePkgUrl } from '@shared/utils/url'
 import { useTimelinePage } from '@baima-milestone/composables/useTimelinePage'
+import { page5Entries } from '@baima-milestone/data/slides'
 import PageLayout from './PageLayout.vue'
 
 const url = resolvePkgUrl
-const ENTRY_COUNT = 4
+const entries = page5Entries
 
 const layoutRef = ref<InstanceType<typeof PageLayout> | null>(null)
 const topBarRef = ref<HTMLImageElement | null>(null)
@@ -49,5 +56,5 @@ defineExpose({ play, reset })
 <style lang="scss" scoped>
 @use '@baima-milestone/styles/mixins' as local;
 
-@include local.timeline-entry(d.h(76), d.h(130));
+@include local.timeline-entry();
 </style>

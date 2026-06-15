@@ -4,6 +4,7 @@ import type { RouteLocationNormalizedLoaded } from 'vue-router'
 import { useRouter } from 'vue-router'
 import { useBridge } from '@shared/composables/useBridge'
 import { useIdleReset } from '@shared/composables/useIdleReset'
+import { IDLE_RESET_MS } from '@shared/config'
 import { useProjectSfx } from '@shared/composables/useProjectSfx'
 import { useControl } from '@baima-yushui/composables/useControl'
 
@@ -28,7 +29,7 @@ useIdleReset(() => {
   if (router.currentRoute.value.name !== 'home') {
     router.push({ name: 'home' })
   }
-}, 300_000)
+}, IDLE_RESET_MS)
 
 // 监听中控自定义事件（exhibitBridge.emit 由 main 进程或其他屏触发）
 on('app:home', () => router.push({ name: 'home' }))
