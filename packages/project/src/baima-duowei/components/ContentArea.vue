@@ -113,9 +113,10 @@ const overlayComputedStyle = computed(() => {
 <template>
   <div class="content-area__wrapper">
     <!-- 背景层 -->
-    <div class="content-area">
+    <!-- TODO: 暂时注释 -->
+    <!-- <div class="content-area">
       <img class="content-area__bg" :src="props.contentBg" alt="" />
-    </div>
+    </div> -->
 
     <!-- overlay：基于 content-area__wrapper（页面级）独立定位 -->
     <Transition name="overlay-fade" mode="out-in" appear>
