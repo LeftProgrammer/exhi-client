@@ -44,6 +44,7 @@ export function useControl() {
     syncVideoPause,
     syncVideoSeek,
     syncVideoSpeed,
+    syncVideoScrub,
     syncVideoVolume,
     syncVideoMute
   } = useScreenSync()
@@ -104,6 +105,11 @@ export function useControl() {
       rc.onCommand('video-mute', (p) => {
         const muted = p.muted !== undefined ? Boolean(p.muted) : true
         syncVideoMute(muted)
+      })
+      // 长按快进/快退（speed > 0 快进，speed < 0 快退，speed === 0 停止）
+      rc.onCommand('video-scrub', (p) => {
+        const speed = Number(p.speed)
+        if (!isNaN(speed)) syncVideoScrub(speed)
       })
 
       if (!isBrowserDev) {

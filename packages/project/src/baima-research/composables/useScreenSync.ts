@@ -18,6 +18,7 @@ type SyncMsg =
   | { type: 'research:video-speed'; rate: number }
   | { type: 'research:video-volume'; delta: number }
   | { type: 'research:video-mute'; muted: boolean }
+  | { type: 'research:video-scrub'; speed: number }
 
 /**
  * 架构（多设备分布式部署）：
@@ -60,6 +61,8 @@ function msgToCmd(msg: SyncMsg): Record<string, unknown> {
       return { cmd: 'video-volume', delta: msg.delta }
     case 'research:video-mute':
       return { cmd: 'video-mute', muted: msg.muted }
+    case 'research:video-scrub':
+      return { cmd: 'video-scrub', speed: msg.speed }
   }
 }
 
@@ -127,6 +130,11 @@ export function useScreenSync() {
     broadcast({ type: 'research:video-speed', rate })
   }
 
+  /** 主屏：通知所有副屏长按快进/快退（speed > 0 快进，speed < 0 快退，speed === 0 停止） */
+  function syncVideoScrub(speed: number) {
+    broadcast({ type: 'research:video-scrub', speed })
+  }
+
   /** 主屏：通知所有副屏调节音量（delta 单位：0~1，正数加大，负数减小） */
   function syncVideoVolume(delta: number) {
     broadcast({ type: 'research:video-volume', delta })
@@ -173,6 +181,11 @@ export function useScreenSync() {
     subscribe('research:video-speed', (msg) => cb(msg.rate))
   }
 
+  /** 副屏：监听长按快进/快退指令（speed > 0 快进，speed < 0 快退，speed === 0 停止） */
+  function onSyncVideoScrub(cb: (speed: number) => void) {
+    subscribe('research:video-scrub', (msg) => cb(msg.speed))
+  }
+
   /** 副屏：监听音量调节指令 */
   function onSyncVideoVolume(cb: (delta: number) => void) {
     subscribe('research:video-volume', (msg) => cb(msg.delta))
@@ -191,6 +204,7 @@ export function useScreenSync() {
     syncVideoPause,
     syncVideoSeek,
     syncVideoSpeed,
+    syncVideoScrub,
     syncVideoVolume,
     syncVideoMute,
     onSyncPoint,
@@ -199,6 +213,7 @@ export function useScreenSync() {
     onSyncVideoPause,
     onSyncVideoSeek,
     onSyncVideoSpeed,
+    onSyncVideoScrub,
     onSyncVideoVolume,
     onSyncVideoMute
   }

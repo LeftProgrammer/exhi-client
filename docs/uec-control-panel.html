@@ -205,9 +205,14 @@ body{display:flex}
       <div class="btn-row">
         <button class="cmd-btn" onclick="sendTo('research-main',{cmd:'video-play'})"><span class="label">播放</span><span class="payload">{"cmd":"video-play"}</span></button>
         <button class="cmd-btn" onclick="sendTo('research-main',{cmd:'video-pause'})"><span class="label">暂停</span><span class="payload">{"cmd":"video-pause"}</span></button>
-        <button class="cmd-btn" onclick="sendTo('research-main',{cmd:'video-speed',rate:0.5})"><span class="label">快退(0.5x)</span><span class="payload">{"cmd":"video-speed","rate":0.5}</span></button>
+        <button class="cmd-btn" onclick="sendTo('research-main',{cmd:'video-speed',rate:0.5})"><span class="label">慢放(0.5x)</span><span class="payload">{"cmd":"video-speed","rate":0.5}</span></button>
         <button class="cmd-btn" onclick="sendTo('research-main',{cmd:'video-speed',rate:2})"><span class="label">快进(2x)</span><span class="payload">{"cmd":"video-speed","rate":2}</span></button>
         <button class="cmd-btn" onclick="sendTo('research-main',{cmd:'video-speed',rate:1})"><span class="label">恢复正常(1x)</span><span class="payload">{"cmd":"video-speed","rate":1}</span></button>
+        <button class="cmd-btn" onclick="sendTo('research-main',{cmd:'video-seek',offset:-10})"><span class="label">后退 10s</span><span class="payload">{"cmd":"video-seek","offset":-10}</span></button>
+        <button class="cmd-btn" onclick="sendTo('research-main',{cmd:'video-seek',offset:10})"><span class="label">快进 10s</span><span class="payload">{"cmd":"video-seek","offset":10}</span></button>
+        <button class="cmd-btn" onmousedown="sendScrubStart(2)" onmouseup="sendScrubStop()" onmouseleave="sendScrubStop()"><span class="label">长按快进</span><span class="payload">{"cmd":"video-scrub","speed":2}</span></button>
+        <button class="cmd-btn" onmousedown="sendScrubStart(-2)" onmouseup="sendScrubStop()" onmouseleave="sendScrubStop()"><span class="label">长按快退</span><span class="payload">{"cmd":"video-scrub","speed":-2}</span></button>
+        <button class="cmd-btn" onclick="sendScrubStop()"><span class="label">停止 scrub</span><span class="payload">{"cmd":"video-scrub","speed":0}</span></button>
       </div>
     </div>
   </div>
@@ -337,9 +342,11 @@ function sendTo(target, payload) {
     log('WebSocket 未连接，无法发送', 'err');
     return;
   }
-  var data = { to: target, msg: payload };
+  // UEC 服务要求 msg 为字符串（与 Electron ws-client.sendApp 一致），否则转发内容为空
+  var data = { to: target, msg: JSON.stringify(payload) };
   websocket.send(JSON.stringify(data));
-  log('发送 → ' + JSON.stringify(data), 'out');
+  // 日志显示可读的原始 payload（不展示转义后的字符串）
+  log('发送 → ' + JSON.stringify({ to: target, msg: payload }), 'out');
 }
 
 function sendCustom() {
@@ -352,6 +359,24 @@ function sendCustom() {
   } catch (e) {
     log('JSON 解析失败: ' + e.message, 'err');
   }
+}
+
+/* 长按 scrub（快进/快退）：按下时发送 speed，抬起/移出时发送 0 */
+var scrubTimer = null;
+function sendScrubStart(speed) {
+  if (scrubTimer) clearInterval(scrubTimer);
+  sendTo('research-main', { cmd: 'video-scrub', speed: speed });
+  // 持续重发（防止网络丢包导致 scrub 停不下来）
+  scrubTimer = setInterval(function () {
+    sendTo('research-main', { cmd: 'video-scrub', speed: speed });
+  }, 500);
+}
+function sendScrubStop() {
+  if (scrubTimer) {
+    clearInterval(scrubTimer);
+    scrubTimer = null;
+  }
+  sendTo('research-main', { cmd: 'video-scrub', speed: 0 });
 }
 
 function log(text, cls) {
@@ -417,13 +442,14 @@ function copyText(text) {
 }
 
 function addCopyTag(btn) {
+  var payloadEl = btn.querySelector('.payload');
+  if (!payloadEl) return; // 没有 payload 的按钮不加 copy-tag
   var tag = document.createElement('span');
   tag.className = 'copy-tag';
   tag.textContent = '复制JSON';
   tag.addEventListener('click', function (e) {
     e.stopPropagation();
-    var payloadEl = btn.querySelector('.payload');
-    if (payloadEl) copyText(payloadEl.textContent);
+    copyText(payloadEl.textContent);
   });
   btn.appendChild(tag);
 }

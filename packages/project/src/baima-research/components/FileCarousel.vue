@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, onBeforeUnmount } from 'vue'
+import { CAROUSEL_INTERVAL_MS } from '../data/config'
 
 /**
  * 文件轮播组件（卡片栈），基于 bottom-left 的可用实现封装。
@@ -58,7 +59,7 @@ const props = withDefaults(
   {
     textGap: 20,
     autoplay: true,
-    interval: 4000,
+    interval: CAROUSEL_INTERVAL_MS,
     contentScale() {
       return { x: 0.94, y: 0.96 }
     },

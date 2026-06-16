@@ -96,10 +96,14 @@ control.sendTo('screen-2', { cmd: 'home' })
 | 选中点位（兼容） | `{ "cmd": "goto", "id": "baima-bridge" }` | 同上 |
 | 播放视频 | `{ "cmd": "video-play" }` | 播放当前点位视频 |
 | 暂停视频 | `{ "cmd": "video-pause" }` | 暂停当前点位视频 |
-| 快进播放 | `{ "cmd": "video-speed", "rate": 2 }` | 2 倍速快进 |
-| 快退播放 | `{ "cmd": "video-speed", "rate": 0.5 }` | 0.5 倍速回看 |
+| 快进（2x） | `{ "cmd": "video-speed", "rate": 2 }` | 2 倍速快进（仅正向） |
+| 慢放（0.5x） | `{ "cmd": "video-speed", "rate": 0.5 }` | 0.5 倍速慢放（仅正向） |
 | 恢复正常 | `{ "cmd": "video-speed", "rate": 1 }` | 恢复 1 倍速 |
-| 跳时间 | `{ "cmd": "video-seek", "offset": 10 }` | 当前时间 +10 秒（可选） |
+| 快进 10s | `{ "cmd": "video-seek", "offset": 10 }` | 当前时间 +10 秒（单击） |
+| 后退 10s | `{ "cmd": "video-seek", "offset": -10 }` | 当前时间 -10 秒（单击） |
+| 长按快进 | `{ "cmd": "video-scrub", "speed": 2 }` | 持续快进：正向按 `speed` 倍速播放（需配合 `speed:0` 停止） |
+| 长按快退 | `{ "cmd": "video-scrub", "speed": -2 }` | 持续快退：定时回退（需配合 `speed:0` 停止） |
+| 停止 scrub | `{ "cmd": "video-scrub", "speed": 0 }` | 停止长按快进/快退，恢复倍速为 1 并还原播放/暂停 |
 | 音量加大 | `{ "cmd": "video-volume", "delta": 0.1 }` | 音量增加 10%（0~1 范围） |
 | 音量减小 | `{ "cmd": "video-volume", "delta": -0.1 }` | 音量减小 10% |
 | 静音 | `{ "cmd": "video-mute", "muted": true }` | 静音 |
@@ -107,10 +111,11 @@ control.sendTo('screen-2', { cmd: 'home' })
 
 ### 字段说明
 
-- `cmd` —— 指令类型：`home` / `point` / `goto` / `video-play` / `video-pause` / `video-speed` / `video-seek` / `video-volume` / `video-mute`
+- `cmd` —— 指令类型：`home` / `point` / `goto` / `video-play` / `video-pause` / `video-speed` / `video-seek` / `video-scrub` / `video-volume` / `video-mute`
 - `id` —— 点位标识，见下表
-- `rate` —— 视频播放倍速，如 `0.5`、`1`、`2`
+- `rate` —— 视频播放倍速，如 `0.5`、`1`、`2`（仅正向，不支持倒放）
 - `offset` —— 视频 seek 偏移量（秒），正数向后跳，负数向前跳
+- `speed` —— 长按快进/快退速度，`0` 表示停止并恢复；正数走 `playbackRate` 倍速播放（如 `2` = 2 倍速，上限 16），负数走定时 seek 回退（绝对值越大回退越快）
 - `delta` —— 音量变化量（0~1），正数加大，负数减小
 - `muted` —— 是否静音：`true` 静音，`false` 恢复
 
@@ -129,8 +134,8 @@ control.sendTo('screen-2', { cmd: 'home' })
 
 ### 无"恢复"按钮的操作逻辑
 
-- 点了快进（2x）→ 点暂停 → 再点播放 → **自动恢复 1 倍速**
-- 点了快退（0.5x）→ 点暂停 → 再点播放 → **自动恢复 1 倍速**
+- 点了快进（2x）或慢放（0.5x）→ 点暂停 → 再点播放 → **自动恢复 1 倍速**
+- 长按快进/快退（video-scrub）→ 松开自动停止 → 恢复之前的播放/暂停状态
 
 ### 项目交互说明
 

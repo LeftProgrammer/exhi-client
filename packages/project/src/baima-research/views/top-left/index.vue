@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onBeforeUnmount } from 'vue'
 import { resolvePkgUrl } from '@shared/utils/url'
 import { useScreenSync, getDebugPoint } from '../../composables/useScreenSync'
 import { getPoint } from '../../data/points'
@@ -13,18 +13,22 @@ const {
   onSyncVideoSeek,
   onSyncVideoSpeed,
   onSyncVideoVolume,
-  onSyncVideoMute
+  onSyncVideoMute,
+  onSyncVideoScrub
 } = useScreenSync()
 
 // dev 调试：可通过 URL ?point=baima-bridge 直接预览选中态
 const activeId = ref<string | null>(getDebugPoint())
+
 onSyncPoint((id) => {
   activeId.value = id
   isPaused.value = true
+  stopVideoScrub()
 })
 onSyncIdle(() => {
   activeId.value = null
   isPaused.value = true
+  stopVideoScrub()
 })
 
 onSyncVideoPlay(() => {
@@ -71,6 +75,80 @@ onSyncVideoMute((muted) => {
   if (!v) return
   v.muted = muted
 })
+
+// 长按快进/快退：speed > 0 快进，speed < 0 快退，speed === 0 停止
+// 正向：用 playbackRate 正常倍速播放（画面流畅、有声）。
+// 反向：playbackRate 不支持负值，用降频 seek 回退（throttle 避免 seek 互相打断导致卡帧）。
+let rewindTimer: number | null = null
+let rewindLastTime = 0
+let wasPlayingBeforeScrub = false
+
+// 反向快退 seek 间隔（ms）；过小会让 seek 来不及完成导致卡帧
+const REWIND_STEP_MS = 100
+
+function stopRewind() {
+  if (rewindTimer !== null) {
+    clearInterval(rewindTimer)
+    rewindTimer = null
+  }
+}
+
+onSyncVideoScrub((speed) => {
+  const v = videoRef.value
+  if (!v) return
+
+  // 任何新指令先停掉上一次的 scrub 状态
+  stopVideoScrub()
+
+  if (speed === 0) {
+    v.playbackRate = 1
+    if (wasPlayingBeforeScrub) {
+      v.play()
+      isPaused.value = false
+    } else {
+      v.pause()
+      isPaused.value = true
+    }
+    return
+  }
+
+  wasPlayingBeforeScrub = !v.paused
+
+  if (speed > 0) {
+    // 正向快进：倍速正常播放
+    v.playbackRate = Math.min(16, speed)
+    v.play()
+    isPaused.value = false
+  } else {
+    // 反向快退：定时回退 currentTime
+    v.pause()
+    isPaused.value = false
+    rewindLastTime = performance.now()
+    rewindTimer = window.setInterval(() => {
+      const ve = videoRef.value
+      if (!ve) { stopRewind(); return }
+      const now = performance.now()
+      const dt = (now - rewindLastTime) / 1000
+      rewindLastTime = now
+      const target = ve.currentTime + dt * speed // speed < 0，向前回退
+      if (target <= 0) {
+        ve.currentTime = 0
+        stopRewind()
+        return
+      }
+      ve.currentTime = target
+    }, REWIND_STEP_MS)
+  }
+})
+
+// 统一停止入口：清理快进倍速 + 反向定时器
+function stopVideoScrub() {
+  stopRewind()
+  const v = videoRef.value
+  if (v && v.playbackRate !== 1) v.playbackRate = 1
+}
+
+onBeforeUnmount(() => stopVideoScrub())
 
 const point = computed(() => getPoint(activeId.value))
 
@@ -399,7 +477,7 @@ function asset(name: string) {
       .tl__video-player {
         width: 96%;
         height: 90%;
-        object-fit: cover;
+        object-fit: contain;
         border-radius: d.w(20);
       }
 
