@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>UEC 中控对接测试面板 — 白马展厅</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;background:#f0f2f5}
+body{display:flex}
+.sidebar{width:380px;flex-shrink:0;background:#fff;border-right:1px solid #e0e0e0;padding:20px;overflow-y:auto;display:flex;flex-direction:column;gap:16px}
+.sidebar h1{font-size:18px;color:#1a1a1a}
+.sidebar .sub{font-size:12px;color:#888}
+.conn-box{background:#f7f9fc;border:1px solid #e4e7ed;border-radius:8px;padding:14px}
+.conn-box label{display:block;font-size:12px;color:#666;margin-bottom:4px;margin-top:10px}
+.conn-box label:first-of-type{margin-top:0}
+.conn-box input{width:100%;padding:7px 10px;border:1px solid #d0d5dd;border-radius:5px;font-size:13px;font-family:inherit}
+.conn-box input:focus{outline:none;border-color:#1a73e8}
+.conn-btns{display:flex;gap:8px;margin-top:12px}
+.conn-btns button{flex:1;padding:8px 0;border:1px solid #d0d5dd;border-radius:5px;background:#fff;cursor:pointer;font-size:13px;transition:.15s}
+.conn-btns button:hover{background:#e8f0fe;border-color:#aecbfa}
+.conn-btns button.primary{background:#1a73e8;color:#fff;border-color:#1a73e8}
+.conn-btns button.primary:hover{background:#1557b0}
+.conn-btns button.warn{background:#e53935;color:#fff;border-color:#e53935}
+.conn-status{font-size:12px;color:#888;margin-top:8px;text-align:center}
+.conn-status.ok{color:#0b8043}
+.conn-status.err{color:#c5221f}
+.log-panel{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.log-header{padding:14px 20px;background:#fff;border-bottom:1px solid #e0e0e0;display:flex;justify-content:space-between;align-items:center}
+.log-header h2{font-size:15px;color:#333;font-weight:500}
+.log-header button{padding:5px 12px;font-size:12px;border:1px solid #ddd;border-radius:4px;background:#fff;cursor:pointer;color:#666}
+#message{flex:1;overflow-y:auto;padding:16px 20px;font-size:13px;line-height:1.7}
+#message .row{margin-bottom:6px}
+#message .ts{color:#999;font-size:11px;margin-right:6px}
+#message .out{color:#0b8043}
+#message .in{color:#1a73e8}
+#message .err{color:#c5221f}
+#message pre{display:inline;white-space:pre-wrap;word-break:break-all;font-family:"SF Mono",Monaco,Consolas,monospace;font-size:12px}
+.main-scroll{flex:1;overflow-y:auto;padding:20px 24px}
+.project{background:#fff;border-radius:10px;border:1px solid #e4e7ed;margin-bottom:20px;overflow:hidden}
+.project-header{padding:14px 18px;background:#f7f9fc;border-bottom:1px solid #e4e7ed;display:flex;justify-content:space-between;align-items:center}
+.project-header h3{font-size:15px;color:#1a1a1a;font-weight:600}
+.project-header .hub-id{font-size:12px;color:#666;background:#e8f0fe;padding:3px 10px;border-radius:12px;font-family:monospace}
+.project-body{padding:14px 18px}
+.group{margin-bottom:14px}
+.group:last-child{margin-bottom:0}
+.group-title{font-size:13px;color:#555;margin-bottom:8px;font-weight:500}
+.btn-row{display:flex;flex-wrap:wrap;gap:8px}
+.cmd-btn{display:inline-flex;flex-direction:column;align-items:flex-start;padding:8px 12px;border:1px solid #d0d5dd;border-radius:6px;background:#fff;cursor:pointer;font-size:13px;color:#1a1a1a;transition:.15s;min-width:0}
+.cmd-btn:hover{background:#e8f0fe;border-color:#aecbfa}
+.cmd-btn:active{transform:translateY(1px)}
+.cmd-btn .label{font-weight:500;margin-bottom:3px;white-space:nowrap}
+.cmd-btn .payload{font-size:11px;color:#888;font-family:"SF Mono",Monaco,Consolas,monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:240px}
+.cmd-btn:hover .payload{color:#555}
+.cmd-btn{position:relative}
+.copy-tag{position:absolute;top:4px;right:4px;display:none;font-size:10px;padding:2px 6px;background:#e8f0fe;border:1px solid #aecbfa;border-radius:4px;cursor:pointer;color:#1a73e8;z-index:10;line-height:1}
+.cmd-btn:hover .copy-tag{display:block}
+.copy-tag:hover{background:#1a73e8;color:#fff;border-color:#1a73e8}
+.input-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.input-row input{width:70px;padding:5px 8px;border:1px solid #d0d5dd;border-radius:4px;font-size:13px}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div><h1>UEC 中控对接测试面板</h1><div class="sub">白马展厅 · 各项目中控指令速查与测试</div></div>
+  <div class="conn-box">
+    <label>WebSocket 地址</label>
+    <input id="wsUrl" type="text" value="wss://www.zzqxs.cn/uec/UECServer/ws/webSocketServer.do">
+    <label>本机 ID（连接标识）</label>
+    <input id="myId" type="text" value="test-controller" placeholder="如 test-pc">
+    <label>默认目标设备</label>
+    <input id="targetId" type="text" value="yushui" placeholder="如 yushui / duowei / milestone">
+    <div class="conn-btns">
+      <button class="primary" onclick="connect()">连接</button>
+      <button class="warn" onclick="disconnect()">断开</button>
+    </div>
+    <div class="conn-status" id="connStatus">未连接</div>
+  </div>
+  <div style="font-size:12px;color:#888;line-height:1.6;">
+    <strong style="color:#555;">使用说明：</strong><br>
+    1. 填写 WS 地址和本机 ID，点击「连接」。<br>
+    2. 每个按钮上标注了发送的消息格式（JSON）。<br>
+    3. 点击按钮即可发送测试；项目内各按钮已绑定对应 hub id。<br>
+    4. 右侧查看发送/接收日志。<br>
+    5. <strong>扩展：</strong>新增按钮按 JSON 格式增加即可。
+  </div>
+</div>
+
+<div class="log-panel">
+  <div class="log-header"><h2>消息日志</h2><button onclick="clearLog()">清空</button></div>
+  <div id="message"></div>
+</div>
+
+<div class="main-scroll">
+
+<!-- ===== yushui ===== -->
+<div class="project">
+  <div class="project-header"><h3>白马展厅 · 渝水新景 + 领导关怀</h3><span class="hub-id">hub id: yushui</span></div>
+  <div class="project-body">
+    <div class="group">
+      <div class="group-title">板块跳转</div>
+      <div class="btn-row">
+        <button class="cmd-btn" onclick="sendTo('yushui',{cmd:'home'})"><span class="label">首页</span><span class="payload">{"cmd":"home"}</span></button>
+        <button class="cmd-btn" onclick="sendTo('yushui',{cmd:'goto',target:'yushui'})"><span class="label">渝水新景</span><span class="payload">{"cmd":"goto","target":"yushui"}</span></button>
+        <button class="cmd-btn" onclick="sendTo('yushui',{cmd:'goto',target:'leaders'})"><span class="label">领导关怀</span><span class="payload">{"cmd":"goto","target":"leaders"}</span></button>
+      </div>
+    </div>
+    <div class="group">
+      <div class="group-title">分类切换（仅领导关怀板块）</div>
+      <div class="btn-row">
+        <button class="cmd-btn" onclick="sendTo('yushui',{cmd:'category',id:'1'})"><span class="label">2023年-2024年</span><span class="payload">{"cmd":"category","id":"1"}</span></button>
+        <button class="cmd-btn" onclick="sendTo('yushui',{cmd:'category',id:'2'})"><span class="label">2025年</span><span class="payload">{"cmd":"category","id":"2"}</span></button>
+      </div>
+    </div>
+    <div class="group">
+      <div class="group-title">翻页控制</div>
+      <div class="btn-row">
+        <button class="cmd-btn" onclick="sendTo('yushui',{cmd:'page',action:'prev'})"><span class="label">上一页</span><span class="payload">{"cmd":"page","action":"prev"}</span></button>
+        <button class="cmd-btn" onclick="sendTo('yushui',{cmd:'page',action:'next'})"><span class="label">下一页</span><span class="payload">{"cmd":"page","action":"next"}</span></button>
+        <div class="input-row"><input id="yushuiPageIdx" type="number" min="0" placeholder="页码"><button class="cmd-btn" onclick="var ypi=document.getElementById('yushuiPageIdx').value;sendTo('yushui',{cmd:'page',index:Number(ypi)})" style="padding:6px 10px;"><span class="label">跳到指定页</span><span class="payload">{"cmd":"page","index":N}</span></button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== milestone ===== -->
+<div class="project">
+  <div class="project-header"><h3>白马展厅 · 里程碑滑轨</h3><span class="hub-id">hub id: milestone</span></div>
+  <div class="project-body">
+    <div class="group">
+      <div class="group-title">页面跳转</div>
+      <div class="btn-row">
+        <button class="cmd-btn" onclick="sendTo('milestone',{cmd:'home'})"><span class="label">首页（第1页）</span><span class="payload">{"cmd":"home"}</span></button>
+        <div class="input-row"><input id="milestonePageIdx" type="number" min="0" placeholder="页码"><button class="cmd-btn" onclick="var mpi=document.getElementById('milestonePageIdx').value;sendTo('milestone',{cmd:'goto',index:Number(mpi)})" style="padding:6px 10px;"><span class="label">切到第几页</span><span class="payload">{"cmd":"goto","index":N}</span></button></div>
+      </div>
+    </div>
+    <div class="group">
+      <div class="group-title">自动滚动控制（当前页）</div>
+      <div class="btn-row">
+        <button class="cmd-btn" onclick="sendTo('milestone',{cmd:'scrollPlay'})"><span class="label">播放</span><span class="payload">{"cmd":"scrollPlay"}</span></button>
+        <button class="cmd-btn" onclick="sendTo('milestone',{cmd:'scrollPause'})"><span class="label">暂停</span><span class="payload">{"cmd":"scrollPause"}</span></button>
+        <button class="cmd-btn" onclick="sendTo('milestone',{cmd:'scrollReset'})"><span class="label">重置</span><span class="payload">{"cmd":"scrollReset"}</span></button>
+      </div>
+    </div>
+    <div class="group">
+      <div class="group-title">翻页控制</div>
+      <div class="btn-row">
+        <button class="cmd-btn" onclick="sendTo('milestone',{cmd:'page',action:'prev'})"><span class="label">上一页</span><span class="payload">{"cmd":"page","action":"prev"}</span></button>
+        <button class="cmd-btn" onclick="sendTo('milestone',{cmd:'page',action:'next'})"><span class="label">下一页</span><span class="payload">{"cmd":"page","action":"next"}</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== duowei ===== -->
+<div class="project">
+  <div class="project-header"><h3>白马展厅 · 多维筑安</h3><span class="hub-id">hub id: duowei</span></div>
+  <div class="project-body">
+    <div class="group">
+      <div class="group-title">板块跳转</div>
+      <div class="btn-row">
+        <button class="cmd-btn" onclick="sendTo('duowei',{cmd:'home'})"><span class="label">首页</span><span class="payload">{"cmd":"home"}</span></button>
+        <button class="cmd-btn" onclick="sendTo('duowei',{cmd:'goto',target:'safety'})"><span class="label">安全成效</span><span class="payload">{"cmd":"goto","target":"safety"}</span></button>
+        <button class="cmd-btn" onclick="sendTo('duowei',{cmd:'goto',target:'tech'})"><span class="label">智慧技术</span><span class="payload">{"cmd":"goto","target":"tech"}</span></button>
+        <button class="cmd-btn" onclick="sendTo('duowei',{cmd:'goto',target:'activity'})"><span class="label">安全活动</span><span class="payload">{"cmd":"goto","target":"activity"}</span></button>
+        <button class="cmd-btn" onclick="sendTo('duowei',{cmd:'goto',target:'standard'})"><span class="label">标准化建设</span><span class="payload">{"cmd":"goto","target":"standard"}</span></button>
+      </div>
+    </div>
+    <div class="group">
+      <div class="group-title">翻页控制</div>
+      <div class="btn-row">
+        <button class="cmd-btn" onclick="sendTo('duowei',{cmd:'page',action:'prev'})"><span class="label">上一页</span><span class="payload">{"cmd":"page","action":"prev"}</span></button>
+        <button class="cmd-btn" onclick="sendTo('duowei',{cmd:'page',action:'next'})"><span class="label">下一页</span><span class="payload">{"cmd":"page","action":"next"}</span></button>
+        <div class="input-row"><input id="duoweiPageIdx" type="number" min="0" placeholder="页码"><button class="cmd-btn" onclick="var dpi=document.getElementById('duoweiPageIdx').value;sendTo('duowei',{cmd:'page',index:Number(dpi)})" style="padding:6px 10px;"><span class="label">跳到指定页</span><span class="payload">{"cmd":"page","index":N}</span></button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== research ===== -->
+<div class="project">
+  <div class="project-header"><h3>白马展厅 · 科研创新</h3><span class="hub-id">hub id: research-main</span></div>
+  <div class="project-body">
+    <div class="group">
+      <div class="group-title">首页</div>
+      <div class="btn-row">
+        <button class="cmd-btn" onclick="sendTo('research-main',{cmd:'home'})"><span class="label">首页</span><span class="payload">{"cmd":"home"}</span></button>
+      </div>
+    </div>
+    <div class="group">
+      <div class="group-title">选中点位</div>
+      <div class="btn-row">
+        <button class="cmd-btn" onclick="sendTo('research-main',{cmd:'point',id:'excavation'})"><span class="label">绿色开挖料</span><span class="payload">{"cmd":"point","id":"excavation"}</span></button>
+        <button class="cmd-btn" onclick="sendTo('research-main',{cmd:'point',id:'navigation'})"><span class="label">急弯通航</span><span class="payload">{"cmd":"point","id":"navigation"}</span></button>
+        <button class="cmd-btn" onclick="sendTo('research-main',{cmd:'point',id:'coating'})"><span class="label">聚脲涂层</span><span class="payload">{"cmd":"point","id":"coating"}</span></button>
+        <button class="cmd-btn" onclick="sendTo('research-main',{cmd:'point',id:'concrete'})"><span class="label">抗冲磨混凝土</span><span class="payload">{"cmd":"point","id":"concrete"}</span></button>
+        <button class="cmd-btn" onclick="sendTo('research-main',{cmd:'point',id:'slope'})"><span class="label">高边坡建模</span><span class="payload">{"cmd":"point","id":"slope"}</span></button>
+        <button class="cmd-btn" onclick="sendTo('research-main',{cmd:'point',id:'baima-bridge'})"><span class="label">白马大桥</span><span class="payload">{"cmd":"point","id":"baima-bridge"}</span></button>
+        <button class="cmd-btn" onclick="sendTo('research-main',{cmd:'point',id:'blasting'})"><span class="label">旧桥爆破</span><span class="payload">{"cmd":"point","id":"blasting"}</span></button>
+        <button class="cmd-btn" onclick="sendTo('research-main',{cmd:'point',id:'turbine'})"><span class="label">水轮机</span><span class="payload">{"cmd":"point","id":"turbine"}</span></button>
+      </div>
+    </div>
+    <div class="group">
+      <div class="group-title">视频控制</div>
+      <div class="btn-row">
+        <button class="cmd-btn" onclick="sendTo('research-main',{cmd:'video-play'})"><span class="label">播放</span><span class="payload">{"cmd":"video-play"}</span></button>
+        <button class="cmd-btn" onclick="sendTo('research-main',{cmd:'video-pause'})"><span class="label">暂停</span><span class="payload">{"cmd":"video-pause"}</span></button>
+        <button class="cmd-btn" onclick="sendTo('research-main',{cmd:'video-speed',rate:0.5})"><span class="label">快退(0.5x)</span><span class="payload">{"cmd":"video-speed","rate":0.5}</span></button>
+        <button class="cmd-btn" onclick="sendTo('research-main',{cmd:'video-speed',rate:2})"><span class="label">快进(2x)</span><span class="payload">{"cmd":"video-speed","rate":2}</span></button>
+        <button class="cmd-btn" onclick="sendTo('research-main',{cmd:'video-speed',rate:1})"><span class="label">恢复正常(1x)</span><span class="payload">{"cmd":"video-speed","rate":1}</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== zhineng ===== -->
+<div class="project">
+  <div class="project-header"><h3>白马展厅 · 职能建设</h3><span class="hub-id">hub id: zhineng</span></div>
+  <div class="project-body">
+    <div class="group">
+      <div class="group-title">页面跳转</div>
+      <div class="btn-row">
+        <button class="cmd-btn" onclick="sendTo('zhineng',{cmd:'home'})"><span class="label">首页</span><span class="payload">{"cmd":"home"}</span></button>
+        <button class="cmd-btn" onclick="sendTo('zhineng',{cmd:'goto',target:'zhidu'})"><span class="label">制度建设</span><span class="payload">{"cmd":"goto","target":"zhidu"}</span></button>
+        <button class="cmd-btn" onclick="sendTo('zhineng',{cmd:'goto',target:'guihua'})"><span class="label">规划建设</span><span class="payload">{"cmd":"goto","target":"guihua"}</span></button>
+        <button class="cmd-btn" onclick="sendTo('zhineng',{cmd:'goto',target:'xingdong'})"><span class="label">行动实施</span><span class="payload">{"cmd":"goto","target":"xingdong"}</span></button>
+      </div>
+    </div>
+    <div class="group">
+      <div class="group-title">翻页 / 切 tab</div>
+      <div class="btn-row">
+        <button class="cmd-btn" onclick="sendTo('zhineng',{cmd:'page',action:'prev'})"><span class="label">上一页</span><span class="payload">{"cmd":"page","action":"prev"}</span></button>
+        <button class="cmd-btn" onclick="sendTo('zhineng',{cmd:'page',action:'next'})"><span class="label">下一页</span><span class="payload">{"cmd":"page","action":"next"}</span></button>
+        <div class="input-row"><input id="zhinengPageIdx" type="number" min="0" placeholder="页码"><button class="cmd-btn" onclick="var zpi=document.getElementById('zhinengPageIdx').value;sendTo('zhineng',{cmd:'page',index:Number(zpi)})" style="padding:6px 10px;"><span class="label">跳到指定页</span><span class="payload">{"cmd":"page","index":N}</span></button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== custom ===== -->
+<div class="project">
+  <div class="project-header"><h3>自定义消息（调试验证）</h3><span class="hub-id">任意 target</span></div>
+  <div class="project-body">
+    <div class="group">
+      <div class="group-title">直接发送原始 JSON</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <input id="customTarget" type="text" placeholder="目标设备" value="yushui" style="width:120px;padding:6px 10px;border:1px solid #d0d5dd;border-radius:4px;font-size:13px;">
+        <input id="customMsg" type="text" placeholder='{"cmd":"home"}' style="flex:1;min-width:200px;padding:6px 10px;border:1px solid #d0d5dd;border-radius:4px;font-size:13px;">
+        <button class="cmd-btn" onclick="sendCustom()" style="padding:6px 14px;"><span class="label">发送</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+var websocket = null;
+var tt = null;
+var lockReconnect = false;
+
+function getWsUrl() {
+  return document.getElementById('wsUrl').value.trim()
+    + '?id=' + encodeURIComponent(document.getElementById('myId').value.trim() || 'test-controller');
+}
+
+function connect() {
+  if (websocket && (websocket.readyState === WebSocket.OPEN || websocket.readyState === WebSocket.CONNECTING)) {
+    log('已在连接中，请先断开', 'err');
+    return;
+  }
+  createWebSocket();
+}
+
+function createWebSocket() {
+  try {
+    init();
+  } catch (e) {
+    console.log('exception', e);
+    reconnect();
+  }
+}
+
+function init() {
+  var url = getWsUrl();
+  log('正在连接: ' + url, 'info');
+  websocket = new WebSocket(url);
+
+  websocket.onerror = function () {
+    log('WebSocket 连接发生错误', 'err');
+    reconnect();
+  };
+
+  websocket.onopen = function () {
+    log('WebSocket 连接成功', 'info');
+    document.getElementById('connStatus').textContent = '已连接';
+    document.getElementById('connStatus').className = 'conn-status ok';
+    heartbeat.start();
+  };
+
+  websocket.onmessage = function (e) {
+    if (e.data === 'heartbeat') {
+      log('收到心跳反馈', 'in');
+    } else {
+      log('收到: ' + e.data, 'in');
+    }
+    heartbeat.start();
+  };
+
+  websocket.onclose = function () {
+    log('WebSocket 连接关闭', 'err');
+    document.getElementById('connStatus').textContent = '已断开';
+    document.getElementById('connStatus').className = 'conn-status err';
+  };
+}
+
+function disconnect() {
+  if (websocket != null) {
+    websocket.close();
+    websocket = null;
+  }
+  log('已断开', 'info');
+  document.getElementById('connStatus').textContent = '未连接';
+  document.getElementById('connStatus').className = 'conn-status';
+}
+
+function sendTo(target, payload) {
+  if (!websocket || websocket.readyState !== WebSocket.OPEN) {
+    log('WebSocket 未连接，无法发送', 'err');
+    return;
+  }
+  var data = { to: target, msg: payload };
+  websocket.send(JSON.stringify(data));
+  log('发送 → ' + JSON.stringify(data), 'out');
+}
+
+function sendCustom() {
+  var raw = document.getElementById('customMsg').value.trim();
+  if (!raw) return;
+  try {
+    var obj = JSON.parse(raw);
+    var t = document.getElementById('customTarget').value.trim() || 'yushui';
+    sendTo(t, obj);
+  } catch (e) {
+    log('JSON 解析失败: ' + e.message, 'err');
+  }
+}
+
+function log(text, cls) {
+  var el = document.getElementById('message');
+  var ts = new Date().toLocaleTimeString();
+  var c = cls ? ' class="' + cls + '"' : '';
+  el.innerHTML += '<div class="row"><span class="ts">[' + ts + ']</span><span' + c + '>' + escapeHtml(text) + '</span></div>';
+  el.scrollTop = el.scrollHeight;
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function clearLog() {
+  document.getElementById('message').innerHTML = '';
+}
+
+function reconnect() {
+  if (lockReconnect) return;
+  lockReconnect = true;
+  tt && clearTimeout(tt);
+  tt = setTimeout(function () {
+    createWebSocket();
+    lockReconnect = false;
+  }, 3000);
+}
+
+var heartbeat = {
+  timeout: 20000,
+  timeoutObj: null,
+  serverTimeoutObj: null,
+  start: function () {
+    var self = this;
+    this.timeoutObj && clearTimeout(this.timeoutObj);
+    this.serverTimeoutObj && clearTimeout(this.serverTimeoutObj);
+    this.timeoutObj = setTimeout(function () {
+      if (websocket && websocket.readyState === WebSocket.OPEN) {
+        websocket.send('heartbeat');
+      }
+      self.serverTimeoutObj = setTimeout(function () {
+        if (websocket) websocket.close();
+      }, self.timeout);
+    }, this.timeout);
+  }
+};
+
+/* ===== 一键复制 payload JSON ===== */
+function copyText(text) {
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try {
+    document.execCommand('copy');
+    log('已复制: ' + text, 'info');
+  } catch (err) {
+    log('复制失败', 'err');
+  }
+  document.body.removeChild(ta);
+}
+
+function addCopyTag(btn) {
+  var tag = document.createElement('span');
+  tag.className = 'copy-tag';
+  tag.textContent = '复制JSON';
+  tag.addEventListener('click', function (e) {
+    e.stopPropagation();
+    var payloadEl = btn.querySelector('.payload');
+    if (payloadEl) copyText(payloadEl.textContent);
+  });
+  btn.appendChild(tag);
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.cmd-btn').forEach(addCopyTag);
+});
+</script>
+</body>
+</html>
