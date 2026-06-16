@@ -25,7 +25,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { usePageScroll } from '@shared/composables/usePageScroll'
-import { SCROLL_HOLD_MS, SCROLL_LOOP_BOTTOM_MS } from '@baima-milestone/data/config'
+import { SCROLL_HOLD_MS, SCROLL_SPEED } from '@baima-milestone/data/config'
 
 defineProps<{ bg: string; deco?: string }>()
 
@@ -44,7 +44,11 @@ const {
   onTouchMove,
   onTouchEnd,
   onClick
-} = usePageScroll(wrapperRef, contentRef, SCROLL_HOLD_MS, SCROLL_LOOP_BOTTOM_MS)
+} = usePageScroll(wrapperRef, contentRef, {
+  holdMs: SCROLL_HOLD_MS,
+  loopBottomMs: 0, // 不循环，到底即停
+  speed: SCROLL_SPEED,
+})
 
 defineExpose({ bgEl: bgRef, decoEl: decoRef, scheduleAutoScroll, startAutoScroll, pause, resetScroll })
 </script>

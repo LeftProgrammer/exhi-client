@@ -9,8 +9,8 @@
  */
 export const SCROLL_HOLD_MS = 1_000
 
-/** 自动滚动到底部后，多少毫秒回到顶部重新开始 */
-export const SCROLL_LOOP_BOTTOM_MS = 20_000
+/** 自动滚动固定速度（px/s），默认 40 */
+export const SCROLL_SPEED = 40
 
 /**
  * 自动滚动「起算时刻」默认值（秒）：从页面入场动画开始算起，固定多少秒后安排自动滚动。

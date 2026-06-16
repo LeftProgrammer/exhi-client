@@ -1,4 +1,9 @@
 <script setup lang="ts">
+/**
+ * 职能建设 · 首页（待机页）。
+ *
+ * 展示 3 个模块入口图标，点击后跳转对应二级页并播放 nav 音效。
+ */
 import { useRouter } from 'vue-router'
 import { useSfx } from '@shared/composables/useSfx'
 import { MODULES, HOME, type ModuleDef } from '../../data/modules'

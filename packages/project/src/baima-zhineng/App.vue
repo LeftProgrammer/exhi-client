@@ -25,11 +25,11 @@ if (!window.exhibitBridge) {
 // 空闲超时自动回首页
 useIdleReset(() => router.push({ name: 'home' }), IDLE_RESET_MS)
 
-// 初始化音效系统（注册 + 预加载 + 手势解锁）
-onMounted(() => {
-  const sfx = useProjectSfx()
-  sfx.unlock()
-})
+// 注册项目音效文件（setup 阶段即完成，供全局共享）
+const { unlock } = useProjectSfx()
+
+// 首次用户手势后解锁 AudioContext（自动播放策略要求）
+onMounted(() => unlock())
 </script>
 
 <template>

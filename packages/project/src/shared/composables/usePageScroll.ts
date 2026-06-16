@@ -1,19 +1,31 @@
 import { onBeforeUnmount, type Ref } from 'vue'
 import gsap from 'gsap'
 
+export interface PageScrollOptions {
+  /** 入场动效结束后，延迟多少毫秒开始自动滚动（默认 10_000） */
+  holdMs?: number
+  /** 滚动到底部后，延迟多少毫秒回到顶部重新开始；
+   *  <= 0 表示不循环，到底即停止（默认 20_000） */
+  loopBottomMs?: number
+  /** 自动滚动固定速度（px/s），默认 40 */
+  speed?: number
+}
+
 /**
  * 页面内容区滚动控制。
  * wrapperRef：滚动可视窗口（overflow:hidden，有明确高度）
  * contentRef：实际内容容器（高度可能超出 wrapper）
- * holdMs：入场动效结束后，延迟多少毫秒开始自动滚动
- * loopBottomMs：滚动到底部后，延迟多少毫秒回到顶部重新开始
  */
 export function usePageScroll(
   wrapperRef: Ref<HTMLElement | null>,
   contentRef: Ref<HTMLElement | null>,
-  holdMs = 10_000,
-  loopBottomMs = 20_000
+  options: PageScrollOptions = {}
 ) {
+  const {
+    holdMs = 10_000,
+    loopBottomMs = 20_000,
+    speed = 40,
+  } = options
   let currentY = 0
   let scrollTween: gsap.core.Tween | null = null
   let holdTimer: ReturnType<typeof setTimeout> | null = null
@@ -73,8 +85,7 @@ export function usePageScroll(
       resetScroll()
     }
     const maxNow = maxScroll()
-    // 每 100px 约 3.5s，最少 12s（整体慢速、和缓）
-    const duration = Math.max(12, (maxNow / 100) * 3.5)
+    const duration = maxNow / speed
     scrollTween = gsap.to(contentRef.value, {
       y: -maxNow,
       duration,
@@ -84,12 +95,13 @@ export function usePageScroll(
       },
       onComplete: () => {
         currentY = -maxNow
-        // 到底后等待 loopBottomMs 回到顶部重新开始
-        loopTimer = setTimeout(() => {
-          loopTimer = null
-          resetScroll()
-          startAutoScroll()
-        }, loopBottomMs)
+        if (loopBottomMs > 0) {
+          loopTimer = setTimeout(() => {
+            loopTimer = null
+            resetScroll()
+            startAutoScroll()
+          }, loopBottomMs)
+        }
       }
     })
   }
