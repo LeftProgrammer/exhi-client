@@ -42,6 +42,14 @@ export interface TabDef {
 }
 
 /** 模块定义 */
+/** 内容区边界（设计稿 ） */
+export interface ContentInset {
+  top?: number    // 默认 926
+  bottom?: number // 默认 435
+  left?: number   // 默认 0
+  right?: number  // 默认 0
+}
+
 export interface ModuleDef {
   id: string
   /** 模块名（用于无障碍 / 调试） */
@@ -52,6 +60,8 @@ export interface ModuleDef {
   icon: string
   /** 待机页图标布局（设计稿 ） */
   layout: { left: number; top: number; width: number; height: number }
+  /** scroll / frame-scroll 模式下内容区边界（设计稿 ） */
+  contentInset?: ContentInset
   /** tab 列表 */
   tabs: TabDef[]
 }
@@ -62,7 +72,8 @@ export const COMMON = {
   frame: url('common/frame.png'),
   arrowUp: url('common/arrow-up.png'),
   arrowDown: url('common/arrow-down.png'),
-  home: url('common/home.png')
+  home: url('common/home.png'),
+  thumb: url('common/thumb.png')
 }
 
 /** 待机页素材 */
@@ -92,148 +103,65 @@ const zhidu: ModuleDef = {
   route: 'zhidu',
   icon: url('home/icon-zhidu.png'),
   layout: { left: 840, top: 930, width: 1193, height: 828 },
+  contentInset: { top: 1070 , bottom: 580 },
   tabs: [
     makeTab('zhidu-gzsgl', ZHIDU_TITLE_GZSGL, [
       {
         blocks: [
-          {
-            src: url('modules/zhidu/gzsgl-p1-a.png'),
-            left: 173,
-            top: 1151,
-            width: 1814,
-            height: 890
-          },
-          {
-            src: url('modules/zhidu/gzsgl-p1-b.png'),
-            left: 173,
-            top: 2211,
-            width: 1814,
-            height: 947
-          }
+          { src: url('modules/zhidu/gzsgl-1.png'), left: 509, top: 1160, width: 1141, height: 82 },
+          { src: url('modules/zhidu/gzsgl-2.png'), left: 0, top: 1046, width: 2160, height: 500 },
+          { src: url('modules/zhidu/gzsgl-3.png'), left: 173, top: 1280, width: 1814, height: 291 },
+          { src: url('modules/zhidu/gzsgl-4.png'), left: 340, top: 1534, width: 1541, height: 507 },
+          { src: url('modules/zhidu/gzsgl-5.png'), left: 509, top: 2220, width: 1138, height: 82 },
+          { src: url('modules/zhidu/gzsgl-6.png'), left: 0, top: 2104, width: 2160, height: 500 },
+          { src: url('modules/zhidu/gzsgl-7.png'), left: 173, top: 2340, width: 1814, height: 291 },
+          { src: url('modules/zhidu/gzsgl-8.png'), left: 340, top: 2594, width: 1541, height: 564 }
         ]
       }
     ]),
     makeTab('zhidu-gzz', url('modules/zhidu/gzz-title.png'), [
       {
         blocks: [
-          {
-            src: url('modules/zhidu/gzz-p1-a.png'),
-            left: 173,
-            top: 1151,
-            width: 1814,
-            height: 890
-          },
-          {
-            src: url('modules/zhidu/gzz-p1-b.png'),
-            left: 173,
-            top: 2041,
-            width: 1814,
-            height: 1117
-          }
-        ]
-      },
-      {
-        blocks: [
-          {
-            src: url('modules/zhidu/gzz-p2-a.png'),
-            left: 173,
-            top: 1151,
-            width: 1814,
-            height: 890
-          },
-          {
-            src: url('modules/zhidu/gzz-p2-b.png'),
-            left: 173,
-            top: 2041,
-            width: 1814,
-            height: 1117
-          }
+          { src: url('modules/zhidu/gzz-11.png'), left: 0, top: 1057, width: 2160, height: 500 },
+          { src: url('modules/zhidu/gzz-12.png'), left: 0, top: 2173, width: 2160, height: 500 },
+          { src: url('modules/zhidu/gzz-13.png'), left: 0, top: 3171, width: 2160, height: 500 },
+          { src: url('modules/zhidu/gzz-14.png'), left: 0, top: 4220, width: 2160, height: 500 },
+          { src: url('modules/zhidu/gzz-1.png'), left: 311, top: 1160, width: 1539, height: 998 },
+          { src: url('modules/zhidu/gzz-2.png'), left: 311, top: 2283, width: 1539, height: 846 },
+          { src: url('modules/zhidu/gzz-3.png'), left: 311, top: 3261, width: 1539, height: 956 },
+          { src: url('modules/zhidu/gzz-4.png'), left: 174, top: 4318, width: 1812, height: 857 }
         ]
       }
     ]),
     makeTab('zhidu-rygl', url('modules/zhidu/rygl-title.png'), [
       {
         blocks: [
-          {
-            src: url('modules/zhidu/rygl-p1-a.png'),
-            left: 173,
-            top: 1151,
-            width: 1814,
-            height: 890
-          },
-          {
-            src: url('modules/zhidu/rygl-p1-b.png'),
-            left: 173,
-            top: 2041,
-            width: 1814,
-            height: 1117
-          }
-        ]
-      },
-      {
-        blocks: [
-          {
-            src: url('modules/zhidu/rygl-p2-a.png'),
-            left: 173,
-            top: 1151,
-            width: 1814,
-            height: 890
-          },
-          {
-            src: url('modules/zhidu/rygl-p2-b.png'),
-            left: 173,
-            top: 2041,
-            width: 1814,
-            height: 1117
-          }
-        ]
-      },
-      {
-        blocks: [
-          {
-            src: url('modules/zhidu/rygl-p3-a.png'),
-            left: 173,
-            top: 1151,
-            width: 1814,
-            height: 2007
-          }
+          { src: url('modules/zhidu/rygl-7.png'), left: 0, top: 1034, width: 2160, height: 500 },
+          { src: url('modules/zhidu/rygl-8.png'), left: 0, top: 1510, width: 2160, height: 500 },
+          { src: url('modules/zhidu/rygl-9.png'), left: 0, top: 4570, width: 2160, height: 500 },
+          { src: url('modules/zhidu/rygl-10.png'), left: 0, top: 5704, width: 2160, height: 500 },
+          { src: url('modules/zhidu/rygl-11.png'), left: 0, top: 7021, width: 2160, height: 500 },
+          { src: url('modules/zhidu/rygl-1.png'), left: 486, top: 1143, width: 1188, height: 542 },
+          { src: url('modules/zhidu/rygl-2.png'), left: 565, top: 4665, width: 1029, height: 83 },
+          { src: url('modules/zhidu/rygl-3.png'), left: 565, top: 5825, width: 1028, height: 1400 },
+          { src: url('modules/zhidu/rygl-4.png'), left: 174, top: 1264, width: 1812, height: 1896 },
+          { src: url('modules/zhidu/rygl-5.png'), left: 351, top: 3224, width: 1458, height: 2157 },
+          { src: url('modules/zhidu/rygl-6.png'), left: 351, top: 5426, width: 1458, height: 2049 }
         ]
       }
     ]),
     makeTab('zhidu-jgcx', url('modules/zhidu/jgcx-title.png'), [
       {
         blocks: [
-          {
-            src: url('modules/zhidu/jgcx-p1.png'),
-            left: 173,
-            top: 1151,
-            width: 1814,
-            height: 2007
-          }
-        ]
-      },
-      {
-        blocks: [
-          {
-            src: url('modules/zhidu/jgcx-p2.png'),
-            left: 173,
-            top: 1151,
-            width: 1814,
-            height: 2007
-          }
+          { src: url('modules/zhidu/jgcx-1.png'), left: 351, top: 1107, width: 1458, height: 2084 },
+          { src: url('modules/zhidu/jgcx-2.png'), left: 351, top: 3265, width: 1458, height: 2084 }
         ]
       }
     ]),
     makeTab('zhidu-kjcg', url('modules/zhidu/kjcg-title.png'), [
       {
         blocks: [
-          {
-            src: url('modules/zhidu/kjcg-p1.png'),
-            left: 173,
-            top: 1151,
-            width: 1814,
-            height: 2007
-          }
+          { src: url('modules/zhidu/kjcg-1.png'), left: 351, top: 1142, width: 1458, height: 2084 }
         ]
       }
     ])
@@ -249,30 +177,21 @@ const guihua: ModuleDef = {
   route: 'guihua',
   icon: url('home/icon-guihua.png'),
   layout: { left: 85, top: 1673, width: 1193, height: 828 },
+  contentInset: { top: 1070 , bottom: 580 },
   tabs: [
     makeTab('guihua-gzjh', GUIHUA_TITLE, [
       {
         blocks: [
-          {
-            src: url('modules/guihua/gzjh-p1.png'),
-            left: 173,
-            top: 1151,
-            width: 1814,
-            height: 890
-          }
+          { src: url('modules/guihua/gzjh-1.png'), left: 351, top: 1107, width: 1458, height: 2084 },
+          { src: url('modules/guihua/gzjh-2.png'), left: 0, top: 997, width: 2160, height: 500 }
         ]
       }
     ]),
     makeTab('guihua-kygh', url('modules/guihua/kygh-title.png'), [
       {
         blocks: [
-          {
-            src: url('modules/guihua/kygh-p1.png'),
-            left: 173,
-            top: 1151,
-            width: 1814,
-            height: 890
-          }
+          { src: url('modules/guihua/kygh-1.png'), left: 351, top: 1107, width: 1458, height: 2084 },
+          { src: url('modules/guihua/kygh-2.png'), left: 0, top: 1187, width: 2160, height: 500 }
         ]
       }
     ])
@@ -293,6 +212,7 @@ const xingdong: ModuleDef = {
   route: 'xingdong',
   icon: url('home/icon-xingdong.png'),
   layout: { left: 831, top: 2427, width: 1193, height: 828 },
+  contentInset: { top: 926, bottom: 435 },
   tabs: [
     // 先锋引领 攻坚克难 (5)
     makeTab('xingdong-xfyl', XINGDONG_TITLE_XFYL, [

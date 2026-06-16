@@ -7,8 +7,8 @@ import { COMMON, type ModuleDef } from '../data/modules'
 
 const props = defineProps<{
   module: ModuleDef
-  /** 交互模式：pager（翻页，默认）| scroll（纵向滚动） */
-  mode?: 'pager' | 'scroll'
+  /** 交互模式：pager（翻页，默认）| scroll（纵向滚动）| frame-scroll（带边框纵向滚动） */
+  mode?: 'pager' | 'scroll' | 'frame-scroll'
 }>()
 
 const router = useRouter()
@@ -42,17 +42,40 @@ function onContentScroll() {
   })
 }
 
-/** 滑块高度占轨道的百分比 */
-const THUMB_H_PCT = 3
+/** 滑块图（thumb.png）尺寸与内部亮点占位（px，实测自素材）。
+ *  图片画布 69×142，但可见亮点只在垂直方向 38~103 之间，
+ *  上下各有约 38px 透明/辉光留白，定位需基于亮点而非整张图片盒子。 */
+const THUMB_DOT_TOP = 38
+const THUMB_DOT_BOTTOM = 103
+const THUMB_DOT_H = THUMB_DOT_BOTTOM - THUMB_DOT_TOP
+
+/** 轨道高度（设计稿 px） */
+const trackHeight = computed(() => 3840 - contentInset.value.top - contentInset.value.bottom)
 
 const progressStyle = computed(() => {
   return { height: `${scrollProgress.value * 100}%` }
 })
 
+/** 滑块定位：让亮点(38~103)在 progress 0→1 间贴齐轨道顶/底，
+ *  整张图片盒子相应上下溢出，溢出部分仅是透明辉光。 */
 const thumbStyle = computed(() => {
-  const maxOffset = 100 - THUMB_H_PCT
-  const top = scrollProgress.value * maxOffset
-  return { top: `${top}%` }
+  const trackH = trackHeight.value
+  if (trackH <= 0) return { top: '0%' }
+  // 盒子顶边相对轨道的位置（px）：progress0 时 -DOT_TOP，使亮点顶=0；progress1 时使亮点底=轨道底
+  const topPx = -THUMB_DOT_TOP + scrollProgress.value * (trackH - THUMB_DOT_H)
+  return { top: `${(topPx / trackH) * 100}%` }
+})
+
+/** 亮点在轨道中的中心与半高（占比），用于点击命中判定 */
+const dotMetrics = computed(() => {
+  const trackH = trackHeight.value
+  if (trackH <= 0) return { center: 0, half: 0 }
+  const topPx = -THUMB_DOT_TOP + scrollProgress.value * (trackH - THUMB_DOT_H)
+  const dotTopPx = topPx + THUMB_DOT_TOP
+  return {
+    center: (dotTopPx + THUMB_DOT_H / 2) / trackH,
+    half: THUMB_DOT_H / 2 / trackH,
+  }
 })
 
 /** 滚动条拖拽交互 */
@@ -85,9 +108,7 @@ function onScrollbarPointerDown(e: MouseEvent | TouchEvent) {
   if (!info) return
 
   const ratio = (clientY - info.top) / info.height
-  const halfThumb = THUMB_H_PCT / 2 / 100
-  const maxOffset = 100 - THUMB_H_PCT
-  const thumbCenter = (scrollProgress.value * maxOffset + THUMB_H_PCT / 2) / 100
+  const { center: thumbCenter, half: halfThumb } = dotMetrics.value
 
   if (Math.abs(ratio - thumbCenter) <= halfThumb) {
     // 按在胶囊上：记录起始位置，进入相对拖拽
@@ -380,7 +401,9 @@ const activeTab = ref(0)
 const activePage = ref(0)
 const slideDirection = ref<'right' | 'left'>('right')
 
-const isScroll = computed(() => props.mode === 'scroll')
+const isScroll = computed(() => props.mode === 'scroll' || props.mode === 'frame-scroll')
+const isFrameScroll = computed(() => props.mode === 'frame-scroll')
+const showFrame = computed(() => props.mode !== 'scroll')
 
 const currentTab = computed(() => props.module.tabs[activeTab.value])
 const pages = computed(() => currentTab.value?.pages ?? [])
@@ -388,14 +411,39 @@ const currentPage = computed(() => pages.value[activePage.value] ?? null)
 const pageCount = computed(() => pages.value.length)
 const tabCount = computed(() => props.module.tabs.length)
 
-const showPager = computed(() => !isScroll.value && (tabCount.value > 1 || pageCount.value > 1))
+const showPager = computed(() => props.mode === 'pager' && (tabCount.value > 1 || pageCount.value > 1))
 const canPrev = computed(() => activePage.value > 0 || activeTab.value > 0)
 const canNext = computed(
   () => activePage.value < pageCount.value - 1 || activeTab.value < tabCount.value - 1
 )
 
-/** scroll 模式下内容区起始偏移（设计稿 px） */
-const SCROLL_OFFSET_TOP = 926
+/** scroll / frame-scroll 模式下内容区边界（设计稿 px，模块可自定义） */
+const contentInset = computed(() => ({
+  top: props.module.contentInset?.top ?? 926,
+  bottom: props.module.contentInset?.bottom ?? 435,
+  left: props.module.contentInset?.left ?? 0,
+  right: props.module.contentInset?.right ?? 0,
+}))
+
+/** 内容区动态位置样式（scroll / frame-scroll 模式） */
+const contentStyle = computed(() => {
+  if (!isScroll.value) return undefined
+  return {
+    top: `calc(${contentInset.value.top} / var(--design-h) * 100vh)`,
+    bottom: `calc(${contentInset.value.bottom} / var(--design-h) * 100vh)`,
+    left: `calc(${contentInset.value.left} / var(--design-w) * 100vw)`,
+    right: `calc(${contentInset.value.right} / var(--design-w) * 100vw)`,
+  }
+})
+
+/** 自定义滚动条动态位置 */
+const scrollbarStyle = computed(() => {
+  if (!isScroll.value) return undefined
+  return {
+    top: `calc(${contentInset.value.top} / var(--design-h) * 100vh)`,
+    bottom: `calc(${contentInset.value.bottom} / var(--design-h) * 100vh)`,
+  }
+})
 
 /** scroll 模式下根据 blocks 最大 bottom 计算页面所需高度 */
 const pageHeightStyle = computed(() => {
@@ -404,7 +452,7 @@ const pageHeightStyle = computed(() => {
     (max, b) => Math.max(max, b.top + b.height),
     0
   )
-  return { height: `calc(${maxBottom - SCROLL_OFFSET_TOP} / var(--design-h) * 100vh)` }
+  return { height: `calc(${maxBottom - contentInset.value.top} / var(--design-h) * 100vh)` }
 })
 
 // 切换 tab 时回到首页内容，scroll 模式滚动到顶部
@@ -456,7 +504,7 @@ function goHome() {
 </script>
 
 <template>
-  <main class="sec" :class="{ 'sec--scroll': isScroll }">
+  <main class="sec" :class="{ 'sec--scroll': isScroll, 'sec--frame-scroll': isFrameScroll }">
     <img class="sec__bg" :src="COMMON.bg" alt="" />
 
     <!-- 顶部标题（含副标题，按 tab 切换） -->
@@ -469,6 +517,7 @@ function goHome() {
       ref="contentRef"
       class="sec__content"
       :class="{ 'sec__content--scroll': isScroll }"
+      :style="contentStyle"
       @scroll="onContentScroll"
       @mousedown="onContentPointerDown"
       @touchstart.passive="onContentPointerDown"
@@ -491,7 +540,7 @@ function goHome() {
             :style="{
               left: `calc(${block.left} / var(--design-w) * 100vw)`,
               top: isScroll
-                ? `calc((${block.top} - ${SCROLL_OFFSET_TOP}) / var(--design-h) * 100vh)`
+                ? `calc((${block.top} - ${contentInset.top}) / var(--design-h) * 100vh)`
                 : `calc(${block.top} / var(--design-h) * 100vh)`,
               width: `calc(${block.width} / var(--design-w) * 100vw)`,
               height: `calc(${block.height} / var(--design-h) * 100vh)`
@@ -507,20 +556,21 @@ function goHome() {
       v-if="isScroll && hasOverflow"
       ref="scrollbarRef"
       class="sec__scrollbar"
+      :style="scrollbarStyle"
       @mousedown="onScrollbarPointerDown"
       @touchstart.passive="onScrollbarPointerDown"
     >
       <div class="sec__scrollbar-track" />
       <div class="sec__scrollbar-progress" :style="progressStyle" />
-      <div class="sec__scrollbar-thumb" :style="thumbStyle" />
+      <img class="sec__scrollbar-thumb" :src="COMMON.thumb" :style="thumbStyle" alt="" />
     </div>
 
-    <!-- 边框（仅 pager 模式显示） -->
-    <div v-if="!isScroll" class="sec__frame">
+    <!-- 边框（pager / frame-scroll 模式显示） -->
+    <div v-if="showFrame" class="sec__frame">
       <img class="sec__frame-bg" :src="COMMON.frame" alt="" />
     </div>
 
-    <!-- 右侧上下翻页按钮（仅 pager 模式且多页时显示） -->
+    <!-- 右侧上下翻页按钮（仅 pager 模式显示） -->
     <div v-if="showPager" class="sec__pager">
       <button class="sec__pager-btn" :disabled="!canPrev" @click="prevPage">
         <img :src="COMMON.arrowUp" alt="上一页" />
@@ -603,8 +653,9 @@ function goHome() {
     opacity: 0;
     animation: sec-title-enter 0.5s ease-out 0.1s both;
 
-    // scroll 模式下标题需浮在可滚动内容区之上
-    .sec--scroll & {
+    // scroll / frame-scroll 模式下标题需浮在可滚动内容区之上
+    .sec--scroll &,
+    .sec--frame-scroll & {
       z-index: 4;
     }
   }
@@ -643,10 +694,6 @@ function goHome() {
     animation: sec-enter-up 0.6s ease-out 0.35s both;
 
     &--scroll {
-      top: d.h(926);
-      bottom: d.h(435);
-      left: 0;
-      right: 0;
       overflow-y: scroll;
       pointer-events: auto;
       user-select: none; // 拖拽时禁止选中文本
@@ -659,6 +706,7 @@ function goHome() {
       scrollbar-width: none;
       -ms-overflow-style: none;
     }
+
   }
 
   &__page {
@@ -704,8 +752,6 @@ function goHome() {
   &__scrollbar {
     position: absolute;
     right: d.w(100);
-    top: d.h(926);
-    bottom: d.h(435);
     width: d.w(30); // 加宽点击区域，视觉轨道仍是 4px
     z-index: 10;
     pointer-events: auto;
@@ -737,50 +783,25 @@ function goHome() {
       transition: height 0.15s ease-out;
     }
 
-    // 椭圆滑块
+    // 滑块图片
     &-thumb {
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
-      width: d.w(30);
-      height: 4%;
-      min-height: d.h(28);
-      border-radius: d.w(15);
-      border: d.w(1.5) solid rgba(255, 255, 255, 0.9);
-      background: linear-gradient(180deg, #c8e8ff 0%, #7ec4ff 100%);
-      box-shadow:
-        0 0 d.w(4) rgba(180, 220, 255, 0.8),
-        0 0 d.w(8) rgba(80, 170, 255, 0.6),
-        0 0 d.w(16) rgba(80, 170, 255, 0.3),
-        0 0 d.w(50) rgba(100, 190, 255, 0.35),
-        inset 0 d.w(2) d.w(4) rgba(255, 255, 255, 0.6);
+      width: d.w(69);
+      height: d.h(142);
+      object-fit: contain;
+      pointer-events: none;
       transition:
         top 0.15s ease-out,
-        transform 0.15s ease,
-        box-shadow 0.2s ease,
-        background 0.2s ease;
+        transform 0.15s ease;
 
-      // 悬停：更亮更大光晕
       &:hover {
-        background: linear-gradient(180deg, #d4ecff 0%, #8acaff 100%);
-        box-shadow:
-          0 0 d.w(6) rgba(180, 220, 255, 1),
-          0 0 d.w(12) rgba(80, 170, 255, 0.8),
-          0 0 d.w(24) rgba(80, 170, 255, 0.5),
-          0 0 d.w(60) rgba(100, 190, 255, 0.45),
-          inset 0 d.w(2) d.w(5) rgba(255, 255, 255, 0.7);
+        transform: translateX(-50%) scale(1.05);
       }
 
-      // 按下：微微缩小、光晕内聚、颜色加深
       &:active {
         transform: translateX(-50%) scale(0.92);
-        background: linear-gradient(180deg, #a8d8ff 0%, #6cb8ff 100%);
-        box-shadow:
-          0 0 d.w(2) rgba(180, 220, 255, 0.9),
-          0 0 d.w(6) rgba(80, 170, 255, 0.8),
-          0 0 d.w(12) rgba(80, 170, 255, 0.5),
-          0 0 d.w(24) rgba(100, 190, 255, 0.3),
-          inset 0 d.w(1) d.w(3) rgba(255, 255, 255, 0.4);
       }
     }
   }

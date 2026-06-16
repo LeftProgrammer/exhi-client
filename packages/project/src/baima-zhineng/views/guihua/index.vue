@@ -6,5 +6,5 @@ const module = getModule('guihua')!
 </script>
 
 <template>
-  <SecondaryPage :module="module" />
+  <SecondaryPage :module="module" mode="frame-scroll" />
 </template>
