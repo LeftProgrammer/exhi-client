@@ -294,40 +294,50 @@ control.sendTo('screen-2', { cmd: 'home' })
 | 进制度建设 | `{ "cmd": "goto", "target": "zhidu" }` | 进入制度建设板块 |
 | 进规划计划 | `{ "cmd": "goto", "target": "guihua" }` | 进入规划计划板块 |
 | 进行动举措 | `{ "cmd": "goto", "target": "xingdong" }` | 进入行动举措板块 |
-| 下一页 | `{ "cmd": "page", "action": "next" }` | 当前板块下一个 tab/页 |
-| 上一页 | `{ "cmd": "page", "action": "prev" }` | 当前板块上一个 tab/页 |
-| 直接定位 | `{ "cmd": "page", "index": 0 }` | 直接跳到指定 tab 索引 |
+| 下一 tab | `{ "cmd": "page", "action": "next" }` | 当前板块下一个 tab |
+| 上一 tab | `{ "cmd": "page", "action": "prev" }` | 当前板块上一个 tab |
+| 直接定位 | `{ "cmd": "page", "index": 0 }` | 直接跳到指定 tab 索引（0 即第一个）|
+| 滚动播放 | `{ "cmd": "scroll", "action": "play" }` | 当前 tab 立即开始自动滚动 |
+| 滚动暂停 | `{ "cmd": "scroll", "action": "pause" }` | 当前 tab 暂停自动滚动 |
+| 滚动重置 | `{ "cmd": "scroll", "action": "scroll-top" }` | 当前 tab 回到顶部并暂停 |
 
 ### 字段说明
 
-- `cmd` —— 指令类型：`home` / `goto` / `page`
+- `cmd` —— 指令类型：`home` / `goto` / `page` / `scroll`
 - `target` —— 板块标识：`zhidu`（制度建设）/ `guihua`（规划计划）/ `xingdong`（行动举措）
-- `action` —— 翻页方向：`next` / `prev`
+- `action` —— 翻页方向：`next` / `prev`；滚动控制：`play` / `pause` / `scroll-top`
 - `index` —— tab 索引（从 0 开始，用于 `page` 直接定位）
 
 ### 板块标识
 
 | target | 板块名 | 模式 |
 |--------|--------|------|
-| zhidu | 制度建设 | 翻页 |
-| guihua | 规划计划 | 翻页 |
-| xingdong | 行动举措 | 滚动 + tab |
+| zhidu | 制度建设 | 纵向滚动 + tab |
+| guihua | 规划计划 | 纵向滚动 + tab |
+| xingdong | 行动举措 | 纵向滚动 + tab |
 
 ### 项目交互说明
 
 **首页：** 3 个模块入口图标（制度建设、规划计划、行动举措），点击图标进入对应板块。
 
 **二级页（板块页）：**
-- **制度建设** / **规划计划**：翻页模式（右侧上下翻页按钮）
-- **行动举措**：滚动模式（纵向滚动 + 底部 tab 切换）
+- **制度建设** / **规划计划** / **行动举措**：纵向滚动模式（内容区纵向滚动，底部 tab 切换）
+- **自动滚动**：tab 加载后 3 秒自动开始向下滚动，用户操作或到底后停止，不再自动恢复
 - **底部 Tab 菜单**：点击切换不同 tab
 - **右下角**：回首页按钮
+
+### 中控滚动控制说明
+
+- `scroll` 指令仅对**当前展示的 tab**生效。
+- `play` 立即开始自动滚动；`pause` 立即停止；`scroll-top` 平滑回到顶部并停止。
+- 用户触摸/点击内容区或滚动条后自动滚动也会停止，但中控可再次发送 `play` 恢复。
 
 ### 注意事项
 
 1. 中控发送 `page` 指令前，设备需已处于某个板块（二级页），否则忽略。
 2. `goto` 指令可直接定位到板块，无需先发送板块跳转。
-3. 所有消息通过 UEC WebSocket 服务转发，设备仅接收发给自己 `id` 的消息。
+3. `scroll` 指令在 pager 模式下（如仅含单页无溢出的 tab）无效。
+4. 所有消息通过 UEC WebSocket 服务转发，设备仅接收发给自己 `id` 的消息。
 
 ---
 

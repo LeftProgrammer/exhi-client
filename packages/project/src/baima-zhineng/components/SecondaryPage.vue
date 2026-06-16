@@ -4,6 +4,10 @@ import { useRouter } from 'vue-router'
 import { useSfx } from '@shared/composables/useSfx'
 import TabBar from './TabBar.vue'
 import { COMMON, type ModuleDef } from '../data/modules'
+import {
+  AUTO_SCROLL_SPEED,
+  AUTO_SCROLL_START_DELAY,
+} from '../data/config'
 
 const props = defineProps<{
   module: ModuleDef
@@ -270,16 +274,16 @@ function onUecScroll(e: Event) {
   const action = detail.action as string | undefined
   if (action === 'pause') {
     stopAutoScroll()
+    if (idleTimer) clearTimeout(idleTimer)
+    idleTimer = 0
   } else if (action === 'play') {
+    if (idleTimer) clearTimeout(idleTimer)
+    idleTimer = 0
     startAutoScroll()
   } else if (action === 'scroll-top') {
     if (contentRef.value) {
       contentRef.value.scrollTo({ top: 0, behavior: 'smooth' })
       stopAutoScroll()
-      if (idleTimer) clearTimeout(idleTimer)
-      idleTimer = window.setTimeout(() => {
-        if (isScroll.value && hasOverflow.value) startAutoScroll()
-      }, 20000)
     }
   }
 }
@@ -289,8 +293,7 @@ let autoScrollRaf = 0
 let idleTimer = 0
 let autoScrollDelayTimer = 0
 let lastScrollTimestamp = 0
-const AUTO_SCROLL_SPEED = 90 // px/s，跨刷新率一致
-const AUTO_SCROLL_START_DELAY = 3000
+let autoScrollSession = { tab: 0, page: 0 }
 
 function startAutoScroll(delay = 0) {
   if (autoScrollRaf) cancelAnimationFrame(autoScrollRaf)
@@ -300,6 +303,8 @@ function startAutoScroll(delay = 0) {
   const el = contentRef.value
   if (!el || el.scrollHeight <= el.clientHeight) return
   if (autoScrollDelayTimer) clearTimeout(autoScrollDelayTimer)
+  // 记录当前页签，用于底部循环判定
+  autoScrollSession = { tab: activeTab.value, page: activePage.value }
   if (delay > 0) {
     autoScrollDelayTimer = window.setTimeout(() => tickAutoScroll(), delay)
   } else {
@@ -339,9 +344,10 @@ function tickAutoScroll(timestamp = performance.now()) {
 
   el.scrollTop += (AUTO_SCROLL_SPEED * delta) / 1000
   if (el.scrollTop >= max) {
+    el.scrollTop = max
     autoScrollRaf = 0
     lastScrollTimestamp = 0
-    return // 滚动到底部停止
+    return
   }
 
   autoScrollRaf = requestAnimationFrame(tickAutoScroll)
@@ -350,12 +356,6 @@ function tickAutoScroll(timestamp = performance.now()) {
 function onUserInteract() {
   if (!isScroll.value) return
   stopAutoScroll()
-  if (idleTimer) clearTimeout(idleTimer)
-  idleTimer = window.setTimeout(() => {
-    if (isScroll.value && hasOverflow.value) {
-      startAutoScroll()
-    }
-  }, 20000)
 }
 
 /** transition 钩子：插入瞬间强制隐藏，防止默认样式闪现 */

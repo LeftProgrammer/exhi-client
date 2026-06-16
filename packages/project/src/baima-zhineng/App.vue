@@ -3,6 +3,8 @@ import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useBridge } from '@shared/composables/useBridge'
 import { useProjectSfx } from '@shared/composables/useProjectSfx'
+import { useIdleReset } from '@shared/composables/useIdleReset'
+import { IDLE_RESET_MS } from '@baima-zhineng/data/config'
 import { useControl } from '@baima-zhineng/composables/useControl'
 
 const router = useRouter()
@@ -19,6 +21,9 @@ control.setupCommands(router)
 if (!window.exhibitBridge) {
   control.startFallback('zhineng')
 }
+
+// 空闲超时自动回首页
+useIdleReset(() => router.push({ name: 'home' }), IDLE_RESET_MS)
 
 // 初始化音效系统（注册 + 预加载 + 手势解锁）
 onMounted(() => {

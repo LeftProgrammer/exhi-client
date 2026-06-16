@@ -227,11 +227,19 @@ body{display:flex}
       </div>
     </div>
     <div class="group">
-      <div class="group-title">翻页 / 切 tab</div>
+      <div class="group-title">切 tab</div>
       <div class="btn-row">
-        <button class="cmd-btn" onclick="sendTo('zhineng',{cmd:'page',action:'prev'})"><span class="label">上一页</span><span class="payload">{"cmd":"page","action":"prev"}</span></button>
-        <button class="cmd-btn" onclick="sendTo('zhineng',{cmd:'page',action:'next'})"><span class="label">下一页</span><span class="payload">{"cmd":"page","action":"next"}</span></button>
-        <div class="input-row"><input id="zhinengPageIdx" type="number" min="0" placeholder="页码"><button class="cmd-btn" onclick="var zpi=document.getElementById('zhinengPageIdx').value;sendTo('zhineng',{cmd:'page',index:Number(zpi)})" style="padding:6px 10px;"><span class="label">跳到指定页</span><span class="payload">{"cmd":"page","index":N}</span></button></div>
+        <button class="cmd-btn" onclick="sendTo('zhineng',{cmd:'page',action:'prev'})"><span class="label">上一 tab</span><span class="payload">{"cmd":"page","action":"prev"}</span></button>
+        <button class="cmd-btn" onclick="sendTo('zhineng',{cmd:'page',action:'next'})"><span class="label">下一 tab</span><span class="payload">{"cmd":"page","action":"next"}</span></button>
+        <div class="input-row"><input id="zhinengPageIdx" type="number" min="0" placeholder="tab 索引"><button class="cmd-btn" onclick="var zpi=document.getElementById('zhinengPageIdx').value;sendTo('zhineng',{cmd:'page',index:Number(zpi)})" style="padding:6px 10px;"><span class="label">跳到指定 tab</span><span class="payload">{"cmd":"page","index":N}</span></button></div>
+      </div>
+    </div>
+    <div class="group">
+      <div class="group-title">自动滚动控制（当前 tab）</div>
+      <div class="btn-row">
+        <button class="cmd-btn" onclick="sendTo('zhineng',{cmd:'scroll',action:'play'})"><span class="label">播放</span><span class="payload">{"cmd":"scroll","action":"play"}</span></button>
+        <button class="cmd-btn" onclick="sendTo('zhineng',{cmd:'scroll',action:'pause'})"><span class="label">暂停</span><span class="payload">{"cmd":"scroll","action":"pause"}</span></button>
+        <button class="cmd-btn" onclick="sendTo('zhineng',{cmd:'scroll',action:'scroll-top'})"><span class="label">重置到顶</span><span class="payload">{"cmd":"scroll","action":"scroll-top"}</span></button>
       </div>
     </div>
   </div>
