@@ -7,7 +7,7 @@ import { useViewTransition } from '@shared/composables/useViewTransition'
 import { usePageLeave } from '@shared/composables/usePageLeave'
 import { useProjectSfx } from '@shared/composables/useProjectSfx'
 import { useControl } from '@baima-yushui/composables/useControl'
-import { AUTOPLAY_INTERVAL_MS } from '@baima-yushui/data/config'
+import { AUTOPLAY_INTERVAL_MS, CATEGORY_SWITCH_LOCK_MS, PAGE_LEAVE_DURATION_MS } from '@baima-yushui/data/config'
 import StageFooter from '@baima-yushui/components/StageFooter.vue'
 import {
   blurDissolveOut,
@@ -26,8 +26,7 @@ const props = defineProps<{
 
 const router = useRouter()
 
-// 500ms 离场动画完整跑完再返回首页
-const { leaving, leaveTo } = usePageLeave({ duration: 500 })
+const { leaving, leaveTo } = usePageLeave({ duration: PAGE_LEAVE_DURATION_MS })
 
 const control = useControl()
 
@@ -98,7 +97,7 @@ function selectCategory(id: string) {
   sfx.play('tap')
   transitionType.value = 'category'
   categorySwitching.value = true
-  setTimeout(() => (categorySwitching.value = false), 600)
+  setTimeout(() => (categorySwitching.value = false), CATEGORY_SWITCH_LOCK_MS)
   onUserInteract()
   control.reportCategory(props.sectionId, id)
   router.replace({
