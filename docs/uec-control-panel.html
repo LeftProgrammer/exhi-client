@@ -363,8 +363,10 @@ function sendCustom() {
 
 /* 长按 scrub（快进/快退）：按下时发送 speed，抬起/移出时发送 0 */
 var scrubTimer = null;
+var isScrubbing = false;
 function sendScrubStart(speed) {
-  if (scrubTimer) clearInterval(scrubTimer);
+  if (isScrubbing) return; // 防止重复按下
+  isScrubbing = true;
   sendTo('research-main', { cmd: 'video-scrub', speed: speed });
   // 持续重发（防止网络丢包导致 scrub 停不下来）
   scrubTimer = setInterval(function () {
@@ -372,6 +374,8 @@ function sendScrubStart(speed) {
   }, 500);
 }
 function sendScrubStop() {
+  if (!isScrubbing) return; // 未在 scrub 中：mouseleave 误触发时直接忽略
+  isScrubbing = false;
   if (scrubTimer) {
     clearInterval(scrubTimer);
     scrubTimer = null;

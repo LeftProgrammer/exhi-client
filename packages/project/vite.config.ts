@@ -58,6 +58,48 @@ function mpaTrailingSlash(): Plugin {
 }
 
 /**
+ * 发送本地文件，支持 HTTP Range（206 Partial Content）。
+ * 视频/音频 seek 依赖 Range，否则浏览器拿到的是完整文件 200，会导致 seek 失败 / 视频重置回开头。
+ */
+function sendFileWithRange(
+  req: { headers: Record<string, string | string[] | undefined> },
+  res: {
+    statusCode: number
+    setHeader(name: string, value: string | number): void
+    end(): void
+  },
+  file: string
+): void {
+  const stat = fs.statSync(file)
+  const ext = path.extname(file).toLowerCase()
+  res.setHeader('Content-Type', MIME[ext] ?? 'application/octet-stream')
+  res.setHeader('Accept-Ranges', 'bytes')
+
+  const rangeHeader = req.headers.range
+  const range = Array.isArray(rangeHeader) ? rangeHeader[0] : rangeHeader
+  const match = range ? /bytes=(\d*)-(\d*)/.exec(range) : null
+
+  if (match) {
+    const start = match[1] ? parseInt(match[1], 10) : 0
+    const end = match[2] ? parseInt(match[2], 10) : stat.size - 1
+    if (start >= stat.size || end >= stat.size || start > end) {
+      res.statusCode = 416
+      res.setHeader('Content-Range', `bytes */${stat.size}`)
+      res.end()
+      return
+    }
+    res.statusCode = 206
+    res.setHeader('Content-Range', `bytes ${start}-${end}/${stat.size}`)
+    res.setHeader('Content-Length', end - start + 1)
+    fs.createReadStream(file, { start, end }).pipe(res)
+    return
+  }
+
+  res.setHeader('Content-Length', stat.size)
+  fs.createReadStream(file).pipe(res)
+}
+
+/**
  * 开发模式下，从所有 deploy/<pkg>/contents/ 目录提供静态素材。
  * 不依赖 publicDir（publicDir 只能指向单一目录，多项目共用 dev server 时会互相 404）。
  */
@@ -80,10 +122,7 @@ function serveDeployContents(): Plugin {
         for (const pkg of sorted) {
           const file = path.join(DEPLOY_DIR, pkg.name, 'contents', url)
           if (fs.existsSync(file)) {
-            const ext = path.extname(file).toLowerCase()
-            res.setHeader('Content-Type', MIME[ext] ?? 'application/octet-stream')
-            res.setHeader('Content-Length', fs.statSync(file).size)
-            fs.createReadStream(file).pipe(res)
+            sendFileWithRange(req, res, file)
             return
           }
         }
@@ -91,10 +130,7 @@ function serveDeployContents(): Plugin {
         // fallback：共享素材目录（deploy/shared/contents/）
         const sharedFile = path.join(DEPLOY_DIR, 'shared', 'contents', url)
         if (fs.existsSync(sharedFile)) {
-          const ext = path.extname(sharedFile).toLowerCase()
-          res.setHeader('Content-Type', MIME[ext] ?? 'application/octet-stream')
-          res.setHeader('Content-Length', fs.statSync(sharedFile).size)
-          fs.createReadStream(sharedFile).pipe(res)
+          sendFileWithRange(req, res, sharedFile)
           return
         }
         next()

@@ -51,8 +51,12 @@ onSyncVideoPause(() => {
 onSyncVideoSeek((offset) => {
   const v = videoRef.value
   if (!v || !offset) return
-  const target = Math.max(0, Math.min(v.duration || Infinity, v.currentTime + offset))
-  v.currentTime = target
+  let target = v.currentTime + offset
+  // 时长已知时，clamp 到 duration-0.1，避免落到结尾被 loop 当成 ended 回到开头
+  if (isFinite(v.duration) && v.duration > 0) {
+    target = Math.min(v.duration - 0.1, target)
+  }
+  v.currentTime = Math.max(0, target)
 })
 
 // 播放倍速（rate 如 0.5、1、1.5、2）
@@ -133,6 +137,9 @@ onSyncVideoScrub((speed) => {
       const target = ve.currentTime + dt * speed // speed < 0，向前回退
       if (target <= 0) {
         ve.currentTime = 0
+        ve.pause()
+        isPaused.value = true // 退到开头，恢复播放按钮
+        wasPlayingBeforeScrub = false
         stopRewind()
         return
       }
