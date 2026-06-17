@@ -1,4 +1,4 @@
-import { ref, type Ref } from 'vue'
+import { onBeforeUnmount, ref, type Ref } from 'vue'
 import gsap from 'gsap'
 import { playEnterSequence } from '@baima-milestone/effects/gsapPresets'
 import { SCROLL_ARM_AT } from '@baima-milestone/data/config'
@@ -34,8 +34,8 @@ export function useTimelinePage(
   let tl: gsap.core.Timeline | null = null
 
   function buildHeaders(): Element[] {
-    const list = [layoutRef.value?.bgEl, topBarRef.value, titleRef.value]
-    if (deco) list.push(layoutRef.value?.decoEl)
+    const list: (Element | null)[] = [topBarRef.value, titleRef.value]
+    if (deco) list.push(layoutRef.value?.decoEl ?? null)
     return list.filter(Boolean) as Element[]
   }
 
@@ -85,6 +85,11 @@ export function useTimelinePage(
       gsap.set(lines, { opacity: 0, scaleY: 0, transformOrigin: 'top center' })
     }
   }
+
+  onBeforeUnmount(() => {
+    tl?.kill()
+    tl = null
+  })
 
   return { play, pause, resume, reset }
 }

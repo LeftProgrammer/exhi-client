@@ -8,8 +8,8 @@ export function slideFadeOut(el: Element, done: () => void, dir: SlideDir = 'nex
 }
 
 export function slideFadeIn(el: Element, done: () => void, dir: SlideDir = 'next') {
-  gsap.set(el, { x: dir === 'next' ? 80 : -80, opacity: 0 })
-  gsap.to(el, { delay: 0.05, duration: 0.65, ease: 'expo.out', x: 0, opacity: 1, onComplete: done })
+  gsap.set(el, { x: dir === 'next' ? 80 : -80, opacity: 1 })
+  gsap.to(el, { duration: 0.85, ease: 'expo.out', x: 0, opacity: 1, onComplete: done })
 }
 
 /**

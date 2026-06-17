@@ -7,7 +7,6 @@
     @touchend="onTouchEnd"
     @click="onClick"
   >
-    <img ref="bgRef" class="layer-bg" :src="bg" alt="" />
     <img v-if="deco" ref="decoRef" class="layer-deco" :src="deco" alt="" />
 
     <div class="header">
@@ -27,9 +26,8 @@ import { ref } from 'vue'
 import { usePageScroll } from '@shared/composables/usePageScroll'
 import { SCROLL_HOLD_MS, SCROLL_SPEED } from '@baima-milestone/data/config'
 
-defineProps<{ bg: string; deco?: string }>()
+defineProps<{ deco?: string }>()
 
-const bgRef = ref<HTMLImageElement | null>(null)
 const decoRef = ref<HTMLImageElement | null>(null)
 const wrapperRef = ref<HTMLElement | null>(null)
 const contentRef = ref<HTMLElement | null>(null)
@@ -50,7 +48,7 @@ const {
   speed: SCROLL_SPEED,
 })
 
-defineExpose({ bgEl: bgRef, decoEl: decoRef, scheduleAutoScroll, startAutoScroll, pause, resetScroll })
+defineExpose({ decoEl: decoRef, scheduleAutoScroll, startAutoScroll, pause, resetScroll })
 </script>
 
 <style lang="scss" scoped>
@@ -58,20 +56,10 @@ defineExpose({ bgEl: bgRef, decoEl: decoRef, scheduleAutoScroll, startAutoScroll
 
 .page {
   @include m.fill;
+  z-index: 1;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-}
-
-.layer-bg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: fill;
-  z-index: 0;
-  opacity: 0;
-  will-change: opacity;
 }
 
 .layer-deco {

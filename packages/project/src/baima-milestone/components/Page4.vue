@@ -1,5 +1,5 @@
 <template>
-  <PageLayout ref="layoutRef" :bg="url('bg.png')">
+  <PageLayout ref="layoutRef">
     <template #header>
       <img ref="topBarRef" class="header-bg" :src="url('header-bg.png')" alt="" />
       <img ref="titleRef" class="header-title" :src="url('page4/header-title.png')" alt="" />

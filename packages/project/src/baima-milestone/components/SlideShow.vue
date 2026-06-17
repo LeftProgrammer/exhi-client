@@ -1,15 +1,24 @@
 <template>
   <div class="slideshow">
-    <Transition :css="false" @leave="onLeave" @enter="onEnter">
-      <KeepAlive>
-        <component :is="currentComponent" :key="currentIndex" ref="pageRef" />
-      </KeepAlive>
+    <video
+      class="bg-video"
+      :src="bgVideoUrl"
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="auto"
+    ></video>
+    <Transition :css="false" appear @leave="onLeave" @enter="onEnter">
+      <component :is="currentComponent" :key="currentIndex" ref="pageRef" />
     </Transition>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, type Component } from 'vue'
+import gsap from 'gsap'
+import { resolvePkgUrl } from '@shared/utils/url'
 import { slides } from '@baima-milestone/data/slides'
 import { slideFadeOut, slideFadeIn, type SlideDir } from '@baima-milestone/effects/gsapPresets'
 import { useProjectSfx } from '@shared/composables/useProjectSfx'
@@ -28,9 +37,11 @@ const COMPONENT_MAP: Record<string, Component | null> = {
   page5: Page5
 }
 
+const bgVideoUrl = resolvePkgUrl('bg.mp4')
 const currentIndex = ref(0)
 const pageRef = ref<{ play: () => void; pause?: () => void; resume?: () => void; reset: () => void } | null>(null)
 let lastDir: SlideDir = 'next'
+let isTransitioning = false
 const sfx = useProjectSfx()
 
 const currentComponent = computed(() => {
@@ -39,8 +50,10 @@ const currentComponent = computed(() => {
 })
 
 function goto(i: number) {
+  if (isTransitioning) return
   if (i < 0 || i >= slides.length) return
   if (i === currentIndex.value) return
+  isTransitioning = true
   lastDir = i > currentIndex.value ? 'next' : 'prev'
   currentIndex.value = i
   sfx.play('nav')
@@ -72,7 +85,6 @@ function onKeyDown(e: KeyboardEvent) {
 
 onMounted(() => {
   window.addEventListener('keydown', onKeyDown)
-  nextTick(() => pageRef.value?.play())
   sfx.unlock()
 })
 
@@ -81,15 +93,21 @@ onBeforeUnmount(() => {
 })
 
 function onLeave(el: Element, done: () => void) {
-  slideFadeOut(el, done, lastDir)
+  gsap.killTweensOf(el)
+  slideFadeOut(el, () => {
+    isTransitioning = false
+    done()
+  }, lastDir)
 }
 
 function onEnter(el: Element, done: () => void) {
-  pageRef.value?.reset()
+  gsap.killTweensOf(el)
+  pageRef.value?.reset?.()
   slideFadeIn(
     el,
     () => {
-      pageRef.value?.play()
+      pageRef.value?.play?.()
+      isTransitioning = false
       done()
     },
     lastDir
@@ -104,5 +122,15 @@ function onEnter(el: Element, done: () => void) {
   height: 100%;
   overflow: hidden;
   outline: none;
+}
+
+.bg-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  z-index: 0;
+  pointer-events: none;
 }
 </style>
