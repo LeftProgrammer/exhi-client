@@ -150,7 +150,7 @@ const overlayComputedStyle = computed(() => {
         <button
           v-if="props.showPageNav"
           class="content-area__nav-btn"
-          :class="{ 'is-disabled': props.isFirst }"
+          :class="{ 'is-disabled': props.isFirst, 'is-active': prevHover }"
           :disabled="props.isFirst"
           @mouseenter="!props.isFirst && (prevHover = true)"
           @mouseleave="prevHover = false"
@@ -175,7 +175,7 @@ const overlayComputedStyle = computed(() => {
         <button
           v-if="props.showPageNav"
           class="content-area__nav-btn"
-          :class="{ 'is-disabled': props.isLast }"
+          :class="{ 'is-disabled': props.isLast, 'is-active': nextHover }"
           :disabled="props.isLast"
           @mouseenter="!props.isLast && (nextHover = true)"
           @mouseleave="nextHover = false"
@@ -199,6 +199,7 @@ const overlayComputedStyle = computed(() => {
         <!-- 首页 -->
         <button
           class="content-area__nav-btn"
+          :class="{ 'is-active': homeHover }"
           @mouseenter="homeHover = true"
           @mouseleave="homeHover = false"
           @touchstart="homeHover = true"
@@ -270,8 +271,8 @@ const overlayComputedStyle = computed(() => {
 /* 内部切换：overlay 离场渐隐 + 入场渐显 + 轻微缩放位移 */
 .overlay-fade-enter-active {
   transition:
-    opacity 0.8s ease 0.15s,
-    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s;
+    opacity 0.8s ease 1.2s,
+    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1.2s;
 }
 .overlay-fade-leave-active {
   transition:
@@ -424,7 +425,8 @@ const overlayComputedStyle = computed(() => {
     transition: opacity 0.25s ease;
   }
 
-  &:hover {
+  &:hover,
+  &.is-active {
     .btn-outer--normal {
       opacity: 0;
     }
@@ -446,7 +448,8 @@ const overlayComputedStyle = computed(() => {
     transform: scaleX(-1);
   }
 
-  &:hover .btn-icon--flip {
+  &:hover .btn-icon--flip,
+  &.is-active .btn-icon--flip {
     transform: scaleX(-1) scale(1.12);
   }
 }

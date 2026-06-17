@@ -1,6 +1,7 @@
 import type { Router } from 'vue-router'
 import { useRemoteControl } from '@shared/composables/useRemoteControl'
 import { useBrowserFallback } from '@shared/composables/useBrowserFallback'
+import { useProjectSfx } from '@shared/composables/useProjectSfx'
 
 /**
  * 白马多维筑安 中控通信封装。
@@ -25,7 +26,10 @@ export function useControl() {
      *  router: Vue Router 实例
      */
     setupCommands(router: Router) {
+      const sfx = useProjectSfx()
+
       rc.onCommand('home', () => {
+        try { sfx.play('back') } catch { /* 静默忽略 */ }
         router.push({ name: 'home' })
       })
 
@@ -33,6 +37,7 @@ export function useControl() {
         const target = p.target as string
         const valid = ['safety', 'tech', 'activity', 'standard']
         if (!valid.includes(target)) return
+        try { sfx.play('nav') } catch { /* 静默忽略 */ }
         const index = p.index as number | undefined
         router.push({
           name: target,
@@ -41,6 +46,7 @@ export function useControl() {
       })
 
       rc.onCommand('page', (p) => {
+        try { sfx.play('page') } catch { /* 静默忽略 */ }
         // 通过 window 自定义事件同文档内派发，当前 view 组件监听
         window.dispatchEvent(new CustomEvent('uec:page', { detail: p }))
       })
