@@ -1,5 +1,6 @@
 import { useRemoteControl } from '@shared/composables/useRemoteControl'
 import { useBrowserFallback } from '@shared/composables/useBrowserFallback'
+import { useProjectSfx } from '@shared/composables/useProjectSfx'
 
 /**
  * 白马 milestones 中控通信封装。
@@ -37,13 +38,17 @@ export function useControl() {
       onScrollPause?: () => void
       onScrollReset?: () => void
     }) {
+      const sfx = useProjectSfx()
+
       rc.onCommand('home', () => {
+        try { sfx.play('back') } catch { /* 静默忽略 */ }
         options.onGoto(0)
       })
 
       rc.onCommand('goto', (p) => {
         const index = (p.index as number) ?? 0
         if (index >= 0 && index < options.total) {
+          try { sfx.play('nav') } catch { /* 静默忽略 */ }
           options.onGoto(index)
         }
       })
@@ -61,6 +66,7 @@ export function useControl() {
           next = Math.max(0, Math.min(p.index as number, total - 1))
         }
         if (next !== current) {
+          try { sfx.play('page') } catch { /* 静默忽略 */ }
           options.onGoto(next)
         }
       })

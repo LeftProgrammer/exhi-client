@@ -1,6 +1,7 @@
 import { useRemoteControl } from '@shared/composables/useRemoteControl'
 import { useBridge } from '@shared/composables/useBridge'
 import { useBrowserFallback } from '@shared/composables/useBrowserFallback'
+import { useProjectSfx } from '@shared/composables/useProjectSfx'
 import { useScreenSync, setSyncForwarder } from './useScreenSync'
 import { useRouter } from 'vue-router'
 
@@ -73,16 +74,27 @@ export function useControl() {
 
       if (!displayId && !isBrowserDev) return
 
+      const sfx = useProjectSfx()
+
       // 每个屏都注册全部指令：handler 调用 syncXxx 把指令应用到本设备视图。
       // 主屏会经 forwarder 把指令转发给副屏，副屏的 forwarder 为 null 不再二次转发。
-      rc.onCommand('home', () => syncIdle())
+      rc.onCommand('home', () => {
+        try { sfx.play('back') } catch { /* 静默忽略 */ }
+        syncIdle()
+      })
       rc.onCommand('point', (p) => {
         const id = p.id as string
-        if (id) syncPoint(id)
+        if (id) {
+          try { sfx.play('tap') } catch { /* 静默忽略 */ }
+          syncPoint(id)
+        }
       })
       rc.onCommand('goto', (p) => {
         const id = p.id as string
-        if (id) syncPoint(id)
+        if (id) {
+          try { sfx.play('tap') } catch { /* 静默忽略 */ }
+          syncPoint(id)
+        }
       })
       rc.onCommand('video-play', () => syncVideoPlay())
       rc.onCommand('video-pause', () => syncVideoPause())

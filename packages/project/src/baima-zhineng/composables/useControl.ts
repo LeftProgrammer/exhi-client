@@ -1,6 +1,7 @@
 import type { Router } from 'vue-router'
 import { useRemoteControl } from '@shared/composables/useRemoteControl'
 import { useBrowserFallback } from '@shared/composables/useBrowserFallback'
+import { useProjectSfx } from '@shared/composables/useProjectSfx'
 
 /**
  * 白马职能建设 中控通信封装。
@@ -25,7 +26,10 @@ export function useControl() {
      *  router: Vue Router 实例
      */
     setupCommands(router: Router) {
+      const sfx = useProjectSfx()
+
       rc.onCommand('home', () => {
+        try { sfx.play('back') } catch { /* 静默忽略 */ }
         router.push({ name: 'home' })
       })
 
@@ -33,6 +37,7 @@ export function useControl() {
         const target = p.target as string
         const valid = ['zhidu', 'guihua', 'xingdong']
         if (!valid.includes(target)) return
+        try { sfx.play('tap') } catch { /* 静默忽略 */ }
         router.push({ name: target })
       })
 

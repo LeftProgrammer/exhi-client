@@ -268,7 +268,6 @@ function onNext() {
               />
             </div>
           </div>
-          <div class="a6__right-text"><img :src="a6.rightText" alt="" /></div>
           <div
             v-for="(group, i) in a6.groups"
             :key="i"
@@ -282,6 +281,7 @@ function onNext() {
           >
             <img :src="group.line" alt="" />
           </div>
+          <div class="a6__right-text"><img :src="a6.rightText" alt="" /></div>
         </div>
       </Transition>
     </ContentArea>
