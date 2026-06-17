@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, nextTick, onMounted } from 'vue'
+import { ref, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
 
 interface Props {
   /** 操作栏背景图 URL */
@@ -38,7 +38,7 @@ const captionWrapRef = ref<HTMLDivElement | null>(null)
 const captionInnerRef = ref<HTMLSpanElement | null>(null)
 const needsScroll = ref(false)
 const scrollDuration = ref('0s')
-const SCROLL_SPEED = 60 // px/s
+const SCROLL_SPEED = 40 // px/s
 
 function checkScroll() {
   nextTick(() => {
@@ -59,9 +59,19 @@ function checkScroll() {
 
 // 在 Transition 入场完成后检测（mode="out-in" 下新元素延迟插入，不能用 watch 直接检测）
 // onMounted 检测首次渲染，after-enter 检测后续 caption 切换
+let scrollCheckTimer: ReturnType<typeof setTimeout> | null = null
+
 onMounted(() => {
-  // 首次渲染：等一帧确保文字已布局
-  requestAnimationFrame(() => checkScroll())
+  // 从首页首次进入时，section 有入场动画（content-frame 1.4s + footer 1.3s）
+  // 需等页面完全可见后再检测，否则 animationDelay 会被入场动画覆盖
+  scrollCheckTimer = setTimeout(() => checkScroll(), 1500)
+})
+
+onBeforeUnmount(() => {
+  if (scrollCheckTimer != null) {
+    clearTimeout(scrollCheckTimer)
+    scrollCheckTimer = null
+  }
 })
 </script>
 
@@ -74,7 +84,7 @@ onMounted(() => {
             ref="captionInnerRef"
             class="footer__caption-inner"
             :class="{ 'footer__caption-inner--scroll': needsScroll }"
-            :style="needsScroll ? { animationDuration: scrollDuration, animationDelay: '0.8s' } : {}"
+            :style="needsScroll ? { animationDuration: scrollDuration, animationDelay: '1s' } : {}"
           >
             <span class="footer__caption-text">{{ caption }}</span>
             <span v-if="needsScroll" class="footer__caption-text">{{ caption }}</span>
@@ -165,7 +175,7 @@ onMounted(() => {
 
 .footer__caption-text {
   display: inline-block;
-  padding-right: 12vw;
+  padding-right: 18vw;
 }
 
 @keyframes footer-caption-scroll {
@@ -208,12 +218,14 @@ onMounted(() => {
   cursor: pointer;
   outline: none;
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  user-select: none;
   transition:
     transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
     box-shadow 0.25s t.$ease-base;
 
-  /* hover 放大发光仅在支持 hover 的设备生效 */
-  @media (hover: hover) {
+  /* hover 放大发光仅在支持 hover 的精细指针设备（鼠标）生效 */
+  @media (hover: hover) and (pointer: fine) {
     &:hover:not(:disabled) {
       transform: scale(1.12) translateY(d.h(-2));
     }
@@ -275,8 +287,8 @@ onMounted(() => {
   opacity: 0;
 }
 
-/* hover：底图 + 图标同时切换到 active 态（仅在支持 hover 的设备） */
-@media (hover: hover) {
+/* hover：底图 + 图标同时切换到 active 态（仅在支持 hover 的精细指针设备） */
+@media (hover: hover) and (pointer: fine) {
   .footer__btn:hover:not(:disabled) {
     .footer__btn-bg {
       opacity: 0;

@@ -99,7 +99,7 @@ function selectCategory(id: string) {
   categorySwitching.value = true
   setTimeout(() => (categorySwitching.value = false), CATEGORY_SWITCH_LOCK_MS)
   onUserInteract()
-  control.reportCategory(props.sectionId, id)
+  // control.reportCategory(props.sectionId, id)
   router.replace({
     name: 'section',
     params: { sectionId: props.sectionId, categoryId: id, entryIndex: 0 }
@@ -113,7 +113,7 @@ function next() {
   onUserInteract()
   const len = total.value
   const ni = (props.entryIndex + 1) % len
-  control.reportPage(props.sectionId, currentCategory.value.id, ni, len, 'next')
+  // control.reportPage(props.sectionId, currentCategory.value.id, ni, len, 'next')
   router.replace({
     name: 'section',
     params: { sectionId: props.sectionId, categoryId: currentCategory.value.id, entryIndex: ni }
@@ -127,7 +127,7 @@ function prev() {
   onUserInteract()
   const len = total.value
   const ni = (props.entryIndex - 1 + len) % len
-  control.reportPage(props.sectionId, currentCategory.value.id, ni, len, 'prev')
+  // control.reportPage(props.sectionId, currentCategory.value.id, ni, len, 'prev')
   router.replace({
     name: 'section',
     params: { sectionId: props.sectionId, categoryId: currentCategory.value.id, entryIndex: ni }
@@ -206,13 +206,38 @@ function onUecCarousel(e: Event) {
   }
 }
 
+/** 中控 page 指令处理：设置过渡方向 + 音效 */
+function onUecPage(e: Event) {
+  const detail = (e as CustomEvent).detail as Record<string, unknown>
+  if (!detail) return
+  const sid = detail.sectionId as string
+  const cid = detail.categoryId as string
+  if (sid !== props.sectionId || cid !== currentCategory.value.id) return
+
+  const action = detail.action as string
+  if (action === 'next') {
+    transitionType.value = 'entry-next'
+  } else if (action === 'prev') {
+    transitionType.value = 'entry-prev'
+  } else if (typeof detail.entryIndex === 'number') {
+    const idx = detail.entryIndex as number
+    transitionType.value = idx > props.entryIndex ? 'entry-next' : 'entry-prev'
+  } else {
+    // 兜底：既没有 action 也没有 entryIndex 时，默认使用 entry-next
+    transitionType.value = 'entry-next'
+  }
+  sfx.play('page')
+}
+
 onMounted(() => {
   window.addEventListener('uec:carousel', onUecCarousel)
+  window.addEventListener('uec:page', onUecPage)
   startAutoplay()
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('uec:carousel', onUecCarousel)
+  window.removeEventListener('uec:page', onUecPage)
   stopAutoplay()
 })
 

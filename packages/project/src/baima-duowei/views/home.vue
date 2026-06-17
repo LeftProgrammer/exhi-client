@@ -90,6 +90,7 @@ function goTo(name: string) {
   border: none;
   padding: 0;
   cursor: pointer;
+  outline: none;
   transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 
   img {

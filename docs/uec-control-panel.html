@@ -200,7 +200,7 @@ body{display:flex}
         <button class="cmd-btn" onclick="sendTo('research-main',{cmd:'point',id:'turbine'})"><span class="label">水轮机</span><span class="payload">{"cmd":"point","id":"turbine"}</span></button>
       </div>
     </div>
-    <div class="group">
+    <!-- <div class="group">
       <div class="group-title">视频控制</div>
       <div class="btn-row">
         <button class="cmd-btn" onclick="sendTo('research-main',{cmd:'video-play'})"><span class="label">播放</span><span class="payload">{"cmd":"video-play"}</span></button>
@@ -213,6 +213,28 @@ body{display:flex}
         <button class="cmd-btn" onmousedown="sendScrubStart(2)" onmouseup="sendScrubStop()" onmouseleave="sendScrubStop()"><span class="label">长按快进</span><span class="payload">{"cmd":"video-scrub","speed":2}</span></button>
         <button class="cmd-btn" onmousedown="sendScrubStart(-2)" onmouseup="sendScrubStop()" onmouseleave="sendScrubStop()"><span class="label">长按快退</span><span class="payload">{"cmd":"video-scrub","speed":-2}</span></button>
         <button class="cmd-btn" onclick="sendScrubStop()"><span class="label">停止 scrub</span><span class="payload">{"cmd":"video-scrub","speed":0}</span></button>
+      </div>
+    </div> -->
+  </div>
+</div>
+
+<!-- ===== research top-left ===== -->
+<div class="project">
+  <div class="project-header"><h3>白马展厅 · 科研创新（左上副屏）</h3><span class="hub-id">hub id: research-tl</span></div>
+  <div class="project-body">
+    <div class="group">
+      <div class="group-title">视频控制</div>
+      <div class="btn-row">
+        <button class="cmd-btn" onclick="sendTo('research-tl',{cmd:'video-play'})"><span class="label">播放</span><span class="payload">{"cmd":"video-play"}</span></button>
+        <button class="cmd-btn" onclick="sendTo('research-tl',{cmd:'video-pause'})"><span class="label">暂停</span><span class="payload">{"cmd":"video-pause"}</span></button>
+        <!-- <button class="cmd-btn" onclick="sendTo('research-tl',{cmd:'video-speed',rate:0.5})"><span class="label">慢放(0.5x)</span><span class="payload">{"cmd":"video-speed","rate":0.5}</span></button>
+        <button class="cmd-btn" onclick="sendTo('research-tl',{cmd:'video-speed',rate:2})"><span class="label">快进(2x)</span><span class="payload">{"cmd":"video-speed","rate":2}</span></button>
+        <button class="cmd-btn" onclick="sendTo('research-tl',{cmd:'video-speed',rate:1})"><span class="label">恢复正常(1x)</span><span class="payload">{"cmd":"video-speed","rate":1}</span></button> -->
+        <button class="cmd-btn" onclick="sendTo('research-tl',{cmd:'video-seek',offset:-10})"><span class="label">后退 10s</span><span class="payload">{"cmd":"video-seek","offset":-10}</span></button>
+        <button class="cmd-btn" onclick="sendTo('research-tl',{cmd:'video-seek',offset:10})"><span class="label">快进 10s</span><span class="payload">{"cmd":"video-seek","offset":10}</span></button>
+        <button class="cmd-btn" onmousedown="sendScrubStart(2,'research-tl')" onmouseup="sendScrubStop('research-tl')" onmouseleave="sendScrubStop('research-tl')"><span class="label">长按快进</span><span class="payload">{"cmd":"video-scrub","speed":2}</span></button>
+        <button class="cmd-btn" onmousedown="sendScrubStart(-2,'research-tl')" onmouseup="sendScrubStop('research-tl')" onmouseleave="sendScrubStop('research-tl')"><span class="label">长按快退</span><span class="payload">{"cmd":"video-scrub","speed":-2}</span></button>
+        <!-- <button class="cmd-btn" onclick="sendScrubStop('research-tl')"><span class="label">停止 scrub</span><span class="payload">{"cmd":"video-scrub","speed":0}</span></button> -->
       </div>
     </div>
   </div>
@@ -227,8 +249,36 @@ body{display:flex}
       <div class="btn-row">
         <button class="cmd-btn" onclick="sendTo('zhineng',{cmd:'home'})"><span class="label">首页</span><span class="payload">{"cmd":"home"}</span></button>
         <button class="cmd-btn" onclick="sendTo('zhineng',{cmd:'goto',target:'zhidu'})"><span class="label">制度机制</span><span class="payload">{"cmd":"goto","target":"zhidu"}</span></button>
-        <button class="cmd-btn" onclick="sendTo('zhineng',{cmd:'goto',target:'guihua'})"><span class="label">规划建设</span><span class="payload">{"cmd":"goto","target":"guihua"}</span></button>
-        <button class="cmd-btn" onclick="sendTo('zhineng',{cmd:'goto',target:'xingdong'})"><span class="label">行动实施</span><span class="payload">{"cmd":"goto","target":"xingdong"}</span></button>
+        <button class="cmd-btn" onclick="sendTo('zhineng',{cmd:'goto',target:'guihua'})"><span class="label">规划安排</span><span class="payload">{"cmd":"goto","target":"guihua"}</span></button>
+        <button class="cmd-btn" onclick="sendTo('zhineng',{cmd:'goto',target:'xingdong'})"><span class="label">行动举措</span><span class="payload">{"cmd":"goto","target":"xingdong"}</span></button>
+      </div>
+    </div>
+    <div class="group">
+      <div class="group-title">制度机制 tab</div>
+      <div class="btn-row">
+        <button class="cmd-btn" onclick="sendTo('zhineng',{cmd:'page',index:0})"><span class="label">工作室管理</span><span class="payload">{"cmd":"page","index":0}</span></button>
+        <button class="cmd-btn" onclick="sendTo('zhineng',{cmd:'page',index:1})"><span class="label">规章制度</span><span class="payload">{"cmd":"page","index":1}</span></button>
+        <button class="cmd-btn" onclick="sendTo('zhineng',{cmd:'page',index:2})"><span class="label">人员管理</span><span class="payload">{"cmd":"page","index":2}</span></button>
+        <button class="cmd-btn" onclick="sendTo('zhineng',{cmd:'page',index:3})"><span class="label">进程创新</span><span class="payload">{"cmd":"page","index":3}</span></button>
+        <button class="cmd-btn" onclick="sendTo('zhineng',{cmd:'page',index:4})"><span class="label">考核成果</span><span class="payload">{"cmd":"page","index":4}</span></button>
+      </div>
+    </div>
+    <div class="group">
+      <div class="group-title">规划安排 tab</div>
+      <div class="btn-row">
+        <button class="cmd-btn" onclick="sendTo('zhineng',{cmd:'page',index:0})"><span class="label">工作规划</span><span class="payload">{"cmd":"page","index":0}</span></button>
+        <button class="cmd-btn" onclick="sendTo('zhineng',{cmd:'page',index:1})"><span class="label">科研规划</span><span class="payload">{"cmd":"page","index":1}</span></button>
+      </div>
+    </div>
+    <div class="group">
+      <div class="group-title">行动举措 tab（大层级）</div>
+      <div class="btn-row">
+        <button class="cmd-btn" onclick="sendTo('zhineng',{cmd:'page',index:0})"><span class="label">先锋引领</span><span class="payload">{"cmd":"page","index":0}</span></button>
+        <button class="cmd-btn" onclick="sendTo('zhineng',{cmd:'page',index:5})"><span class="label">学思践悟</span><span class="payload">{"cmd":"page","index":5}</span></button>
+        <button class="cmd-btn" onclick="sendTo('zhineng',{cmd:'page',index:9})"><span class="label">技能强企</span><span class="payload">{"cmd":"page","index":9}</span></button>
+        <button class="cmd-btn" onclick="sendTo('zhineng',{cmd:'page',index:13})"><span class="label">安全护航</span><span class="payload">{"cmd":"page","index":13}</span></button>
+        <button class="cmd-btn" onclick="sendTo('zhineng',{cmd:'page',index:17})"><span class="label">联建共建</span><span class="payload">{"cmd":"page","index":17}</span></button>
+        <button class="cmd-btn" onclick="sendTo('zhineng',{cmd:'page',index:21})"><span class="label">科研创新</span><span class="payload">{"cmd":"page","index":21}</span></button>
       </div>
     </div>
     <div class="group">
@@ -362,25 +412,27 @@ function sendCustom() {
 }
 
 /* 长按 scrub（快进/快退）：按下时发送 speed，抬起/移出时发送 0 */
-var scrubTimer = null;
-var isScrubbing = false;
-function sendScrubStart(speed) {
-  if (isScrubbing) return; // 防止重复按下
-  isScrubbing = true;
-  sendTo('research-main', { cmd: 'video-scrub', speed: speed });
+var scrubTimerMap = {};
+var isScrubbingMap = {};
+function sendScrubStart(speed, hubId) {
+  hubId = hubId || 'research-main';
+  if (isScrubbingMap[hubId]) return; // 防止重复按下
+  isScrubbingMap[hubId] = true;
+  sendTo(hubId, { cmd: 'video-scrub', speed: speed });
   // 持续重发（防止网络丢包导致 scrub 停不下来）
-  scrubTimer = setInterval(function () {
-    sendTo('research-main', { cmd: 'video-scrub', speed: speed });
+  scrubTimerMap[hubId] = setInterval(function () {
+    sendTo(hubId, { cmd: 'video-scrub', speed: speed });
   }, 500);
 }
-function sendScrubStop() {
-  if (!isScrubbing) return; // 未在 scrub 中：mouseleave 误触发时直接忽略
-  isScrubbing = false;
-  if (scrubTimer) {
-    clearInterval(scrubTimer);
-    scrubTimer = null;
+function sendScrubStop(hubId) {
+  hubId = hubId || 'research-main';
+  if (!isScrubbingMap[hubId]) return; // 未在 scrub 中：mouseleave 误触发时直接忽略
+  isScrubbingMap[hubId] = false;
+  if (scrubTimerMap[hubId]) {
+    clearInterval(scrubTimerMap[hubId]);
+    scrubTimerMap[hubId] = null;
   }
-  sendTo('research-main', { cmd: 'video-scrub', speed: 0 });
+  sendTo(hubId, { cmd: 'video-scrub', speed: 0 });
 }
 
 function log(text, cls) {

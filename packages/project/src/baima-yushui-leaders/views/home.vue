@@ -23,7 +23,7 @@ function enterSection(sectionId: 'yushui' | 'leaders') {
   leaveTo({ name: 'section', params: { sectionId } })
   try { sfx.play('nav') } catch { /* 音效文件缺失，静默忽略 */ }
   const pageMap: Record<string, number> = { yushui: 1, leaders: 2 }
-  control.reportNav(pageMap[sectionId] ?? 0, sectionId)
+  // control.reportNav(pageMap[sectionId] ?? 0, sectionId)
 }
 </script>
 

@@ -64,7 +64,7 @@ const leaders: Section = {
   id: 'leaders',
   bannerFrameImage: 'leader/header-bg.png',
   bannerTitleImage: 'leader/header-title.png',
-  contentBgColor: '#003a9a',
+  contentBgColor: 'transparent',
   categories: [
     {
       id: '1',

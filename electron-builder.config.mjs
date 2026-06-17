@@ -5,6 +5,8 @@
  *   EXHI_SEED=baima-yushui-leaders  → 渝水+领导触摸屏
  *   EXHI_SEED=baima-milestone        → 里程碑滑轨屏
  *   EXHI_SEED=baima-duowei           → 多维筑安
+ *   EXHI_SEED=baima-zhineng          → 职能建设
+ *   EXHI_SEED=baima-research         → 科研创新
  *
  * 种子包来源：build/<id>/packages/<id>/（由 npm run dist:* 生成）
  */
@@ -18,7 +20,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const seed = process.env['EXHI_SEED']
 if (!seed) {
   console.error(
-    '[electron-builder] 缺少 EXHI_SEED 环境变量，请用 npm run dist:yushui / dist:milestone / dist:duowei'
+    '[electron-builder] 缺少 EXHI_SEED 环境变量，请用 npm run dist:yushui / dist:milestone / dist:duowei / dist:zhineng / dist:research'
   )
   process.exit(1)
 }
@@ -40,7 +42,9 @@ const contentVersion = JSON.parse(fs.readFileSync(manifestPath, 'utf-8')).versio
 const PROJECTS = {
   'baima-milestone': { appId: 'com.exhi.baima.milestone', displayName: '智慧展厅·白马·里程碑' },
   'baima-yushui-leaders': { appId: 'com.exhi.baima.yushui', displayName: '智慧展厅·白马·渝水' },
-  'baima-duowei': { appId: 'com.exhi.baima.duowei', displayName: '智慧展厅·白马·多维筑安' }
+  'baima-duowei': { appId: 'com.exhi.baima.duowei', displayName: '智慧展厅·白马·多维筑安' },
+  'baima-zhineng': { appId: 'com.exhi.baima.zhineng', displayName: '智慧展厅·白马·职能建设' },
+  'baima-research': { appId: 'com.exhi.baima.research', displayName: '智慧展厅·白马·科研创新' }
 }
 const project = PROJECTS[seed] ?? { appId: `com.exhi.${seed}`, displayName: 'Exhi Client' }
 const appId = project.appId

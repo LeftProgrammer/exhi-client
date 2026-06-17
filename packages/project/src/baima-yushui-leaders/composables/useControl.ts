@@ -1,6 +1,7 @@
 import type { Router } from 'vue-router'
 import { useRemoteControl } from '@shared/composables/useRemoteControl'
 import { useBrowserFallback } from '@shared/composables/useBrowserFallback'
+import { useProjectSfx } from '@shared/composables/useProjectSfx'
 import { getSection, type SectionId } from '@baima-yushui/data/sections'
 
 /**
@@ -53,13 +54,17 @@ export function useControl() {
      *  router: Vue Router 实例
      */
     setupCommands(router: Router) {
+      const sfx = useProjectSfx()
+
       rc.onCommand('home', () => {
+        try { sfx.play('back') } catch { /* 静默忽略 */ }
         router.push({ name: 'home' })
       })
 
       rc.onCommand('goto', (p) => {
         const target = p.target as 'yushui' | 'leaders'
         if (!target || !['yushui', 'leaders'].includes(target)) return
+        try { sfx.play('nav') } catch { /* 静默忽略 */ }
         const category = (p.category as string) ?? getSection(target).categories[0].id
         const index = (p.index as number) ?? 0
         router.push({
@@ -70,16 +75,50 @@ export function useControl() {
 
       rc.onCommand('category', (p) => {
         const route = router.currentRoute.value
-        if (route.name !== 'section') return
-        const sectionId = route.params.sectionId as string
         const catId = p.id as string
         if (!catId) return
-        const section = getSection(sectionId as SectionId)
-        if (!section.categories.find((c) => c.id === catId)) return
-        router.replace({
-          name: 'section',
-          params: { sectionId, categoryId: catId, entryIndex: 0 }
-        })
+
+        const allSections: SectionId[] = ['yushui', 'leaders']
+
+        // 当前在 section 页面：先查当前 section，没有再跨 section
+        if (route.name === 'section') {
+          const currentSectionId = route.params.sectionId as string
+          const currentSection = getSection(currentSectionId as SectionId)
+          if (currentSection.categories.find((c) => c.id === catId)) {
+            try { sfx.play('tap') } catch { /* 静默忽略 */ }
+            router.replace({
+              name: 'section',
+              params: { sectionId: currentSectionId, categoryId: catId, entryIndex: 0 }
+            })
+            return
+          }
+          for (const sid of allSections) {
+            if (sid === currentSectionId) continue
+            const section = getSection(sid)
+            if (section.categories.find((c) => c.id === catId)) {
+              try { sfx.play('tap') } catch { /* 静默忽略 */ }
+              router.replace({
+                name: 'section',
+                params: { sectionId: sid, categoryId: catId, entryIndex: 0 }
+              })
+              return
+            }
+          }
+          return
+        }
+
+        // 当前不在 section 页面（如首页）：跨 section 查找并直接跳转
+        for (const sid of allSections) {
+          const section = getSection(sid)
+          if (section.categories.find((c) => c.id === catId)) {
+            try { sfx.play('tap') } catch { /* 静默忽略 */ }
+            router.push({
+              name: 'section',
+              params: { sectionId: sid, categoryId: catId, entryIndex: 0 }
+            })
+            return
+          }
+        }
       })
 
       rc.onCommand('page', (p) => {
@@ -99,6 +138,9 @@ export function useControl() {
         else if (typeof p.index === 'number')
           nextIndex = Math.max(0, Math.min(p.index as number, total - 1))
         if (nextIndex !== entryIndex) {
+          window.dispatchEvent(new CustomEvent('uec:page', {
+            detail: { action, sectionId, categoryId, entryIndex: nextIndex }
+          }))
           router.replace({
             name: 'section',
             params: { sectionId, categoryId, entryIndex: nextIndex }

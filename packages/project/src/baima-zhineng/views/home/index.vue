@@ -118,6 +118,7 @@ function enter(m: ModuleDef) {
     background: none;
     cursor: pointer;
     overflow: visible;
+    outline: none;
 
     img {
       display: block;

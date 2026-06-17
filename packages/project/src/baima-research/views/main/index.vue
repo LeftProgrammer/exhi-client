@@ -303,6 +303,7 @@ useIdleReset(() => {
     border: none;
     padding: 0;
     cursor: pointer;
+    outline: none;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -455,6 +456,7 @@ useIdleReset(() => {
     border: none;
     padding: 0;
     cursor: pointer;
+    outline: none;
     display: block;
     overflow: hidden;
     border-radius: d.w(8);
@@ -510,6 +512,7 @@ useIdleReset(() => {
     width: d.w(213);
     height: d.h(51);
     cursor: pointer;
+    outline: none;
     -webkit-tap-highlight-color: transparent;
     transition:
       transform 0.2s ease,
