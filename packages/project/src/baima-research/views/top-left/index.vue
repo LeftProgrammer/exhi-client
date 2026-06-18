@@ -52,11 +52,11 @@ onSyncVideoSeek((offset) => {
   const v = videoRef.value
   if (!v || !offset) return
   let target = v.currentTime + offset
-  // 时长已知时，clamp 到 duration-0.1，避免落到结尾被 loop 当成 ended 回到开头
   if (isFinite(v.duration) && v.duration > 0) {
     target = Math.min(v.duration - 0.1, target)
   }
   v.currentTime = Math.max(0, target)
+  showTip(offset > 0 ? `快进 ${offset} 秒` : `后退 ${Math.abs(offset)} 秒`)
 })
 
 // 播放倍速（rate 如 0.5、1、1.5、2）
@@ -64,6 +64,7 @@ onSyncVideoSpeed((rate) => {
   const v = videoRef.value
   if (!v) return
   v.playbackRate = rate
+  showTip(`倍速 ${rate}x`)
 })
 
 // 音量调节（delta 单位：0~1，正数加大，负数减小）
@@ -71,6 +72,8 @@ onSyncVideoVolume((delta) => {
   const v = videoRef.value
   if (!v) return
   v.volume = Math.max(0, Math.min(1, v.volume + delta))
+  const pct = Math.round(v.volume * 100)
+  showTip(`音量 ${pct}%`)
 })
 
 // 静音/恢复
@@ -78,6 +81,7 @@ onSyncVideoMute((muted) => {
   const v = videoRef.value
   if (!v) return
   v.muted = muted
+  showTip(muted ? '🔇 静音' : '🔊 恢复声音')
 })
 
 // 长按快进/快退：speed > 0 快进，speed < 0 快退，speed === 0 停止
@@ -113,19 +117,22 @@ onSyncVideoScrub((speed) => {
       v.pause()
       isPaused.value = true
     }
+    hideTip()
     return
   }
 
   wasPlayingBeforeScrub = !v.paused
+  showTip(speed > 0 ? `${speed}x 快进中` : `${Math.abs(speed)}x 快退中`)
 
   if (speed > 0) {
-    // 正向快进：倍速正常播放
+    // 正向快进：倍速正常播放，暂停状态下保持暂停
     v.playbackRate = Math.min(16, speed)
-    v.play()
+    if (wasPlayingBeforeScrub) {
+      v.play()
+    }
     isPaused.value = false
   } else {
-    // 反向快退：定时回退 currentTime
-    v.pause()
+    // 反向快退：保持原有播放/暂停状态，定时回退 currentTime
     isPaused.value = false
     rewindLastTime = performance.now()
     rewindTimer = window.setInterval(() => {
@@ -137,9 +144,10 @@ onSyncVideoScrub((speed) => {
       const target = ve.currentTime + dt * speed // speed < 0，向前回退
       if (target <= 0) {
         ve.currentTime = 0
-        ve.pause()
-        isPaused.value = true // 退到开头，恢复播放按钮
-        wasPlayingBeforeScrub = false
+        if (!wasPlayingBeforeScrub) {
+          ve.pause()
+          isPaused.value = true
+        }
         stopRewind()
         return
       }
@@ -161,6 +169,42 @@ const point = computed(() => getPoint(activeId.value))
 
 const videoRef = ref<HTMLVideoElement | null>(null)
 const isPaused = ref(true)
+const showControls = ref(false)
+const isHoveringVideo = ref(false)
+let controlsTimer: ReturnType<typeof setTimeout> | null = null
+
+// 中控操作提示（白灰透明风格）
+const tipState = ref({ show: false, text: '' })
+let tipTimer: ReturnType<typeof setTimeout> | null = null
+function showTip(text: string) {
+  tipState.value = { show: true, text }
+  if (tipTimer) clearTimeout(tipTimer)
+  tipTimer = setTimeout(() => {
+    tipState.value.show = false
+  }, 1500)
+}
+
+function hideTip() {
+  tipState.value.show = false
+  if (tipTimer) {
+    clearTimeout(tipTimer)
+    tipTimer = null
+  }
+}
+
+function onVideoMouseEnter() {
+  isHoveringVideo.value = true
+  showControls.value = true
+  if (controlsTimer) {
+    clearTimeout(controlsTimer)
+    controlsTimer = null
+  }
+}
+
+function onVideoMouseLeave() {
+  isHoveringVideo.value = false
+  showControls.value = false
+}
 
 function toggleVideo() {
   const v = videoRef.value
@@ -206,15 +250,23 @@ function asset(name: string) {
         <img class="tl__baima rt-2" :src="asset('right-top-2.png')" alt="" />
         <img class="tl__baima video-deco" :src="asset('video-deco.png')" alt="" />
         <img class="tl__baima video-frame" :src="asset('video-frame.png')" alt="" />
-        <div class="tl__baima video-wrap" @click="toggleVideo">
+        <div
+          class="tl__baima video-wrap"
+          @mouseenter="onVideoMouseEnter"
+          @mouseleave="onVideoMouseLeave"
+        >
           <video
             ref="videoRef"
             class="tl__video-player"
             :src="asset('video.mp4')"
             loop
-            muted
+            :controls="showControls"
+            @play="isPaused = false"
+            @pause="isPaused = true"
+            @click.prevent.stop="toggleVideo"
           ></video>
           <img v-show="isPaused" class="tl__video-pause" :src="asset('play-btn.png')" alt="" />
+          <div :class="['tl__tip', { 'tl__tip--show': tipState.show }]">{{ tipState.text }}</div>
         </div>
       </div>
     </transition>
@@ -408,7 +460,7 @@ function asset(name: string) {
 
       .tl__baima {
         position: absolute;
-        object-fit: contain;
+        object-fit: fill;
       }
 
       .lt-title {
@@ -484,7 +536,7 @@ function asset(name: string) {
       .tl__video-player {
         width: 96%;
         height: 90%;
-        object-fit: contain;
+        object-fit: fill;
         border-radius: d.w(20);
       }
 
@@ -495,9 +547,39 @@ function asset(name: string) {
         transform: translate(-50%, -50%);
         width: d.w(186);
         height: d.h(186);
-        object-fit: contain;
+        object-fit: fill;
         pointer-events: none;
         z-index: 3;
+      }
+
+      /* 中控操作提示：玻璃态浮窗，仿原生 controls 风格 */
+      .tl__tip {
+        position: absolute;
+        left: 50%;
+        bottom: d.h(120);
+        transform: translate(-50%);
+        padding: d.h(16) d.w(36);
+        background: rgba(30, 30, 30, 0.82);
+        backdrop-filter: blur(d.w(8));
+        border-radius: d.w(12);
+        color: #fff;
+        font-size: d.h(32);
+        font-weight: 500;
+        pointer-events: none;
+        z-index: 4;
+        opacity: 0;
+        transition: opacity 0.35s ease, transform 0.35s ease;
+        white-space: nowrap;
+        box-shadow: 0 d.h(4) d.w(16) rgba(0, 0, 0, 0.3);
+
+        &--show {
+          opacity: 1;
+        }
+      }
+
+      /* 隐藏浏览器扩展注入的倍速控件 */
+      :deep(vsc-controller) {
+        display: none !important;
       }
     }
 
@@ -506,7 +588,7 @@ function asset(name: string) {
 
       .tl__slope {
         position: absolute;
-        object-fit: contain;
+        object-fit: fill;
       }
 
       .sl-lt-title {
@@ -592,7 +674,7 @@ function asset(name: string) {
 
       .tl__coating {
         position: absolute;
-        object-fit: contain;
+        object-fit: fill;
       }
 
       .ct-top-title {
@@ -657,7 +739,7 @@ function asset(name: string) {
 
       .tl__concrete {
         position: absolute;
-        object-fit: contain;
+        object-fit: fill;
       }
 
       .cc-top-title {
@@ -722,7 +804,7 @@ function asset(name: string) {
 
       .tl__excavation {
         position: absolute;
-        object-fit: contain;
+        object-fit: fill;
       }
 
       .ex-top-title {
@@ -794,7 +876,7 @@ function asset(name: string) {
 
       .tl__navigation {
         position: absolute;
-        object-fit: contain;
+        object-fit: fill;
       }
 
       .nav-lt-title {
@@ -873,7 +955,7 @@ function asset(name: string) {
 
       .tl__turbine {
         position: absolute;
-        object-fit: contain;
+        object-fit: fill;
       }
 
       .tr-title {
@@ -903,7 +985,7 @@ function asset(name: string) {
 
       .tl__blasting {
         position: absolute;
-        object-fit: contain;
+        object-fit: fill;
       }
 
       .bl-title {
@@ -978,7 +1060,7 @@ function asset(name: string) {
       .bl-video-player {
         width: 100%;
         height: 100%;
-        object-fit: contain;
+        object-fit: fill;
       }
 
       .bl-video-pause {
@@ -988,7 +1070,7 @@ function asset(name: string) {
         transform: translate(-50%, -50%);
         width: d.w(187);
         height: d.h(187);
-        object-fit: contain;
+        object-fit: fill;
         pointer-events: none;
         z-index: 3;
       }
@@ -1024,7 +1106,7 @@ function asset(name: string) {
   &__title {
     height: d.h(70);
     width: auto;
-    object-fit: contain;
+    object-fit: fill;
     align-self: flex-start;
   }
 
@@ -1032,7 +1114,7 @@ function asset(name: string) {
     flex: 1;
     width: 100%;
     min-height: 0;
-    object-fit: contain;
+    object-fit: fill;
     object-position: left top;
   }
 
@@ -1045,7 +1127,7 @@ function asset(name: string) {
     img {
       flex: 1;
       min-width: 0;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -1064,7 +1146,7 @@ function asset(name: string) {
     inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: fill;
     z-index: 2;
     pointer-events: none;
   }
@@ -1079,7 +1161,7 @@ function asset(name: string) {
   &__video-deco {
     height: d.h(60);
     width: auto;
-    object-fit: contain;
+    object-fit: fill;
   }
 
   &__placeholder {

@@ -188,7 +188,7 @@ function asset(name: string) {
 
       .tr__baima {
         position: absolute;
-        object-fit: contain;
+        object-fit: fill;
       }
 
       .tr-title {
@@ -211,7 +211,7 @@ function asset(name: string) {
 
       .tr__slope {
         position: absolute;
-        object-fit: contain;
+        object-fit: fill;
       }
 
       .tr-st-title {
@@ -248,7 +248,7 @@ function asset(name: string) {
 
       .tr__coating {
         position: absolute;
-        object-fit: contain;
+        object-fit: fill;
       }
 
       .tr-ct-title {
@@ -271,7 +271,7 @@ function asset(name: string) {
 
       .tr__concrete {
         position: absolute;
-        object-fit: contain;
+        object-fit: fill;
       }
 
       .tr-cc-title {
@@ -294,7 +294,7 @@ function asset(name: string) {
 
       .tr__excavation {
         position: absolute;
-        object-fit: contain;
+        object-fit: fill;
       }
 
       .ex-title {
@@ -338,7 +338,7 @@ function asset(name: string) {
 
       .tr__navigation {
         position: absolute;
-        object-fit: contain;
+        object-fit: fill;
       }
 
       .nav-title {
@@ -361,7 +361,7 @@ function asset(name: string) {
 
       .tr__turbine {
         position: absolute;
-        object-fit: contain;
+        object-fit: fill;
       }
 
       .tr-title {
@@ -419,7 +419,7 @@ function asset(name: string) {
 
       .tr__blasting {
         position: absolute;
-        object-fit: contain;
+        object-fit: fill;
       }
 
       .tr-bs-title {
@@ -441,7 +441,7 @@ function asset(name: string) {
   &__title {
     height: d.h(80);
     width: auto;
-    object-fit: contain;
+    object-fit: fill;
     align-self: flex-start;
   }
 
@@ -454,7 +454,7 @@ function asset(name: string) {
     img {
       flex: 1;
       min-width: 0;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 

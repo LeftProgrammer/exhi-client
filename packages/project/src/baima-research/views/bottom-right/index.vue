@@ -209,7 +209,7 @@ const exGroups2 = computed(() => blockGroups(1))
 
       .br__baima {
         position: absolute;
-        object-fit: contain;
+        object-fit: fill;
       }
 
       .br-title {
@@ -246,7 +246,7 @@ const exGroups2 = computed(() => blockGroups(1))
 
       .br__slope {
         position: absolute;
-        object-fit: contain;
+        object-fit: fill;
       }
 
       .br-st-title {
@@ -290,7 +290,7 @@ const exGroups2 = computed(() => blockGroups(1))
 
       .br__coating {
         position: absolute;
-        object-fit: contain;
+        object-fit: fill;
       }
 
       .br-ct-title {
@@ -320,7 +320,7 @@ const exGroups2 = computed(() => blockGroups(1))
 
       .br__concrete {
         position: absolute;
-        object-fit: contain;
+        object-fit: fill;
       }
 
       .br-cc-title {
@@ -343,7 +343,7 @@ const exGroups2 = computed(() => blockGroups(1))
 
       .br__excavation {
         position: absolute;
-        object-fit: contain;
+        object-fit: fill;
       }
 
       .ex-title {
@@ -374,7 +374,7 @@ const exGroups2 = computed(() => blockGroups(1))
 
       .br__navigation {
         position: absolute;
-        object-fit: contain;
+        object-fit: fill;
       }
 
       .nav-title {
@@ -418,7 +418,7 @@ const exGroups2 = computed(() => blockGroups(1))
 
       .br__turbine {
         position: absolute;
-        object-fit: contain;
+        object-fit: fill;
       }
 
       .tr-title {
@@ -441,7 +441,7 @@ const exGroups2 = computed(() => blockGroups(1))
 
       .br__blasting {
         position: absolute;
-        object-fit: contain;
+        object-fit: fill;
       }
 
       .br-bs-title {
@@ -463,7 +463,7 @@ const exGroups2 = computed(() => blockGroups(1))
   &__title {
     height: d.h(80);
     width: auto;
-    object-fit: contain;
+    object-fit: fill;
     align-self: flex-start;
   }
 
@@ -478,7 +478,7 @@ const exGroups2 = computed(() => blockGroups(1))
       flex: 1;
       width: 100%;
       min-height: 0;
-      object-fit: contain;
+      object-fit: fill;
       object-position: left center;
     }
   }
@@ -486,13 +486,13 @@ const exGroups2 = computed(() => blockGroups(1))
   &__center {
     flex: 1;
     width: 100%;
-    object-fit: contain;
+    object-fit: fill;
   }
 
   &__bottom {
     height: d.h(100);
     width: auto;
-    object-fit: contain;
+    object-fit: fill;
   }
 
   &__placeholder {

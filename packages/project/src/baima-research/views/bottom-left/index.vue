@@ -253,7 +253,7 @@ const blGroups3 = computed(() => blockGroups(2))
 
       .bl__baima {
         position: absolute;
-        object-fit: contain;
+        object-fit: fill;
       }
 
       .bl-title {
@@ -290,7 +290,7 @@ const blGroups3 = computed(() => blockGroups(2))
 
       .bl__slope {
         position: absolute;
-        object-fit: contain;
+        object-fit: fill;
       }
 
       .bl-st-title {
@@ -348,7 +348,7 @@ const blGroups3 = computed(() => blockGroups(2))
 
       .bl__coating {
         position: absolute;
-        object-fit: contain;
+        object-fit: fill;
       }
 
       .ct-title {
@@ -384,7 +384,7 @@ const blGroups3 = computed(() => blockGroups(2))
 
       .bl__coating {
         position: absolute;
-        object-fit: contain;
+        object-fit: fill;
       }
 
       .ct-title {
@@ -420,7 +420,7 @@ const blGroups3 = computed(() => blockGroups(2))
 
       .bl__excavation {
         position: absolute;
-        object-fit: contain;
+        object-fit: fill;
       }
 
       .ex-title {
@@ -457,7 +457,7 @@ const blGroups3 = computed(() => blockGroups(2))
 
       .bl__navigation {
         position: absolute;
-        object-fit: contain;
+        object-fit: fill;
       }
 
       .nav-title {
@@ -494,7 +494,7 @@ const blGroups3 = computed(() => blockGroups(2))
 
       .bl__turbine {
         position: absolute;
-        object-fit: contain;
+        object-fit: fill;
       }
 
       .tr-title {
@@ -524,7 +524,7 @@ const blGroups3 = computed(() => blockGroups(2))
 
       .bl__blasting {
         position: absolute;
-        object-fit: contain;
+        object-fit: fill;
       }
 
       .bl-bs-title {
@@ -560,7 +560,7 @@ const blGroups3 = computed(() => blockGroups(2))
   &__title {
     height: d.h(80);
     width: auto;
-    object-fit: contain;
+    object-fit: fill;
     align-self: flex-start;
   }
 
@@ -573,7 +573,7 @@ const blGroups3 = computed(() => blockGroups(2))
     img {
       flex: 1;
       min-width: 0;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
@@ -589,7 +589,7 @@ const blGroups3 = computed(() => blockGroups(2))
       width: 100%;
       height: 100%;
       min-height: 0;
-      object-fit: contain;
+      object-fit: fill;
     }
   }
 
