@@ -90,8 +90,15 @@ export function useVideoControl() {
     if (!v) return
     // 暂停后重新播放，自动恢复正常 1 倍速（无恢复按钮时的兜底）
     if (v.playbackRate !== 1) v.playbackRate = 1
-    v.play()
-    isPaused.value = false
+    v.play().catch((err: unknown) => {
+      const e = err as DOMException
+      // 浏览器下无用户手势时自动播放策略拒绝：静音后重试
+      if (e.name === 'NotAllowedError') {
+        v.muted = true
+        showTip('已自动静音，点击视频可恢复声音')
+        v.play().catch(() => {})
+      }
+    })
   })
 
   onSyncVideoPause(() => {
@@ -148,8 +155,7 @@ export function useVideoControl() {
     if (speed === 0) {
       v.playbackRate = 1
       if (wasPlayingBeforeScrub) {
-        v.play()
-        isPaused.value = false
+        v.play().catch(() => {})
       } else {
         v.pause()
         isPaused.value = true
@@ -165,9 +171,8 @@ export function useVideoControl() {
       // 正向快进：倍速正常播放，暂停状态下保持暂停
       v.playbackRate = Math.min(16, speed)
       if (wasPlayingBeforeScrub) {
-        v.play()
+        v.play().catch(() => {})
       }
-      isPaused.value = false
     } else {
       // 反向快退：保持原有播放/暂停状态，定时回退 currentTime
       isPaused.value = false
@@ -214,8 +219,7 @@ export function useVideoControl() {
     const v = videoRef.value
     if (!v) return
     if (v.paused) {
-      v.play()
-      isPaused.value = false
+      v.play().catch(() => {})
     } else {
       v.pause()
       isPaused.value = true

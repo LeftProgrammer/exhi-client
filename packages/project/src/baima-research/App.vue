@@ -44,10 +44,7 @@ onMounted(async () => {
     await router.isReady()
     initAll()
     unlock()
-    return
-  }
-
-  if (ready.value) {
+  } else if (ready.value) {
     initAll()
     unlock()
   } else {
@@ -58,7 +55,27 @@ onMounted(async () => {
         unwatch()
       }
     })
+    return
   }
+
+  // 判断当前是否主屏
+  const isMainScreen = () => {
+    const displayId = info.value?.displayId
+    const isBrowserDev = typeof window !== 'undefined' && !window.exhibitBridge
+    const routeName = router.currentRoute.value.name
+    return displayId === 'main' || (isBrowserDev && (routeName === 'home' || !routeName))
+  }
+
+  // 副屏用户交互时上报主屏，让主屏重置空闲计时器
+  const reportInteraction = () => {
+    if (!isMainScreen()) {
+      control.sendTo('research-main', { cmd: 'interaction' })
+    }
+  }
+  const idleEvents: Array<keyof DocumentEventMap> = ['pointerdown', 'keydown', 'wheel', 'touchstart']
+  idleEvents.forEach((ev) =>
+    document.addEventListener(ev, reportInteraction, { capture: true, passive: true })
+  )
 })
 </script>
 

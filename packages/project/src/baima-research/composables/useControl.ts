@@ -60,7 +60,14 @@ export function useControl() {
 
     /** 向指定设备发送控制消息（多屏互联） */
     sendTo(target: string, payload: unknown) {
-      rc.sendTo(target, payload)
+      const isBrowserDev = typeof window !== 'undefined' && !window.exhibitBridge
+      if (isBrowserDev) {
+        // 浏览器模式：通过 fallback WebSocket 直接发送
+        fallback.send({ to: target, msg: JSON.stringify(payload) })
+      } else {
+        // Electron 模式：通过 exhibitBridge hub 发送
+        rc.sendTo(target, payload)
+      }
     },
 
     /** 注册中控指令接收处理（在 App.vue 初始化时调用）
@@ -78,14 +85,20 @@ export function useControl() {
 
       // 每个屏都注册全部指令：handler 调用 syncXxx 把指令应用到本设备视图。
       // 主屏会经 forwarder 把指令转发给副屏，副屏的 forwarder 为 null 不再二次转发。
+      // 任意中控指令都视为交互，重置空闲计时器
+      const resetIdle = () => {
+        window.dispatchEvent(new CustomEvent('exhi:interaction'))
+      }
       rc.onCommand('home', () => {
         try { sfx.play('back') } catch { /* 静默忽略 */ }
+        resetIdle()
         syncIdle()
       })
       rc.onCommand('point', (p) => {
         const id = p.id as string
         if (id) {
           try { sfx.play('tap') } catch { /* 静默忽略 */ }
+          resetIdle()
           syncPoint(id)
         }
       })
@@ -93,35 +106,51 @@ export function useControl() {
         const id = p.id as string
         if (id) {
           try { sfx.play('tap') } catch { /* 静默忽略 */ }
+          resetIdle()
           syncPoint(id)
         }
       })
-      rc.onCommand('video-play', () => syncVideoPlay())
-      rc.onCommand('video-pause', () => syncVideoPause())
+      rc.onCommand('video-play', () => {
+        resetIdle()
+        syncVideoPlay()
+      })
+      rc.onCommand('video-pause', () => {
+        resetIdle()
+        syncVideoPause()
+      })
       // 视频快进/快退（offset 单位：秒，正数快进，负数快退）
       rc.onCommand('video-seek', (p) => {
+        resetIdle()
         const offset = Number(p.offset)
         if (!isNaN(offset)) syncVideoSeek(offset)
       })
       // 播放倍速（rate 如 0.5、1、1.5、2）
       rc.onCommand('video-speed', (p) => {
+        resetIdle()
         const rate = Number(p.rate)
         if (!isNaN(rate) && rate > 0) syncVideoSpeed(rate)
       })
       // 音量调节（delta 单位：0~1，正数加大，负数减小）
       rc.onCommand('video-volume', (p) => {
+        resetIdle()
         const delta = Number(p.delta)
         if (!isNaN(delta)) syncVideoVolume(delta)
       })
       // 静音/恢复
       rc.onCommand('video-mute', (p) => {
+        resetIdle()
         const muted = p.muted !== undefined ? Boolean(p.muted) : true
         syncVideoMute(muted)
       })
       // 长按快进/快退（speed > 0 快进，speed < 0 快退，speed === 0 停止）
       rc.onCommand('video-scrub', (p) => {
+        resetIdle()
         const speed = Number(p.speed)
         if (!isNaN(speed)) syncVideoScrub(speed)
+      })
+      // 副屏用户交互上报，主屏收到后重置空闲计时器
+      rc.onCommand('interaction', () => {
+        resetIdle()
       })
 
       if (!isBrowserDev) {

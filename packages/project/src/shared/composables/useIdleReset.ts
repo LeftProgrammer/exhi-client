@@ -33,10 +33,15 @@ export function useIdleReset(onTimeout: () => void, idleMs = 20_000) {
     'touchstart'
   ]
 
+  // 中控指令等非用户交互事件也通过自定义事件重置计时器
+  const INTERACTION_EVENT = 'exhi:interaction'
+  const interactionHandler = () => arm()
+
   onMounted(() => {
     idleEvents.forEach((ev) =>
       document.addEventListener(ev, handler, { capture: true, passive: true })
     )
+    window.addEventListener(INTERACTION_EVENT, interactionHandler)
     arm()
   })
 
@@ -44,6 +49,7 @@ export function useIdleReset(onTimeout: () => void, idleMs = 20_000) {
     idleEvents.forEach((ev) =>
       document.removeEventListener(ev, handler, { capture: true } as EventListenerOptions)
     )
+    window.removeEventListener(INTERACTION_EVENT, interactionHandler)
     disarm()
   })
 

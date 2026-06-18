@@ -59,6 +59,9 @@ if (!singleInstanceLock) {
 app.commandLine.appendSwitch('disable-background-timer-throttling')
 app.commandLine.appendSwitch('disable-renderer-backgrounding')
 app.commandLine.appendSwitch('disable-backgrounding-occluded-windows')
+// 展厅 kiosk 环境：视频由中控指令驱动播放，不要求用户手势。
+// 关闭 Chromium 自动播放策略限制，防止 v.play() 抛出 NotAllowedError。
+app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required')
 // 关闭 Chromium 直接写 stderr 的噪声（DevTools Autofill / Unknown VE context 等）
 app.commandLine.appendSwitch('disable-logging')
 
