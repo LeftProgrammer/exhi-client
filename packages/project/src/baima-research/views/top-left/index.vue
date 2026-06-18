@@ -1,222 +1,24 @@
 <script setup lang="ts">
-import { ref, computed, onBeforeUnmount } from 'vue'
+import { ref, computed } from 'vue'
 import { resolvePkgUrl } from '@shared/utils/url'
 import { useScreenSync, getDebugPoint } from '../../composables/useScreenSync'
 import { getPoint } from '../../data/points'
+import VideoPlayer from '../../components/VideoPlayer.vue'
 
 const SCREEN = 'top-left'
-const {
-  onSyncPoint,
-  onSyncIdle,
-  onSyncVideoPlay,
-  onSyncVideoPause,
-  onSyncVideoSeek,
-  onSyncVideoSpeed,
-  onSyncVideoVolume,
-  onSyncVideoMute,
-  onSyncVideoScrub
-} = useScreenSync()
+const { onSyncPoint, onSyncIdle } = useScreenSync()
 
 // dev 调试：可通过 URL ?point=baima-bridge 直接预览选中态
 const activeId = ref<string | null>(getDebugPoint())
 
 onSyncPoint((id) => {
   activeId.value = id
-  isPaused.value = true
-  stopVideoScrub()
 })
 onSyncIdle(() => {
   activeId.value = null
-  isPaused.value = true
-  stopVideoScrub()
 })
-
-onSyncVideoPlay(() => {
-  const v = videoRef.value
-  if (!v) return
-  // 暂停后重新播放，自动恢复正常 1 倍速（无恢复按钮时的兜底）
-  if (v.playbackRate !== 1) v.playbackRate = 1
-  v.play()
-  isPaused.value = false
-})
-
-onSyncVideoPause(() => {
-  const v = videoRef.value
-  if (!v) return
-  v.pause()
-  isPaused.value = true
-})
-
-// 快进/快退（offset 单位：秒，正数快进，负数快退）
-onSyncVideoSeek((offset) => {
-  const v = videoRef.value
-  if (!v || !offset) return
-  let target = v.currentTime + offset
-  if (isFinite(v.duration) && v.duration > 0) {
-    target = Math.min(v.duration - 0.1, target)
-  }
-  v.currentTime = Math.max(0, target)
-  showTip(offset > 0 ? `快进 ${offset} 秒` : `后退 ${Math.abs(offset)} 秒`)
-})
-
-// 播放倍速（rate 如 0.5、1、1.5、2）
-onSyncVideoSpeed((rate) => {
-  const v = videoRef.value
-  if (!v) return
-  v.playbackRate = rate
-  showTip(`倍速 ${rate}x`)
-})
-
-// 音量调节（delta 单位：0~1，正数加大，负数减小）
-onSyncVideoVolume((delta) => {
-  const v = videoRef.value
-  if (!v) return
-  v.volume = Math.max(0, Math.min(1, v.volume + delta))
-  const pct = Math.round(v.volume * 100)
-  showTip(`音量 ${pct}%`)
-})
-
-// 静音/恢复
-onSyncVideoMute((muted) => {
-  const v = videoRef.value
-  if (!v) return
-  v.muted = muted
-  showTip(muted ? '🔇 静音' : '🔊 恢复声音')
-})
-
-// 长按快进/快退：speed > 0 快进，speed < 0 快退，speed === 0 停止
-// 正向：用 playbackRate 正常倍速播放（画面流畅、有声）。
-// 反向：playbackRate 不支持负值，用降频 seek 回退（throttle 避免 seek 互相打断导致卡帧）。
-let rewindTimer: number | null = null
-let rewindLastTime = 0
-let wasPlayingBeforeScrub = false
-
-// 反向快退 seek 间隔（ms）；过小会让 seek 来不及完成导致卡帧
-const REWIND_STEP_MS = 100
-
-function stopRewind() {
-  if (rewindTimer !== null) {
-    clearInterval(rewindTimer)
-    rewindTimer = null
-  }
-}
-
-onSyncVideoScrub((speed) => {
-  const v = videoRef.value
-  if (!v) return
-
-  // 任何新指令先停掉上一次的 scrub 状态
-  stopVideoScrub()
-
-  if (speed === 0) {
-    v.playbackRate = 1
-    if (wasPlayingBeforeScrub) {
-      v.play()
-      isPaused.value = false
-    } else {
-      v.pause()
-      isPaused.value = true
-    }
-    hideTip()
-    return
-  }
-
-  wasPlayingBeforeScrub = !v.paused
-  showTip(speed > 0 ? `${speed}x 快进中` : `${Math.abs(speed)}x 快退中`)
-
-  if (speed > 0) {
-    // 正向快进：倍速正常播放，暂停状态下保持暂停
-    v.playbackRate = Math.min(16, speed)
-    if (wasPlayingBeforeScrub) {
-      v.play()
-    }
-    isPaused.value = false
-  } else {
-    // 反向快退：保持原有播放/暂停状态，定时回退 currentTime
-    isPaused.value = false
-    rewindLastTime = performance.now()
-    rewindTimer = window.setInterval(() => {
-      const ve = videoRef.value
-      if (!ve) { stopRewind(); return }
-      const now = performance.now()
-      const dt = (now - rewindLastTime) / 1000
-      rewindLastTime = now
-      const target = ve.currentTime + dt * speed // speed < 0，向前回退
-      if (target <= 0) {
-        ve.currentTime = 0
-        if (!wasPlayingBeforeScrub) {
-          ve.pause()
-          isPaused.value = true
-        }
-        stopRewind()
-        return
-      }
-      ve.currentTime = target
-    }, REWIND_STEP_MS)
-  }
-})
-
-// 统一停止入口：清理快进倍速 + 反向定时器
-function stopVideoScrub() {
-  stopRewind()
-  const v = videoRef.value
-  if (v && v.playbackRate !== 1) v.playbackRate = 1
-}
-
-onBeforeUnmount(() => stopVideoScrub())
 
 const point = computed(() => getPoint(activeId.value))
-
-const videoRef = ref<HTMLVideoElement | null>(null)
-const isPaused = ref(true)
-const showControls = ref(false)
-const isHoveringVideo = ref(false)
-let controlsTimer: ReturnType<typeof setTimeout> | null = null
-
-// 中控操作提示（白灰透明风格）
-const tipState = ref({ show: false, text: '' })
-let tipTimer: ReturnType<typeof setTimeout> | null = null
-function showTip(text: string) {
-  tipState.value = { show: true, text }
-  if (tipTimer) clearTimeout(tipTimer)
-  tipTimer = setTimeout(() => {
-    tipState.value.show = false
-  }, 1500)
-}
-
-function hideTip() {
-  tipState.value.show = false
-  if (tipTimer) {
-    clearTimeout(tipTimer)
-    tipTimer = null
-  }
-}
-
-function onVideoMouseEnter() {
-  isHoveringVideo.value = true
-  showControls.value = true
-  if (controlsTimer) {
-    clearTimeout(controlsTimer)
-    controlsTimer = null
-  }
-}
-
-function onVideoMouseLeave() {
-  isHoveringVideo.value = false
-  showControls.value = false
-}
-
-function toggleVideo() {
-  const v = videoRef.value
-  if (!v) return
-  if (v.paused) {
-    v.play()
-    isPaused.value = false
-  } else {
-    v.pause()
-    isPaused.value = true
-  }
-}
 
 const defaultBg = resolvePkgUrl(`common/${SCREEN}-bg.png`)
 const detailBg = resolvePkgUrl(`common/${SCREEN}-detail-bg.png`)
@@ -250,23 +52,8 @@ function asset(name: string) {
         <img class="tl__baima rt-2" :src="asset('right-top-2.png')" alt="" />
         <img class="tl__baima video-deco" :src="asset('video-deco.png')" alt="" />
         <img class="tl__baima video-frame" :src="asset('video-frame.png')" alt="" />
-        <div
-          class="tl__baima video-wrap"
-          @mouseenter="onVideoMouseEnter"
-          @mouseleave="onVideoMouseLeave"
-        >
-          <video
-            ref="videoRef"
-            class="tl__video-player"
-            :src="asset('video.mp4')"
-            loop
-            :controls="showControls"
-            @play="isPaused = false"
-            @pause="isPaused = true"
-            @click.prevent.stop="toggleVideo"
-          ></video>
-          <img v-show="isPaused" class="tl__video-pause" :src="asset('play-btn.png')" alt="" />
-          <div :class="['tl__tip', { 'tl__tip--show': tipState.show }]">{{ tipState.text }}</div>
+        <div class="tl__baima video-wrap">
+          <VideoPlayer :src="asset('video.mp4')" :pause-icon="asset('play-btn.png')" />
         </div>
       </div>
     </transition>
@@ -379,15 +166,8 @@ function asset(name: string) {
         <img class="tl__blasting bl-ct-title-3" :src="asset('content-title-3.png')" alt="" />
         <img class="tl__blasting bl-ct-3" :src="asset('content-3.png')" alt="" />
         <img class="tl__blasting bl-video-frame" :src="asset('video-frame.png')" alt="" />
-        <div class="tl__blasting bl-video-wrap" @click="toggleVideo">
-          <video
-            ref="videoRef"
-            class="bl-video-player"
-            :src="asset('video.mp4')"
-            loop
-            muted
-          ></video>
-          <img v-show="isPaused" class="bl-video-pause" :src="asset('play-btn.png')" alt="" />
+        <div class="tl__blasting bl-video-wrap">
+          <VideoPlayer :src="asset('video.mp4')" :pause-icon="asset('play-btn.png')" />
         </div>
       </div>
     </transition>
@@ -526,60 +306,11 @@ function asset(name: string) {
         top: d.h(889);
         width: d.w(1355);
         height: d.h(774);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
         z-index: 1;
-      }
-
-      .tl__video-player {
-        width: 96%;
-        height: 90%;
-        object-fit: fill;
-        border-radius: d.w(20);
-      }
-
-      .tl__video-pause {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        width: d.w(186);
-        height: d.h(186);
-        object-fit: fill;
-        pointer-events: none;
-        z-index: 3;
-      }
-
-      /* 中控操作提示：玻璃态浮窗，仿原生 controls 风格 */
-      .tl__tip {
-        position: absolute;
-        left: 50%;
-        bottom: d.h(120);
-        transform: translate(-50%);
-        padding: d.h(16) d.w(36);
-        background: rgba(30, 30, 30, 0.82);
-        backdrop-filter: blur(d.w(8));
-        border-radius: d.w(12);
-        color: #fff;
-        font-size: d.h(32);
-        font-weight: 500;
-        pointer-events: none;
-        z-index: 4;
-        opacity: 0;
-        transition: opacity 0.35s ease, transform 0.35s ease;
-        white-space: nowrap;
-        box-shadow: 0 d.h(4) d.w(16) rgba(0, 0, 0, 0.3);
-
-        &--show {
-          opacity: 1;
-        }
-      }
-
-      /* 隐藏浏览器扩展注入的倍速控件 */
-      :deep(vsc-controller) {
-        display: none !important;
+        // VideoPlayer 内部 video 的尺寸/圆角（在 frame 内留边）
+        --vp-video-w: 96%;
+        --vp-video-h: 90%;
+        --vp-radius: #{d.w(20)};
       }
     }
 
@@ -1050,29 +781,7 @@ function asset(name: string) {
         top: d.h(1150);
         width: d.w(923);
         height: d.h(520);
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
         z-index: 1;
-      }
-
-      .bl-video-player {
-        width: 100%;
-        height: 100%;
-        object-fit: fill;
-      }
-
-      .bl-video-pause {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        width: d.w(187);
-        height: d.h(187);
-        object-fit: fill;
-        pointer-events: none;
-        z-index: 3;
       }
     }
   }

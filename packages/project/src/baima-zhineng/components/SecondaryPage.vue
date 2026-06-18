@@ -32,18 +32,14 @@ function updateHasOverflow() {
   hasOverflow.value = el.scrollHeight > el.clientHeight
 }
 
-let scrollRaf = 0
-
 function onContentScroll() {
-  if (scrollRaf) return
-  scrollRaf = requestAnimationFrame(() => {
-    scrollRaf = 0
-    const el = contentRef.value
-    if (!el) return
-    const max = el.scrollHeight - el.clientHeight
-    scrollProgress.value = max > 0 ? el.scrollTop / max : 0
-    hasOverflow.value = max > 0
-  })
+  // 不用 rAF：exe(iframe/非前台) 下 rAF 可能不产帧，会让滚动条进度卡住。
+  // scroll 事件本身已是节流入口，直接同步计算即可。
+  const el = contentRef.value
+  if (!el) return
+  const max = el.scrollHeight - el.clientHeight
+  scrollProgress.value = max > 0 ? el.scrollTop / max : 0
+  hasOverflow.value = max > 0
 }
 
 /** 滑块图（thumb.png）尺寸与内部亮点占位（px，实测自素材）。
@@ -289,68 +285,122 @@ function onUecScroll(e: Event) {
 }
 
 // 自动滚动
-let autoScrollRaf = 0
+// 实现要点（exe 适配）：用 setInterval 驱动而非 requestAnimationFrame。
+//  - 本应用已全局关闭定时器节流（disable-background-timer-throttling），
+//    setInterval 在 kiosk 多窗口/iframe 下可靠触发。
+//  - rAF 受渲染可见性/合成器门控，exe 下非前台渲染进程可能不产帧 → 回调不触发，
+//    这正是浏览器正常、exe 自动滚动失效的根因。
+//  - 采用时间步进（按 performance.now 的 delta 计算位移），节拍抖动也不影响速度。
+const AUTO_SCROLL_TICK_MS = 16 // ~60fps
+let autoScrollTimer = 0 // setInterval id；0 表示未在滚动
 let idleTimer = 0
 let autoScrollDelayTimer = 0
 let lastScrollTimestamp = 0
 let autoScrollSession = { tab: 0, page: 0 }
+/** 自维护的浮点滚动位置：exe 渲染进程的 el.scrollTop 会被量化为整数，
+ *  若直接 `scrollTop += 0.64`（40px/s @16ms）读回恒为 0 → 永远到不了 1px 而卡死。
+ *  改为累加浮点位置再赋值，量化只影响渲染、不丢失累加进度。 */
+let autoScrollPos = 0
+/** 是否"应当"自动滚动（意图）。与 autoScrollTimer（是否"正在"滚动）区分：
+ *  exe(iframe) 下挂载瞬间视口/布局可能未定型，scrollHeight 暂时 <= clientHeight，
+ *  此时不能永久放弃，需保留意图，待 ResizeObserver / visibilitychange 后补触发。 */
+let autoScrollWanted = false
 
 function startAutoScroll(delay = 0) {
-  if (autoScrollRaf) cancelAnimationFrame(autoScrollRaf)
-  autoScrollRaf = 0
+  stopAutoScrollLoop()
   lastScrollTimestamp = 0
-  // 没有溢出时不启动
-  const el = contentRef.value
-  if (!el || el.scrollHeight <= el.clientHeight) return
-  if (autoScrollDelayTimer) clearTimeout(autoScrollDelayTimer)
-  // 记录当前页签，用于底部循环判定
-  autoScrollSession = { tab: activeTab.value, page: activePage.value }
-  if (delay > 0) {
-    autoScrollDelayTimer = window.setTimeout(() => tickAutoScroll(), delay)
-  } else {
-    tickAutoScroll()
-  }
-}
-
-function stopAutoScroll() {
-  if (autoScrollRaf) {
-    cancelAnimationFrame(autoScrollRaf)
-    autoScrollRaf = 0
-  }
+  // 标记意图：即使当前还无溢出（布局未就绪），也不放弃，由后续补触发启动。
+  autoScrollWanted = true
   if (autoScrollDelayTimer) {
     clearTimeout(autoScrollDelayTimer)
     autoScrollDelayTimer = 0
   }
+  // 记录当前页签，用于底部循环判定
+  autoScrollSession = { tab: activeTab.value, page: activePage.value }
+  // 溢出判定放到延迟之后的 step 中，避免在延迟之前过早退出。
+  if (delay > 0) {
+    autoScrollDelayTimer = window.setTimeout(() => {
+      autoScrollDelayTimer = 0
+      runAutoScrollLoop()
+    }, delay)
+  } else {
+    runAutoScrollLoop()
+  }
+}
+
+/** 仅启动定时器循环（不改变意图/延迟状态），供延迟到期与补触发复用。 */
+function runAutoScrollLoop() {
+  if (autoScrollTimer) return
+  lastScrollTimestamp = performance.now()
+  // 从当前实际位置起步（兼容用户/中控已滚动到的位置）
+  autoScrollPos = contentRef.value?.scrollTop ?? 0
+  autoScrollTimer = window.setInterval(stepAutoScroll, AUTO_SCROLL_TICK_MS)
+}
+
+/** 仅停止定时器循环，保留 autoScrollWanted 意图（用于布局未就绪时的暂歇）。 */
+function stopAutoScrollLoop() {
+  if (autoScrollTimer) {
+    clearInterval(autoScrollTimer)
+    autoScrollTimer = 0
+  }
   lastScrollTimestamp = 0
 }
 
-function tickAutoScroll(timestamp = performance.now()) {
+function stopAutoScroll() {
+  autoScrollWanted = false
+  stopAutoScrollLoop()
+  if (autoScrollDelayTimer) {
+    clearTimeout(autoScrollDelayTimer)
+    autoScrollDelayTimer = 0
+  }
+}
+
+function stepAutoScroll() {
   if (!isScroll.value || !contentRef.value) {
-    autoScrollRaf = 0
-    lastScrollTimestamp = 0
+    stopAutoScrollLoop()
     return
   }
   const el = contentRef.value
   const max = el.scrollHeight - el.clientHeight
   if (max <= 0) {
-    autoScrollRaf = 0
-    lastScrollTimestamp = 0
+    // 布局尚未就绪/暂无溢出：停止循环但保留意图（autoScrollWanted），
+    // 待 ResizeObserver / visibilitychange 检测到可滚动后再补触发。
+    stopAutoScrollLoop()
     return
   }
 
-  if (!lastScrollTimestamp) lastScrollTimestamp = timestamp
-  const delta = timestamp - lastScrollTimestamp
-  lastScrollTimestamp = timestamp
+  const now = performance.now()
+  if (!lastScrollTimestamp) lastScrollTimestamp = now
+  const delta = now - lastScrollTimestamp
+  lastScrollTimestamp = now
 
-  el.scrollTop += (AUTO_SCROLL_SPEED * delta) / 1000
-  if (el.scrollTop >= max) {
+  // 用浮点累加器推进，再赋值给 scrollTop（避免整数量化丢失亚像素增量）
+  autoScrollPos += (AUTO_SCROLL_SPEED * delta) / 1000
+  if (autoScrollPos >= max) {
+    autoScrollPos = max
     el.scrollTop = max
-    autoScrollRaf = 0
-    lastScrollTimestamp = 0
+    stopAutoScrollLoop()
+    autoScrollWanted = false // 已滚到底，结束意图，避免补触发重启
     return
   }
+  el.scrollTop = autoScrollPos
+}
 
-  autoScrollRaf = requestAnimationFrame(tickAutoScroll)
+/** 内容/视口尺寸变化回调：exe(iframe) 布局就绪后补触发自动滚动。 */
+function onContentResize() {
+  updateHasOverflow()
+  // 有滚动意图、当前未在滚动、延迟已结束、且内容已可滚动 → 补启动
+  if (!autoScrollWanted || autoScrollTimer || autoScrollDelayTimer) return
+  const el = contentRef.value
+  if (isScroll.value && el && el.scrollHeight > el.clientHeight) {
+    runAutoScrollLoop()
+  }
+}
+
+/** 页面重新可见时自愈：若有滚动意图但未在滚动，尝试补触发。 */
+function onVisibilityChange() {
+  if (document.visibilityState !== 'visible') return
+  onContentResize()
 }
 
 function onUserInteract() {
@@ -369,6 +419,9 @@ function onAfterEnterClean(el: Element) {
   updateHasOverflow()
 }
 
+/** 监听内容区/视口尺寸变化：exe(iframe) 下视口尺寸定型较晚，需借此补触发自动滚动。 */
+let resizeObserver: ResizeObserver | null = null
+
 // 全局监听拖拽中事件（组件卸载时清理）
 onMounted(() => {
   updateHasOverflow()
@@ -379,6 +432,15 @@ onMounted(() => {
     window.addEventListener('touchend', onPointerUp)
     window.addEventListener('uec:page', onUecPage)
     window.addEventListener('uec:scroll', onUecScroll)
+    // iframe 视口尺寸变化（如全屏化）会改变 vh 基准 → 重新评估溢出/补触发
+    window.addEventListener('resize', onContentResize)
+    // 渲染进程重新可见（exe 多窗口/iframe 场景）时自愈补触发
+    document.addEventListener('visibilitychange', onVisibilityChange)
+  }
+  // 观察内容区盒子尺寸：布局就绪后补触发，解决 exe 下挂载即判定失败的问题
+  if (typeof ResizeObserver !== 'undefined' && contentRef.value) {
+    resizeObserver = new ResizeObserver(() => onContentResize())
+    resizeObserver.observe(contentRef.value)
   }
   if (isScroll.value) startAutoScroll(AUTO_SCROLL_START_DELAY)
 })
@@ -391,10 +453,15 @@ onBeforeUnmount(() => {
     window.removeEventListener('touchend', onPointerUp)
     window.removeEventListener('uec:page', onUecPage)
     window.removeEventListener('uec:scroll', onUecScroll)
+    window.removeEventListener('resize', onContentResize)
+    document.removeEventListener('visibilitychange', onVisibilityChange)
+  }
+  if (resizeObserver) {
+    resizeObserver.disconnect()
+    resizeObserver = null
   }
   stopAutoScroll()
   if (idleTimer) clearTimeout(idleTimer)
-  if (scrollRaf) cancelAnimationFrame(scrollRaf)
 })
 
 const activeTab = ref(0)

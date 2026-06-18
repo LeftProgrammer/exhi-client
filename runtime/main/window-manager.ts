@@ -143,6 +143,11 @@ export class WindowManager {
         sandbox: true,
         nodeIntegration: false,
         webSecurity: true,
+        // // 多屏展厅：每块屏独立窗口，非焦点窗口默认会被 Chromium 当作"后台页面"，
+        // // 暂停 requestAnimationFrame、节流 setTimeout/setInterval。
+        // // 这会导致副屏（未获焦点时）的自动滚动等 rAF 动画完全停摆。
+        // // 关闭后台节流，保证所有可见窗口的动画/定时器始终全速运行。
+        // backgroundThrottling: false,
         additionalArguments: [`--exhi-display-id=${cfg.id}`]
       }
     })
