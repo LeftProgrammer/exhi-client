@@ -21,6 +21,8 @@ export function useRemoteControl() {
     const payload = cmd as CommandPayload
     const type = String(payload.cmd ?? '')
     if (!type) return
+    // 任意中控指令都视为用户交互，重置空闲计时器
+    window.dispatchEvent(new CustomEvent('exhi:interaction'))
     const handler = handlers.get(type)
     if (handler) handler(payload)
   })
