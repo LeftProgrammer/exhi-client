@@ -277,7 +277,11 @@ export class WsClient extends EventEmitter {
       this.writeDebugStatus()
       this.emit('hubMessage', parsed)
       // ② 若包含 cmd.type → 同时走框架 Command 路由（控制类指令）
-      if (parsed && typeof parsed === 'object' && (parsed as Record<string, unknown>).type === 'string') {
+      if (
+        parsed &&
+        typeof parsed === 'object' &&
+        (parsed as Record<string, unknown>).type === 'string'
+      ) {
         const p = parsed as { type: string; [key: string]: unknown }
         const cmd: Command = {
           id: (p.id as string) ?? randomId(),
@@ -356,7 +360,7 @@ export class WsClient extends EventEmitter {
         transport: this.settings.hubTransport,
         id: this.settings.hubId || this.deviceId,
         target: this.settings.hubTarget,
-        connectedAt: this._mode === 'online' ? (this.connectedAt || Date.now()) : undefined,
+        connectedAt: this._mode === 'online' ? this.connectedAt || Date.now() : undefined,
         disconnectedAt: this._mode === 'standalone' ? Date.now() : undefined,
         lastHeartbeat: this.lastHeartbeat,
         lastMessageIn: this.lastMessageIn,
@@ -367,8 +371,8 @@ export class WsClient extends EventEmitter {
         ...extra
       }
       fs.writeFileSync(file, JSON.stringify(status, null, 2))
-    } catch {
-      /* 调试文件写入失败不影响主逻辑 */
+    } catch (e) {
+      logger.debug('WS: 调试状态文件写入失败', (e as Error).message)
     }
   }
 
@@ -386,8 +390,8 @@ export class WsClient extends EventEmitter {
           } else {
             this.ws.ping()
           }
-        } catch {
-          /* noop */
+        } catch (e) {
+          logger.debug('WS: 心跳发送失败', (e as Error).message)
         }
         if (!this.pongTimer) this.resetPongTimer()
       }
@@ -400,8 +404,8 @@ export class WsClient extends EventEmitter {
       logger.warn('WS: 心跳超时，强制重连')
       try {
         this.ws?.terminate()
-      } catch {
-        /* noop */
+      } catch (e) {
+        logger.debug('WS: terminate 失败', (e as Error).message)
       }
     }, HUB_DEFAULTS.heartbeatTimeoutMs)
   }
@@ -443,7 +447,11 @@ export class WsClient extends EventEmitter {
     if (this.isUec) {
       logger.info(`WS: UEC 模式跳过 ${this.offlineQueue.length} 条离线事件`)
       this.offlineQueue = []
-      try { if (fs.existsSync(this.queueFile)) fs.unlinkSync(this.queueFile) } catch { /* noop */ }
+      try {
+        if (fs.existsSync(this.queueFile)) fs.unlinkSync(this.queueFile)
+      } catch (e) {
+        logger.debug('WS: 清理离线队列文件失败', (e as Error).message)
+      }
       return
     }
     logger.info(`WS: 补报离线事件 ${this.offlineQueue.length} 条`)
@@ -474,8 +482,8 @@ export class WsClient extends EventEmitter {
           if (this.offlineQueue.length >= this.maxQueue) {
             this.offlineQueue.shift()
           }
-        } catch {
-          /* 单行解析失败跳过 */
+        } catch (e) {
+          logger.debug('WS: 离线队列单行解析失败，跳过', (e as Error).message)
         }
       }
       if (loaded > 0) logger.info(`WS: 从磁盘恢复 ${loaded} 条离线事件`)

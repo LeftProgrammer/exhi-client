@@ -89,8 +89,8 @@ export class MetricsReporter {
       const userData = app.getPath('userData')
       const st = fs.statfsSync ? fs.statfsSync(userData) : null
       if (st) diskFree = Number(st.bavail) * Number(st.bsize)
-    } catch {
-      /* 不致命，忽略 */
+    } catch (e) {
+      logger.debug('metrics: 磁盘信息采集失败', (e as Error).message)
     }
 
     return {

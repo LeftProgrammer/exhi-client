@@ -79,6 +79,7 @@ export class PackageLoader {
       const val = fs.readFileSync(filePath, 'utf-8').trim()
       return val || null
     } catch {
+      // Not an error: file doesn't exist in dev mode or non-packaged environments
       return null
     }
   }
@@ -121,8 +122,8 @@ export class PackageLoader {
               }
             }
           }
-        } catch {
-          /* 文件不存在或解析失败，忽略 */
+        } catch (e) {
+          logger.warn(`displays 目录下 ${entry} 解析失败，已跳过:`, (e as Error).message)
         }
       }
     }
@@ -256,7 +257,9 @@ export class PackageLoader {
               if (slotManifest.projectId === seedManifest.projectId) {
                 slotVersion = slotManifest.version
               }
-            } catch {}
+            } catch (e) {
+              logger.debug(`读取槽 ${slotPath0} manifest 失败:`, (e as Error).message)
+            }
           }
           if (slotVersion !== seedManifest.version) {
             logger.info(
@@ -292,7 +295,8 @@ export class PackageLoader {
             )
             continue
           }
-        } catch {
+        } catch (e) {
+          logger.debug(`槽 ${slot} manifest 读取失败，跳过:`, (e as Error).message)
           continue
         }
         // 与当前指针不一致 → 自动回滚指针

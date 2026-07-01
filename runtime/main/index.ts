@@ -41,7 +41,7 @@ if (app.isPackaged) {
     const f = path.join(process.resourcesPath, 'product-name.txt')
     displayName = fs.readFileSync(f, 'utf-8').trim()
   } catch {
-    /* noop */
+    // product-name.txt is optional; absent in some build configurations
   }
 }
 
@@ -166,7 +166,9 @@ app.whenReady().then(async () => {
       }),
       settings
     )
-    await localServer.start()
+    await localServer.start().catch((e) => {
+      logger.warn('本地 HTTP 服务启动失败，继续运行（本地指令接口不可用）:', (e as Error).message)
+    })
 
     // 创建窗口
     winManager.createAll()

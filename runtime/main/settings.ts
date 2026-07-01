@@ -84,9 +84,9 @@ export const HUB_DEFAULTS = {
   target: '123456789' as string | null,
   token: null as string | null,
   enableSign: false,
-  heartbeatIntervalMs: 20_000,  // UEC 示例心跳间隔
-  heartbeatTimeoutMs: 40_000,   // 超时 > 间隔，给服务端回包留余量
-  reconnectBaseMs: 3_000,       // UEC 示例重连延迟
+  heartbeatIntervalMs: 20_000, // UEC 示例心跳间隔
+  heartbeatTimeoutMs: 40_000, // 超时 > 间隔，给服务端回包留余量
+  reconnectBaseMs: 3_000, // UEC 示例重连延迟
   reconnectMaxMs: 30_000,
   offlineQueueMax: 2_000,
   offlineQueueMaxBytes: 10 * 1024 * 1024 // 10MB
@@ -115,7 +115,10 @@ export function loadSettingsEarly(): Pick<
       disableHardwareAcceleration:
         j.disableHardwareAcceleration ?? DEFAULTS.disableHardwareAcceleration
     }
-  } catch {
+  } catch (e) {
+    // Logger may not be initialized yet (early settings loaded before app.ready),
+    // so use console.warn as fallback
+    console.warn('settings.json 早期解析失败，使用默认值:', (e as Error).message)
     return {
       deviceScaleFactor: DEFAULTS.deviceScaleFactor,
       disableHardwareAcceleration: DEFAULTS.disableHardwareAcceleration
