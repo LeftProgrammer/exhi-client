@@ -3,6 +3,7 @@
 import fs from 'node:fs'
 import fsp from 'node:fs/promises'
 import path from 'node:path'
+import { parseOption } from '../_shared/utils.mjs'
 
 /**
  * release-cli: 把 electron-builder 的产物组织成 OTA 频道目录。
@@ -36,9 +37,9 @@ if (sub === 'publish') {
 }
 
 async function publish() {
-  const channel = parseOption('--channel') ?? 'stable'
-  const src = path.resolve(parseOption('--src') ?? 'build')
-  const out = path.resolve(parseOption('--out') ?? 'build/ota')
+  const channel = parseOption(args, '--channel') ?? 'stable'
+  const src = path.resolve(parseOption(args, '--src') ?? 'build')
+  const out = path.resolve(parseOption(args, '--out') ?? 'build/ota')
 
   if (!fs.existsSync(src)) {
     console.error(`[release] src 不存在: ${src}（先运行 npm run dist）`)
@@ -89,9 +90,4 @@ async function publish() {
   console.log(`  }`)
   console.log('触发更新:')
   console.log('  npm run hub:send -- cmd.runtime.update --applyAt=now')
-}
-
-function parseOption(name) {
-  for (const a of args) if (a.startsWith(name + '=')) return a.slice(name.length + 1)
-  return null
 }

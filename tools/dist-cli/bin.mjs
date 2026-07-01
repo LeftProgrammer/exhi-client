@@ -16,10 +16,10 @@
  *   3. electron-builder：打包 exe → build/<projectId>/，EXHI_SEED 指定内嵌的种子包
  */
 
-import { spawn } from 'node:child_process'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { runNode, runNpm, runNpx } from '../_shared/utils.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '../..')
@@ -75,34 +75,3 @@ if (dirOnly) builderArgs.push('--dir')
 await runNpx(['electron-builder', ...builderArgs], ROOT, { EXHI_SEED: projectId })
 
 console.log(`[dist-cli] 完成。输出目录: build/${projectId}/`)
-
-// ─── 工具函数 ──────────────────────────────────────────────────────────────────
-
-function runNode(nodeArgs, cwd, extraEnv = {}) {
-  return runProcess(process.execPath, nodeArgs, cwd, extraEnv)
-}
-
-function runNpm(npmArgs, cwd, extraEnv = {}) {
-  const isWin = process.platform === 'win32'
-  return runProcess(isWin ? 'npm.cmd' : 'npm', npmArgs, cwd, extraEnv, isWin)
-}
-
-function runNpx(npxArgs, cwd, extraEnv = {}) {
-  const isWin = process.platform === 'win32'
-  return runProcess(isWin ? 'npx.cmd' : 'npx', npxArgs, cwd, extraEnv, isWin)
-}
-
-function runProcess(cmd, args, cwd, extraEnv = {}, shell = false) {
-  return new Promise((resolve, reject) => {
-    const proc = spawn(cmd, args, {
-      cwd,
-      stdio: 'inherit',
-      shell,
-      env: { ...process.env, ...extraEnv }
-    })
-    proc.on('exit', (code) =>
-      code === 0 ? resolve() : reject(new Error(`${path.basename(cmd)} exit ${code}`))
-    )
-    proc.on('error', reject)
-  })
-}

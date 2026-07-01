@@ -24,10 +24,10 @@
  *       <其余 contents 子目录>  ← packages/project/contents/（图片/素材）
  */
 
-import { spawn } from 'node:child_process'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { exists, copyDir, runNode, runNpm } from '../_shared/utils.mjs'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -136,50 +136,6 @@ async function assembleProject(project) {
 async function discoverProjects() {
   const entries = await fs.readdir(DEPLOY_DIR, { withFileTypes: true })
   return entries.filter((e) => e.isDirectory()).map((e) => e.name)
-}
-
-async function exists(p) {
-  try {
-    await fs.access(p)
-    return true
-  } catch {
-    return false
-  }
-}
-
-async function copyDir(src, dest) {
-  await fs.mkdir(dest, { recursive: true })
-  for (const entry of await fs.readdir(src, { withFileTypes: true })) {
-    const s = path.join(src, entry.name)
-    const d = path.join(dest, entry.name)
-    if (entry.isDirectory()) await copyDir(s, d)
-    else await fs.copyFile(s, d)
-  }
-}
-
-function runNpm(npmArgs, cwd) {
-  return runProcess(process.platform === 'win32' ? 'npm.cmd' : 'npm', npmArgs, cwd)
-}
-
-function runNode(nodeArgs, cwd) {
-  // shell: false，直接传可执行路径，避免含空格的路径在 shell 中被拆分
-  return new Promise((resolve, reject) => {
-    const proc = spawn(process.execPath, nodeArgs, { cwd, stdio: 'inherit', shell: false })
-    proc.on('exit', (code) => (code === 0 ? resolve() : reject(new Error(`node exit ${code}`))))
-    proc.on('error', reject)
-  })
-}
-
-function runProcess(cmd, args, cwd) {
-  return new Promise((resolve, reject) => {
-    const proc = spawn(cmd, args, {
-      cwd,
-      stdio: 'inherit',
-      shell: process.platform === 'win32'
-    })
-    proc.on('exit', (code) => (code === 0 ? resolve() : reject(new Error(`${cmd} exit ${code}`))))
-    proc.on('error', reject)
-  })
 }
 
 function parseOpt(args, name) {

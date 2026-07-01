@@ -1,70 +1,54 @@
 import type { Router } from 'vue-router'
-import { useRemoteControl } from '@shared/composables/useRemoteControl'
-import { useBrowserFallback } from '@shared/composables/useBrowserFallback'
-import { useProjectSfx } from '@shared/composables/useProjectSfx'
+import { useControlBase } from '@shared/composables/useControlBase'
 import { getSection, type SectionId } from '@baima-yushui/data/sections'
 
 /**
  * 渝水新景 + 领导关怀 中控通信封装。
  *
- * 基于 useRemoteControl（shared 通用指令注册器），
+ * 基于 useControlBase（shared 通用指令注册器 + sendTo/startFallback），
  * 定义本项目特定的上报格式和接收指令处理。
  */
 export function useControl() {
-  const rc = useRemoteControl()
-  const fallback = useBrowserFallback()
+  const { rc, sfx, sendTo, startFallback } = useControlBase()
 
   return {
-    /** 上报页面导航（进入板块 / 回首页）
-     *  page: 0=首页, 1=渝水新景, 2=领导关怀
-     *  target: 'home' | 'yushui' | 'leaders'
-     */
+    /** 上报页面导航 */
     reportNav(page: number, target: string) {
       rc.send({ cmd: 'nav', page, target })
     },
 
-    /** 上报分类切换
-     *  target: 'yushui' | 'leaders'
-     *  id: 分类标识，如 '1' / '2'
-     */
+    /** 上报分类切换 */
     reportCategory(target: string, id: string) {
       rc.send({ cmd: 'category', target, id })
     },
 
-    /** 上报翻页
-     *  target: 'yushui' | 'leaders'
-     *  category: 当前分类 id
-     *  index: 当前条目索引（从 0 开始）
-     *  total: 当前分类条目总数
-     *  action: 'next' | 'prev'
-     */
+    /** 上报翻页 */
     reportPage(target: string, category: string, index: number, total: number, action: string) {
       rc.send({ cmd: 'page', target, category, index, total, action })
     },
 
-    /** 向指定设备发送控制消息（用于多屏互联场景）
-     *  target: 接收方设备 ID，如 'screen-2'
-     *  payload: 消息体，格式与中控协议一致
-     */
-    sendTo(target: string, payload: unknown) {
-      rc.sendTo(target, payload)
-    },
+    sendTo,
+    startFallback,
 
-    /** 注册中控指令接收处理（在 App.vue 初始化时调用）
-     *  router: Vue Router 实例
-     */
+    /** 注册中控指令接收处理（在 App.vue 初始化时调用） */
     setupCommands(router: Router) {
-      const sfx = useProjectSfx()
-
       rc.onCommand('home', () => {
-        try { sfx.play('back') } catch { /* 静默忽略 */ }
+        try {
+          sfx.play('back')
+        } catch {
+          /* 静默忽略 */
+        }
         router.push({ name: 'home' })
       })
 
       rc.onCommand('goto', (p) => {
         const target = p.target as 'yushui' | 'leaders'
         if (!target || !['yushui', 'leaders'].includes(target)) return
-        try { sfx.play('nav') } catch { /* 静默忽略 */ }
+        try {
+          sfx.play('nav')
+        } catch {
+          /* 静默忽略 */
+        }
         const category = (p.category as string) ?? getSection(target).categories[0].id
         const index = (p.index as number) ?? 0
         router.push({
@@ -85,7 +69,11 @@ export function useControl() {
           const currentSectionId = route.params.sectionId as string
           const currentSection = getSection(currentSectionId as SectionId)
           if (currentSection.categories.find((c) => c.id === catId)) {
-            try { sfx.play('tap') } catch { /* 静默忽略 */ }
+            try {
+              sfx.play('tap')
+            } catch {
+              /* 静默忽略 */
+            }
             router.replace({
               name: 'section',
               params: { sectionId: currentSectionId, categoryId: catId, entryIndex: 0 }
@@ -96,7 +84,11 @@ export function useControl() {
             if (sid === currentSectionId) continue
             const section = getSection(sid)
             if (section.categories.find((c) => c.id === catId)) {
-              try { sfx.play('tap') } catch { /* 静默忽略 */ }
+              try {
+                sfx.play('tap')
+              } catch {
+                /* 静默忽略 */
+              }
               router.replace({
                 name: 'section',
                 params: { sectionId: sid, categoryId: catId, entryIndex: 0 }
@@ -111,7 +103,11 @@ export function useControl() {
         for (const sid of allSections) {
           const section = getSection(sid)
           if (section.categories.find((c) => c.id === catId)) {
-            try { sfx.play('tap') } catch { /* 静默忽略 */ }
+            try {
+              sfx.play('tap')
+            } catch {
+              /* 静默忽略 */
+            }
             router.push({
               name: 'section',
               params: { sectionId: sid, categoryId: catId, entryIndex: 0 }
@@ -138,9 +134,11 @@ export function useControl() {
         else if (typeof p.index === 'number')
           nextIndex = Math.max(0, Math.min(p.index as number, total - 1))
         if (nextIndex !== entryIndex) {
-          window.dispatchEvent(new CustomEvent('uec:page', {
-            detail: { action, sectionId, categoryId, entryIndex: nextIndex }
-          }))
+          window.dispatchEvent(
+            new CustomEvent('uec:page', {
+              detail: { action, sectionId, categoryId, entryIndex: nextIndex }
+            })
+          )
           router.replace({
             name: 'section',
             params: { sectionId, categoryId, entryIndex: nextIndex }
@@ -149,17 +147,8 @@ export function useControl() {
       })
 
       rc.onCommand('carousel', (p) => {
-        // 通过 window 自定义事件同文档内派发，section.vue 监听
         const action = (p.action as string) ?? 'play'
         window.dispatchEvent(new CustomEvent('uec:carousel', { detail: { action } }))
-      })
-    },
-
-    /** 浏览器 dev 模式下启动 WS 回退连接 */
-    startFallback(hubId: string) {
-      fallback.start({
-        hubId,
-        onDispatch: (cmd, payload) => rc.dispatch(cmd, payload)
       })
     }
   }
