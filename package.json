@@ -54,6 +54,9 @@
     "content-server": "node tools/content-server/bin.mjs",
     "release": "node tools/release-cli/bin.mjs publish",
     "guardian": "node guardian/guardian.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json",
     "typecheck:web": "vue-tsc --noEmit -p runtime/renderer/tsconfig.json",
     "typecheck:packages": "npm run typecheck --workspaces --if-present",
@@ -81,6 +84,7 @@
     "@typescript-eslint/eslint-plugin": "^8.18.0",
     "@typescript-eslint/parser": "^8.18.0",
     "@vitejs/plugin-vue": "^5.2.1",
+    "@vitest/coverage-v8": "^4.1.9",
     "@vue/eslint-config-prettier": "^9.0.0",
     "@vue/eslint-config-typescript": "^13.0.0",
     "@vue/tsconfig": "^0.7.0",
@@ -95,6 +99,7 @@
     "sass-embedded": "^1.81.0",
     "typescript": "^5.6.3",
     "vite": "^5.4.11",
+    "vitest": "^4.1.9",
     "vue-eslint-parser": "^9.4.3",
     "vue-tsc": "^2.1.10"
   }
