@@ -93,7 +93,7 @@ app.whenReady().then(async () => {
 
     const settings = loadSettings(pkg.hub)
     logger.info(
-      `Settings: hubUrl=${settings.hubUrl ?? '(disabled)'} transport=${settings.hubTransport} enableSign=${settings.enableSign}`
+      `Settings: hubUrl=${settings.hubUrl ? '***configured***' : '(disabled)'} transport=${settings.hubTransport} enableSign=${settings.enableSign} localToken=${settings.localToken ? '***set***' : '(none)'}`
     )
     attachProtocolHandler(pkg.contentRoot)
 

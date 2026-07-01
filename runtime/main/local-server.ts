@@ -1,3 +1,4 @@
+import { timingSafeEqual } from 'node:crypto'
 import Fastify, { type FastifyInstance } from 'fastify'
 import type { EventEmitter } from 'node:events'
 import { LOCAL_SERVER_PORT } from '@shared/constants'
@@ -45,7 +46,10 @@ export class LocalServer {
       if (this.settings.localToken) {
         const auth = req.headers.authorization ?? ''
         const expect = `Bearer ${this.settings.localToken}`
-        if (auth !== expect) {
+        const authBuf = Buffer.from(auth)
+        const expectBuf = Buffer.from(expect)
+        const match = authBuf.length === expectBuf.length && timingSafeEqual(authBuf, expectBuf)
+        if (!match) {
           return reply.code(401).send({ ok: false, error: 'unauthorized' })
         }
       }

@@ -1,4 +1,4 @@
-import { createHmac } from 'node:crypto'
+import { createHmac, timingSafeEqual } from 'node:crypto'
 import { EventEmitter } from 'node:events'
 import fs from 'node:fs'
 import path from 'node:path'
@@ -277,7 +277,11 @@ export class WsClient extends EventEmitter {
       this.writeDebugStatus()
       this.emit('hubMessage', parsed)
       // ② 若包含 cmd.type → 同时走框架 Command 路由（控制类指令）
-      if (parsed && typeof parsed === 'object' && (parsed as Record<string, unknown>).type === 'string') {
+      if (
+        parsed &&
+        typeof parsed === 'object' &&
+        (parsed as Record<string, unknown>).type === 'string'
+      ) {
         const p = parsed as { type: string; [key: string]: unknown }
         const cmd: Command = {
           id: (p.id as string) ?? randomId(),
@@ -326,7 +330,10 @@ export class WsClient extends EventEmitter {
     const expected = createHmac('sha256', this.settings.hubSecret)
       .update(stableStringify(rest))
       .digest('base64')
-    return expected === sig
+    const expectedBuf = Buffer.from(expected)
+    const sigBuf = Buffer.from(sig)
+    if (expectedBuf.length !== sigBuf.length) return false
+    return timingSafeEqual(expectedBuf, sigBuf)
   }
 
   private errorEvent(code: string, msg: string, cmdId?: string): DomainEvent {
@@ -356,7 +363,7 @@ export class WsClient extends EventEmitter {
         transport: this.settings.hubTransport,
         id: this.settings.hubId || this.deviceId,
         target: this.settings.hubTarget,
-        connectedAt: this._mode === 'online' ? (this.connectedAt || Date.now()) : undefined,
+        connectedAt: this._mode === 'online' ? this.connectedAt || Date.now() : undefined,
         disconnectedAt: this._mode === 'standalone' ? Date.now() : undefined,
         lastHeartbeat: this.lastHeartbeat,
         lastMessageIn: this.lastMessageIn,
@@ -443,7 +450,11 @@ export class WsClient extends EventEmitter {
     if (this.isUec) {
       logger.info(`WS: UEC 模式跳过 ${this.offlineQueue.length} 条离线事件`)
       this.offlineQueue = []
-      try { if (fs.existsSync(this.queueFile)) fs.unlinkSync(this.queueFile) } catch { /* noop */ }
+      try {
+        if (fs.existsSync(this.queueFile)) fs.unlinkSync(this.queueFile)
+      } catch {
+        /* noop */
+      }
       return
     }
     logger.info(`WS: 补报离线事件 ${this.offlineQueue.length} 条`)

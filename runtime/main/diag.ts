@@ -47,9 +47,14 @@ export class DiagHandler {
 
   /**
    * 测试用：强制让指定屏的渲染进程崩溃，验证 watchdog/safe-mode。
-   * 仅 dev / 非生产环境响应；生产应通过 settings 显式启用。
+   * 仅 dev / 非生产环境响应。
    */
   private async crash(cmd: Command) {
+    if (app.isPackaged) {
+      logger.warn('cmd.diag.crash 在生产环境中被拒绝')
+      this.publish('evt.cmdResult', { cmdId: cmd.id, ok: false, error: 'forbidden in production' })
+      return true
+    }
     const displayId = (cmd.payload as { display?: string } | undefined)?.display
     const targets = displayId ? [this.winManager.get(displayId)] : this.winManager.all()
     let n = 0
