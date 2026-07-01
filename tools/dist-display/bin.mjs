@@ -11,10 +11,10 @@
  *   main 使用根目录 displays.json，其他使用 displays/<variant>.json
  */
 
-import { spawn } from 'node:child_process'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { exists, runNode } from '../_shared/utils.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '../..')
@@ -145,22 +145,3 @@ main().catch((e) => {
   console.error(e)
   process.exit(1)
 })
-
-// ─── 工具函数 ──────────────────────────────────────────────────────────────────
-
-async function exists(p) {
-  try {
-    await fs.access(p)
-    return true
-  } catch {
-    return false
-  }
-}
-
-function runNode(nodeArgs, cwd) {
-  return new Promise((resolve, reject) => {
-    const proc = spawn(process.execPath, nodeArgs, { cwd, stdio: 'inherit', shell: false })
-    proc.on('exit', (code) => (code === 0 ? resolve() : reject(new Error(`node exit ${code}`))))
-    proc.on('error', reject)
-  })
-}

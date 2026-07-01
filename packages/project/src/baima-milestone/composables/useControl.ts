@@ -1,35 +1,19 @@
-import { useRemoteControl } from '@shared/composables/useRemoteControl'
-import { useBrowserFallback } from '@shared/composables/useBrowserFallback'
-import { useProjectSfx } from '@shared/composables/useProjectSfx'
+import { useControlBase } from '@shared/composables/useControlBase'
 
 /**
  * 白马 milestones 中控通信封装。
  *
- * 基于 useRemoteControl（shared 通用指令注册器），
+ * 基于 useControlBase（shared 通用指令注册器 + sendTo/startFallback），
  * 支持中控指令控制幻灯片翻页。
  */
 export function useControl() {
-  const rc = useRemoteControl()
-  const fallback = useBrowserFallback()
+  const { rc, sfx, sendTo, startFallback } = useControlBase()
 
   return {
-    /** 向指定设备发送控制消息（多屏互联）
-     *  target: 接收方设备 ID
-     *  payload: 消息体
-     */
-    sendTo(target: string, payload: unknown) {
-      rc.sendTo(target, payload)
-    },
+    sendTo,
+    startFallback,
 
-    /** 注册中控指令接收处理
-     *  options:
-     *    total:     幻灯片总页数
-     *    getCurrent: () => 获取当前页索引
-     *    onGoto:    (index) => 跳转到指定页
-     *    onScrollPlay?:  () => 当前页开始自动滚动
-     *    onScrollPause?: () => 当前页暂停自动滚动
-     *    onScrollReset?: () => 当前页回到顶部并暂停
-     */
+    /** 注册中控指令接收处理 */
     setupCommands(options: {
       total: number
       getCurrent: () => number
@@ -38,17 +22,23 @@ export function useControl() {
       onScrollPause?: () => void
       onScrollReset?: () => void
     }) {
-      const sfx = useProjectSfx()
-
       rc.onCommand('home', () => {
-        try { sfx.play('back') } catch { /* 静默忽略 */ }
+        try {
+          sfx.play('back')
+        } catch {
+          /* 静默忽略 */
+        }
         options.onGoto(0)
       })
 
       rc.onCommand('goto', (p) => {
         const index = (p.index as number) ?? 0
         if (index >= 0 && index < options.total) {
-          try { sfx.play('nav') } catch { /* 静默忽略 */ }
+          try {
+            sfx.play('nav')
+          } catch {
+            /* 静默忽略 */
+          }
           options.onGoto(index)
         }
       })
@@ -66,7 +56,11 @@ export function useControl() {
           next = Math.max(0, Math.min(p.index as number, total - 1))
         }
         if (next !== current) {
-          try { sfx.play('page') } catch { /* 静默忽略 */ }
+          try {
+            sfx.play('page')
+          } catch {
+            /* 静默忽略 */
+          }
           options.onGoto(next)
         }
       })
@@ -80,14 +74,6 @@ export function useControl() {
       if (options.onScrollReset) {
         rc.onCommand('scrollReset', () => options.onScrollReset!())
       }
-    },
-
-    /** 浏览器 dev 模式下启动 WS 回退连接 */
-    startFallback(hubId: string) {
-      fallback.start({
-        hubId,
-        onDispatch: (cmd, payload) => rc.dispatch(cmd, payload)
-      })
     }
   }
 }

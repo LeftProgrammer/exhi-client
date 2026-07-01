@@ -4,6 +4,7 @@ import { createHash } from 'node:crypto'
 import { createReadStream } from 'node:fs'
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import { exists, copyDir, parseOption } from '../_shared/utils.mjs'
 
 /**
  * pack-cli：项目包构建工具。
@@ -48,7 +49,7 @@ if (sub === 'build') {
     console.error('用法: build <package-dir> [--out=<dist-dir>]')
     process.exit(1)
   }
-  const out = parseOption(args, '--out')
+  const out = parseOption(args.slice(1), '--out')
   await build(path.resolve(dir), out ? path.resolve(out) : null)
 } else if (sub === 'verify') {
   const dir = args[1]
@@ -75,8 +76,8 @@ async function build(srcDir, outBase) {
 
   // M10：如果项目包是 Vite 工程（有 src/ + vite.config.ts），先跑 vite build 再扫描
   const hasViteProject =
-    (await fileExists(path.join(srcDir, 'vite.config.ts'))) ||
-    (await fileExists(path.join(srcDir, 'vite.config.js')))
+    (await exists(path.join(srcDir, 'vite.config.ts'))) ||
+    (await exists(path.join(srcDir, 'vite.config.js')))
   if (hasViteProject) {
     await runViteBuild(srcDir)
     await mergeViteDistIntoContents(srcDir)
@@ -185,15 +186,6 @@ async function walk(rootDir, dir, out) {
   }
 }
 
-async function fileExists(p) {
-  try {
-    await fs.access(p)
-    return true
-  } catch {
-    return false
-  }
-}
-
 /** 用项目包自身的 npm 脚本跑 vite build */
 async function runViteBuild(pkgDir) {
   const { spawn } = await import('node:child_process')
@@ -232,7 +224,7 @@ async function runViteBuild(pkgDir) {
  */
 async function mergeViteDistIntoContents(pkgDir) {
   const distDir = path.join(pkgDir, 'dist')
-  if (!(await fileExists(distDir))) {
+  if (!(await exists(distDir))) {
     console.warn('[pack-cli] dist/ 不存在，跳过合并')
     return
   }
@@ -241,7 +233,7 @@ async function mergeViteDistIntoContents(pkgDir) {
 
   // 1) dist/src/<screen>/* → contents/<screen>/*
   const distSrc = path.join(distDir, 'src')
-  if (await fileExists(distSrc)) {
+  if (await exists(distSrc)) {
     for (const screen of await fs.readdir(distSrc, { withFileTypes: true })) {
       if (!screen.isDirectory()) continue
       const from = path.join(distSrc, screen.name)
@@ -252,7 +244,7 @@ async function mergeViteDistIntoContents(pkgDir) {
   }
   // 2) dist/assets/* → contents/assets/*（共享资源）
   const distAssets = path.join(distDir, 'assets')
-  if (await fileExists(distAssets)) {
+  if (await exists(distAssets)) {
     const toAssets = path.join(contentsDir, 'assets')
     await fs.rm(toAssets, { recursive: true, force: true })
     await copyDir(distAssets, toAssets)
@@ -268,23 +260,6 @@ function sha256File(filePath) {
     s.on('end', () => resolve(h.digest('hex')))
     s.on('error', reject)
   })
-}
-
-async function copyDir(src, dest) {
-  await fs.mkdir(dest, { recursive: true })
-  for (const entry of await fs.readdir(src, { withFileTypes: true })) {
-    const s = path.join(src, entry.name)
-    const d = path.join(dest, entry.name)
-    if (entry.isDirectory()) await copyDir(s, d)
-    else await fs.copyFile(s, d)
-  }
-}
-
-function parseOption(args, name) {
-  for (const a of args) {
-    if (a.startsWith(name + '=')) return a.slice(name.length + 1)
-  }
-  return null
 }
 
 function printHelp() {

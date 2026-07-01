@@ -1,9 +1,5 @@
-import { initDesignBase } from '@shared/utils/initDesignBase'
-
-initDesignBase(2160, 3840)
-
-import { createApp } from 'vue'
 import '@shared/styles/reset.scss'
+import { createProjectApp } from '@shared/utils/createProjectApp'
 import App from './App.vue'
 
-createApp(App).mount('#app')
+createProjectApp({ designWidth: 2160, designHeight: 3840, rootComponent: App })

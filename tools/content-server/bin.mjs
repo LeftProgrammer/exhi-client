@@ -3,6 +3,7 @@
 import fs from 'node:fs'
 import http from 'node:http'
 import path from 'node:path'
+import { parseOption } from '../_shared/utils.mjs'
 
 /**
  * 简易静态内容服务器（开发期 / 测试用）。
@@ -20,8 +21,8 @@ import path from 'node:path'
  */
 
 const args = process.argv.slice(2)
-const root = path.resolve(parseOption('--root') ?? './build/packages')
-const port = Number(parseOption('--port') ?? '18090')
+const root = path.resolve(parseOption(args, '--root') ?? './build/packages')
+const port = Number(parseOption(args, '--port') ?? '18090')
 
 if (!fs.existsSync(root)) {
   console.error(`root 不存在: ${root}`)
@@ -66,11 +67,6 @@ server.listen(port, '127.0.0.1', () => {
     if (e.isDirectory()) console.log(`  - http://127.0.0.1:${port}/${e.name}/`)
   }
 })
-
-function parseOption(name) {
-  for (const a of args) if (a.startsWith(name + '=')) return a.slice(name.length + 1)
-  return null
-}
 
 function guessType(p) {
   const ext = path.extname(p).toLowerCase()

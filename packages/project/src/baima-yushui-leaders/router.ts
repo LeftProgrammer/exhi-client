@@ -1,9 +1,5 @@
-import {
-  createRouter,
-  createMemoryHistory,
-  createWebHashHistory,
-  type RouteRecordRaw
-} from 'vue-router'
+import type { RouteRecordRaw } from 'vue-router'
+import { createProjectRouter } from '@shared/utils/createProjectRouter'
 import home from './views/home.vue'
 import section from './views/section.vue'
 
@@ -27,7 +23,4 @@ const routes: RouteRecordRaw[] = [
   { path: '/:pathMatch(.*)*', redirect: '/' }
 ]
 
-export const router = createRouter({
-  history: import.meta.env.DEV ? createWebHashHistory() : createMemoryHistory(),
-  routes
-})
+export const router = createProjectRouter(routes)
