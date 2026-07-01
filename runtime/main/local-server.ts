@@ -83,6 +83,7 @@ export class LocalServer {
       )
     } catch (e) {
       logger.error('本地 HTTP 服务启动失败:', e)
+      throw e
     }
   }
 

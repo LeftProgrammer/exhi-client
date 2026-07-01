@@ -49,9 +49,8 @@ export class Heartbeat {
     try {
       // 同步写：心跳很小，且要保证退出时也能写到
       fs.writeFileSync(this.file, data, 'utf-8')
-    } catch (e) {
-      // 心跳写不进就算了，下次再试，不打日志（避免刷屏）
-      void e
+    } catch {
+      // 心跳写不进就算了，下次再试；不打日志避免刷屏
     }
   }
 }

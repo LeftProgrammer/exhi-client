@@ -81,8 +81,8 @@ function tryStart(reason) {
   console.log(`[guardian] ${new Date().toISOString()} 重启客户端: ${reason}`)
   try {
     fs.appendFileSync(RESTART_LOG, `${new Date().toISOString()}\t${reason}\n`, 'utf-8')
-  } catch {
-    /* ignore */
+  } catch (e) {
+    console.warn('[guardian] 写入重启日志失败:', e.message)
   }
   // 启动 EXE
   // 用 cmd /c start 让 Windows 走标准启动流程，避免 detached spawn 的权限问题：

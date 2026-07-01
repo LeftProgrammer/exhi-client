@@ -125,7 +125,12 @@ export class RuntimeUpdater {
       await result.downloadPromise
       this.scheduleApply(applyAt)
     } catch (e) {
-      logger.error('[updater] handle 失败:', e)
+      const msg = (e as Error).message
+      logger.error('[updater] handle 失败:', msg)
+      this.publish({
+        type: 'evt.runtimeUpdate',
+        payload: { phase: 'error', error: msg }
+      })
     }
   }
 
