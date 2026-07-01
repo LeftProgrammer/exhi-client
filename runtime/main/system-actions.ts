@@ -87,11 +87,12 @@ export async function getSystemVolume(): Promise<number | null> {
 
 /** 重启 Windows 系统（默认 10 秒缓冲） */
 export async function rebootSystem(delaySec = 10): Promise<SystemActionResult> {
+  const safeDelay = sanitizeDelay(delaySec)
   try {
-    await pExec(`shutdown /r /t ${delaySec} /c "exhi-client requested reboot"`, {
+    await pExec(`shutdown /r /t ${safeDelay} /c "exhi-client requested reboot"`, {
       windowsHide: true
     })
-    return { ok: true, data: { delaySec } }
+    return { ok: true, data: { delaySec: safeDelay } }
   } catch (e) {
     return { ok: false, error: (e as Error).message.split('\n')[0] }
   }
@@ -99,14 +100,21 @@ export async function rebootSystem(delaySec = 10): Promise<SystemActionResult> {
 
 /** 关机 */
 export async function shutdownSystem(delaySec = 10): Promise<SystemActionResult> {
+  const safeDelay = sanitizeDelay(delaySec)
   try {
-    await pExec(`shutdown /s /t ${delaySec} /c "exhi-client requested shutdown"`, {
+    await pExec(`shutdown /s /t ${safeDelay} /c "exhi-client requested shutdown"`, {
       windowsHide: true
     })
-    return { ok: true, data: { delaySec } }
+    return { ok: true, data: { delaySec: safeDelay } }
   } catch (e) {
     return { ok: false, error: (e as Error).message.split('\n')[0] }
   }
+}
+
+/** Clamp delay to a safe non-negative integer, reject non-finite values */
+function sanitizeDelay(value: number): number {
+  if (!Number.isFinite(value) || value < 0) return 10
+  return Math.floor(Math.min(value, 315360000))
 }
 
 /** 取消 reboot/shutdown 倒计时 */

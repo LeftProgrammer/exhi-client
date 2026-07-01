@@ -67,8 +67,9 @@ export function unregisterAllHotkeys() {
   globalShortcut.unregisterAll()
 }
 
-/** 注册调试热键（Ctrl+Shift+Alt+D），打开/关闭 DevTools */
+/** 注册调试热键（Ctrl+Shift+Alt+D），打开/关闭 DevTools。仅开发模式。 */
 export function registerDevToolsHotkey() {
+  if (app.isPackaged) return
   const key = 'CommandOrControl+Shift+Alt+D'
   try {
     globalShortcut.register(key, () => {
